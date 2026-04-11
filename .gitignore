@@ -18,3 +18,13 @@ pnpm-debug.log*
 # Build output
 dist/
 build/
+**/build/
+**/.cxx/
+**/.gradle/
+**/.next/
+*.tsbuildinfo
+
+# Android / React Native generated
+packages/mobile/android/app/.cxx/
+packages/mobile/android/app/build/
+packages/mobile/android/.gradle/
