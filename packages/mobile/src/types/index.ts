@@ -114,9 +114,24 @@ export interface NotificationData {
   createdAt: string;
 }
 
+export interface VoterData {
+  _id: string;
+  voterId: string;
+  name: string;
+  mobileNumber: string;
+  email?: string;
+  photoUrl?: string;
+  cast: string;
+  subCast: string;
+  party: string;
+  boothId: string;
+  addedBy: string;
+  createdAt: string;
+}
+
 export interface OfflineQueueItem {
   id: string;
-  type: 'voter_count' | 'check_in' | 'incident';
+  type: 'voter_count' | 'check_in' | 'incident' | 'voter';
   data: any;
   createdAt: string;
   retryCount: number;
@@ -132,6 +147,7 @@ export type MainTabParamList = {
   Home: undefined;
   CheckIn: undefined;
   Submit: undefined;
+  Voters: undefined;
   Incidents: undefined;
   Notifications: undefined;
 };

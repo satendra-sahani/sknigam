@@ -12,6 +12,7 @@ import LoginScreen, { OtpVerificationScreen } from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import CheckInScreen from '../screens/CheckInScreen';
 import SubmitCountScreen from '../screens/SubmitCountScreen';
+import VotersScreen from '../screens/VotersScreen';
 import IncidentScreen from '../screens/IncidentScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 
@@ -56,6 +57,9 @@ function MainTabs() {
               iconName = focused
                 ? 'clipboard-check'
                 : 'clipboard-check-outline';
+              break;
+            case 'Voters':
+              iconName = focused ? 'account-group' : 'account-group-outline';
               break;
             case 'Incidents':
               iconName = focused ? 'alert-circle' : 'alert-circle-outline';
@@ -107,6 +111,11 @@ function MainTabs() {
         name="Submit"
         component={SubmitCountScreen}
         options={{ title: 'Submit' }}
+      />
+      <Tab.Screen
+        name="Voters"
+        component={VotersScreen}
+        options={{ title: 'Voters' }}
       />
       <Tab.Screen
         name="Incidents"

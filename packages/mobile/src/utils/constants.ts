@@ -38,6 +38,64 @@ export const COLORS = {
   blue100: '#dbeafe',
 };
 
+export const CAST_OPTIONS = [
+  { key: 'general', label: 'General' },
+  { key: 'obc', label: 'OBC' },
+  { key: 'sc', label: 'SC' },
+  { key: 'st', label: 'ST' },
+  { key: 'ews', label: 'EWS' },
+];
+
+export const SUBCAST_OPTIONS: Record<string, { key: string; label: string }[]> = {
+  general: [
+    { key: 'brahmin', label: 'Brahmin' },
+    { key: 'rajput', label: 'Rajput' },
+    { key: 'vaishya', label: 'Vaishya' },
+    { key: 'kayastha', label: 'Kayastha' },
+    { key: 'other', label: 'Other' },
+  ],
+  obc: [
+    { key: 'yadav', label: 'Yadav' },
+    { key: 'kurmi', label: 'Kurmi' },
+    { key: 'koeri', label: 'Koeri' },
+    { key: 'saini', label: 'Saini' },
+    { key: 'teli', label: 'Teli' },
+    { key: 'other', label: 'Other' },
+  ],
+  sc: [
+    { key: 'jatav', label: 'Jatav' },
+    { key: 'pasi', label: 'Pasi' },
+    { key: 'dhobi', label: 'Dhobi' },
+    { key: 'kori', label: 'Kori' },
+    { key: 'other', label: 'Other' },
+  ],
+  st: [
+    { key: 'bhil', label: 'Bhil' },
+    { key: 'gond', label: 'Gond' },
+    { key: 'munda', label: 'Munda' },
+    { key: 'santhal', label: 'Santhal' },
+    { key: 'other', label: 'Other' },
+  ],
+  ews: [
+    { key: 'other', label: 'Other' },
+  ],
+};
+
+export const PARTY_OPTIONS = [
+  { key: 'bjp', label: 'BJP' },
+  { key: 'inc', label: 'INC' },
+  { key: 'aap', label: 'AAP' },
+  { key: 'sp', label: 'SP' },
+  { key: 'bsp', label: 'BSP' },
+  { key: 'rjd', label: 'RJD' },
+  { key: 'jdu', label: 'JDU' },
+  { key: 'tmc', label: 'TMC' },
+  { key: 'dmk', label: 'DMK' },
+  { key: 'nota', label: 'NOTA' },
+  { key: 'other', label: 'Other' },
+  { key: 'undecided', label: 'Undecided' },
+];
+
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: '@auth_access_token',
   REFRESH_TOKEN: '@auth_refresh_token',

@@ -124,6 +124,9 @@ async function processItem(item: OfflineQueueItem): Promise<void> {
     case 'incident':
       await api.post('/incidents', item.data);
       break;
+    case 'voter':
+      await api.post('/voters', item.data);
+      break;
     default:
       console.warn(`[OfflineQueue] Unknown item type: ${item.type}`);
   }
