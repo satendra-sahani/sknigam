@@ -37,10 +37,6 @@ export async function connectSocket(): Promise<Socket> {
     console.log('[Socket] Connection error:', error.message);
   });
 
-  socket.on('reconnect', (attemptNumber) => {
-    console.log('[Socket] Reconnected after', attemptNumber, 'attempts');
-  });
-
   return socket;
 }
 
@@ -56,8 +52,8 @@ export function joinBoothRoom(boothId: string): void {
   socket?.emit('join:booth', boothId);
 }
 
-export function joinZoneRoom(zone: string): void {
-  socket?.emit('join:zone', zone);
+export function joinConstituencyRoom(assemblyConstituency: string): void {
+  socket?.emit('join:constituency', assemblyConstituency);
 }
 
 export function onNotification(
@@ -66,23 +62,5 @@ export function onNotification(
   socket?.on('notification', callback);
   return () => {
     socket?.off('notification', callback);
-  };
-}
-
-export function onVoterCountUpdate(
-  callback: (data: any) => void,
-): () => void {
-  socket?.on('voter_count:update', callback);
-  return () => {
-    socket?.off('voter_count:update', callback);
-  };
-}
-
-export function onIncidentUpdate(
-  callback: (data: any) => void,
-): () => void {
-  socket?.on('incident:update', callback);
-  return () => {
-    socket?.off('incident:update', callback);
   };
 }

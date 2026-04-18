@@ -1,0 +1,281 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
+import api from '@/lib/api';
+
+ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
+interface Overview {
+  totalVoters: number;
+  verified: number;
+  unverified: number;
+  verificationRate: number;
+  totalBooths: number;
+  activeAssignments: number;
+}
+
+interface Bucket {
+  key: string;
+  count: number;
+  verified?: number;
+}
+
+interface BoothProgress {
+  _id: string;
+  partNumber: number;
+  name: string;
+  assemblyConstituency: string;
+  total: number;
+  verified: number;
+}
+
+const PALETTE = ['#dc2626', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#64748b', '#0ea5e9'];
+
+export default function AnalyticsPage() {
+  const [constituency, setConstituency] = useState('');
+  const [applied, setApplied] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const [overview, setOverview] = useState<Overview | null>(null);
+  const [caste, setCaste] = useState<Bucket[]>([]);
+  const [religion, setReligion] = useState<Bucket[]>([]);
+  const [age, setAge] = useState<Bucket[]>([]);
+  const [candidates, setCandidates] = useState<Bucket[]>([]);
+  const [intent, setIntent] = useState<Bucket[]>([]);
+  const [grievances, setGrievances] = useState<Bucket[]>([]);
+  const [booths, setBooths] = useState<BoothProgress[]>([]);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = applied ? { assemblyConstituency: applied } : {};
+      const [ov, c, r, a, cd, vi, g, bp] = await Promise.all([
+        api.get('/analytics/overview', { params }),
+        api.get('/analytics/caste', { params }),
+        api.get('/analytics/religion', { params }),
+        api.get('/analytics/age-distribution', { params }),
+        api.get('/analytics/candidate-share', { params }),
+        api.get('/analytics/voting-intention', { params }),
+        api.get('/analytics/grievances', { params }),
+        api.get('/analytics/booth-progress', { params }),
+      ]);
+      setOverview(ov.data.data);
+      setCaste(c.data.data);
+      setReligion(r.data.data);
+      setAge(a.data.data);
+      setCandidates(cd.data.data);
+      setIntent(vi.data.data);
+      setGrievances(g.data.data);
+      setBooths(bp.data.data);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to load analytics');
+    } finally {
+      setLoading(false);
+    }
+  }, [applied]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const boothBarData = useMemo(() => {
+    const top = booths.slice(0, 20);
+    return {
+      labels: top.map((b) => `Part ${b.partNumber}`),
+      datasets: [
+        {
+          label: 'Verified',
+          data: top.map((b) => b.verified),
+          backgroundColor: '#dc2626',
+          stack: 's',
+        },
+        {
+          label: 'Pending',
+          data: top.map((b) => b.total - b.verified),
+          backgroundColor: '#e2e8f0',
+          stack: 's',
+        },
+      ],
+    };
+  }, [booths]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">Analytics</h1>
+          <p className="text-sm text-slate-500">Caste, age, candidate share and grievance insights</p>
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setApplied(constituency.trim());
+          }}
+          className="flex items-center gap-2">
+          <input
+            value={constituency}
+            onChange={(e) => setConstituency(e.target.value)}
+            placeholder="Filter by constituency"
+            className="px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+          />
+          <button type="submit" className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition">
+            Apply
+          </button>
+          {applied && (
+            <button
+              type="button"
+              onClick={() => {
+                setConstituency('');
+                setApplied('');
+              }}
+              className="px-3 py-2 text-sm text-slate-600 hover:text-slate-900">
+              Clear
+            </button>
+          )}
+        </form>
+      </div>
+
+      {overview && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <StatCard label="Total Voters" value={overview.totalVoters.toLocaleString('en-IN')} tone="slate" />
+          <StatCard label="Verified" value={overview.verified.toLocaleString('en-IN')} tone="green" />
+          <StatCard label="Pending" value={overview.unverified.toLocaleString('en-IN')} tone="amber" />
+          <StatCard label="Verification %" value={`${overview.verificationRate}%`} tone="red" />
+          <StatCard label="Booths" value={overview.totalBooths.toLocaleString('en-IN')} tone="slate" />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ChartCard title="Age Distribution" empty={age.length === 0} loading={loading}>
+          <Bar
+            data={{
+              labels: age.map((r) => r.key),
+              datasets: [{ label: 'Voters', data: age.map((r) => r.count), backgroundColor: '#dc2626' }],
+            }}
+            options={{ plugins: { legend: { display: false } } }}
+          />
+        </ChartCard>
+
+        <ChartCard title="Voting Intention" empty={intent.length === 0} loading={loading}>
+          <Doughnut
+            data={{
+              labels: intent.map((r) => r.key),
+              datasets: [{ data: intent.map((r) => r.count), backgroundColor: PALETTE }],
+            }}
+          />
+        </ChartCard>
+
+        <ChartCard title="Caste (Top 10)" empty={caste.length === 0} loading={loading}>
+          <Bar
+            data={{
+              labels: caste.slice(0, 10).map((r) => r.key),
+              datasets: [{ label: 'Voters', data: caste.slice(0, 10).map((r) => r.count), backgroundColor: '#6366f1' }],
+            }}
+            options={{
+              indexAxis: 'y' as const,
+              plugins: { legend: { display: false } },
+            }}
+          />
+        </ChartCard>
+
+        <ChartCard title="Religion" empty={religion.length === 0} loading={loading}>
+          <Doughnut
+            data={{
+              labels: religion.map((r) => r.key),
+              datasets: [{ data: religion.map((r) => r.count), backgroundColor: PALETTE }],
+            }}
+          />
+        </ChartCard>
+
+        <ChartCard title="Candidate / Party Support" empty={candidates.length === 0} loading={loading}>
+          <Bar
+            data={{
+              labels: candidates.slice(0, 10).map((r) => r.key),
+              datasets: [
+                { label: 'Voters', data: candidates.slice(0, 10).map((r) => r.count), backgroundColor: '#22c55e' },
+              ],
+            }}
+            options={{ indexAxis: 'y' as const, plugins: { legend: { display: false } } }}
+          />
+        </ChartCard>
+
+        <ChartCard title="Grievances" empty={grievances.length === 0} loading={loading}>
+          <Bar
+            data={{
+              labels: grievances.map((r) => r.key),
+              datasets: [{ label: 'Voters', data: grievances.map((r) => r.count), backgroundColor: '#f97316' }],
+            }}
+            options={{ plugins: { legend: { display: false } } }}
+          />
+        </ChartCard>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200/60 p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-slate-900">Booth Progress (Top 20)</h2>
+          <span className="text-xs text-slate-500">{booths.length} booths total</span>
+        </div>
+        {booths.length === 0 ? (
+          <p className="text-xs text-slate-400">No booth data.</p>
+        ) : (
+          <div className="h-72">
+            <Bar data={boothBarData} options={{ maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, tone }: { label: string; value: string; tone: 'slate' | 'red' | 'green' | 'amber' }) {
+  const tones: Record<string, string> = {
+    slate: 'text-slate-900',
+    red: 'text-red-600',
+    green: 'text-emerald-600',
+    amber: 'text-amber-600',
+  };
+  return (
+    <div className="bg-white rounded-xl border border-slate-200/60 p-4">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">{label}</p>
+      <p className={`mt-1 text-2xl font-bold ${tones[tone]}`}>{value}</p>
+    </div>
+  );
+}
+
+function ChartCard({
+  title,
+  children,
+  empty,
+  loading,
+}: {
+  title: string;
+  children: React.ReactNode;
+  empty: boolean;
+  loading: boolean;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-slate-200/60 p-5">
+      <h2 className="text-sm font-semibold text-slate-900 mb-3">{title}</h2>
+      <div className="h-64 flex items-center justify-center">
+        {loading ? (
+          <p className="text-xs text-slate-400">Loading…</p>
+        ) : empty ? (
+          <p className="text-xs text-slate-400">No data</p>
+        ) : (
+          <div className="w-full h-full">{children}</div>
+        )}
+      </div>
+    </div>
+  );
+}

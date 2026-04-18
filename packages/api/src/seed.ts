@@ -4,161 +4,166 @@ dotenv.config();
 import mongoose from 'mongoose';
 import User from './models/User';
 import Booth from './models/Booth';
-import BoothAssignment from './models/BoothAssignment';
+import Voter from './models/Voter';
+import VoterAssignment from './models/VoterAssignment';
+import Subscription from './models/Subscription';
 
 async function seed() {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/election_management';
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/pollstics';
     await mongoose.connect(mongoURI);
-    console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB:', mongoURI);
 
-    // Clear existing data
     await Promise.all([
       User.deleteMany({}),
       Booth.deleteMany({}),
-      BoothAssignment.deleteMany({}),
+      Voter.deleteMany({}),
+      VoterAssignment.deleteMany({}),
+      Subscription.deleteMany({}),
     ]);
     console.log('Cleared existing data');
 
-    // Create Super Admin
+    // --- Super Admin ---
     const superAdmin = await User.create({
-      name: 'Super Admin',
-      email: 'admin@election.com',
+      name: 'POLLSTICS Admin',
+      email: 'admin@pollstics.com',
       phone: '9000000001',
       hashedPassword: 'Admin@123',
       role: 'super_admin',
-      otpRequired: true,
+      otpRequired: false,
       isVerified: true,
       isActive: true,
-      trainingCompleted: true,
     });
-    console.log('Created Super Admin: admin@election.com / Admin@123');
+    console.log('Created Super Admin: admin@pollstics.com / Admin@123 (no OTP)');
 
-    // Create Zone In-charges
-    const zoneIncharge1 = await User.create({
-      name: 'Rajesh Kumar',
-      email: 'rajesh@election.com',
-      phone: '9000000002',
-      hashedPassword: 'Zone@123',
-      role: 'zone_incharge',
-      zone: 'Zone-A',
-      otpRequired: true,
-      isVerified: true,
-      isActive: true,
-      trainingCompleted: true,
-    });
-
-    const zoneIncharge2 = await User.create({
-      name: 'Priya Sharma',
-      email: 'priya@election.com',
-      phone: '9000000003',
-      hashedPassword: 'Zone@123',
-      role: 'zone_incharge',
-      zone: 'Zone-B',
-      otpRequired: true,
-      isVerified: true,
-      isActive: true,
-      trainingCompleted: true,
-    });
-    console.log('Created 2 Zone In-charges');
-
-    // Create Booth Supervisors
-    const supervisors = [];
-    const supervisorData = [
-      { name: 'Amit Singh', email: 'amit@election.com', phone: '9000000004', zone: 'Zone-A' },
-      { name: 'Neha Patel', email: 'neha@election.com', phone: '9000000005', zone: 'Zone-A' },
-      { name: 'Vikram Reddy', email: 'vikram@election.com', phone: '9000000006', zone: 'Zone-A' },
-      { name: 'Sunita Devi', email: 'sunita@election.com', phone: '9000000007', zone: 'Zone-B' },
-      { name: 'Manoj Tiwari', email: 'manoj@election.com', phone: '9000000008', zone: 'Zone-B' },
+    // --- Field Staff ---
+    const staffData = [
+      { name: 'Ramesh Kumar', email: 'ramesh@pollstics.com', phone: '9000000011', assemblyConstituency: 'Lucknow Cantt', district: 'Lucknow' },
+      { name: 'Suresh Yadav', email: 'suresh@pollstics.com', phone: '9000000012', assemblyConstituency: 'Lucknow Cantt', district: 'Lucknow' },
+      { name: 'Anita Devi', email: 'anita@pollstics.com', phone: '9000000013', assemblyConstituency: 'Lucknow North', district: 'Lucknow' },
     ];
-
-    for (const data of supervisorData) {
-      const supervisor = await User.create({
+    const staffUsers = [];
+    for (const data of staffData) {
+      const u = await User.create({
         ...data,
         hashedPassword: 'Staff@123',
-        role: 'booth_supervisor',
-        otpRequired: false,
+        role: 'staff',
+        otpRequired: true,
         isVerified: true,
         isActive: true,
-        trainingCompleted: true,
       });
-      supervisors.push(supervisor);
+      staffUsers.push(u);
     }
-    console.log('Created 5 Booth Supervisors');
+    console.log(`Created ${staffUsers.length} field staff (password Staff@123, OTP required)`);
 
-    // Create 10 Booths across 2 zones
-    const booths = [];
+    // --- Politician ---
+    const politician = await User.create({
+      name: 'Rajiv Nath',
+      email: 'rajiv@pollstics.com',
+      phone: '9000000021',
+      hashedPassword: 'Leader@123',
+      role: 'politician',
+      assemblyConstituency: 'Lucknow Cantt',
+      district: 'Lucknow',
+      partyAffiliation: 'Independent',
+      otpRequired: true,
+      isVerified: true,
+      isActive: true,
+    });
+    console.log('Created Politician: rajiv@pollstics.com / Leader@123 (OTP required)');
+
+    // --- Booths (POLLSTICS, Uttar Pradesh) ---
     const boothData = [
-      { name: 'Government Primary School', partNumber: 101, zone: 'Zone-A', village: 'Rampur', totalRegisteredVoters: 850, latitude: 28.6139, longitude: 77.2090 },
-      { name: 'Community Hall Sector-5', partNumber: 102, zone: 'Zone-A', village: 'Rampur', totalRegisteredVoters: 1200, latitude: 28.6145, longitude: 77.2095 },
-      { name: 'Panchayat Bhawan', partNumber: 103, zone: 'Zone-A', village: 'Shyampur', totalRegisteredVoters: 650, latitude: 28.6200, longitude: 77.2150 },
-      { name: 'Municipal Ward Office', partNumber: 104, zone: 'Zone-A', village: 'Shyampur', totalRegisteredVoters: 920, latitude: 28.6210, longitude: 77.2160 },
-      { name: 'District Court Complex', partNumber: 105, zone: 'Zone-A', village: 'Mohanpur', totalRegisteredVoters: 1100, latitude: 28.6250, longitude: 77.2200 },
-      { name: 'Public Library Hall', partNumber: 201, zone: 'Zone-B', village: 'Lakshmipur', totalRegisteredVoters: 780, latitude: 28.6300, longitude: 77.2300 },
-      { name: 'Government High School', partNumber: 202, zone: 'Zone-B', village: 'Lakshmipur', totalRegisteredVoters: 950, latitude: 28.6310, longitude: 77.2310 },
-      { name: 'Town Hall', partNumber: 203, zone: 'Zone-B', village: 'Krishnanagar', totalRegisteredVoters: 1050, latitude: 28.6350, longitude: 77.2350 },
-      { name: 'Sports Complex', partNumber: 204, zone: 'Zone-B', village: 'Krishnanagar', totalRegisteredVoters: 700, latitude: 28.6360, longitude: 77.2360 },
-      { name: 'Cultural Center', partNumber: 205, zone: 'Zone-B', village: 'Govindpur', totalRegisteredVoters: 880, latitude: 28.6400, longitude: 77.2400 },
+      { partNumber: 101, name: 'Government Primary School, Ashok Nagar', assemblyConstituency: 'Lucknow Cantt', district: 'Lucknow', village: 'Ashok Nagar', totalVoters: 850 },
+      { partNumber: 102, name: 'Community Hall, Sector 5', assemblyConstituency: 'Lucknow Cantt', district: 'Lucknow', village: 'Sector 5', totalVoters: 1200 },
+      { partNumber: 103, name: 'Panchayat Bhawan, Rampur', assemblyConstituency: 'Lucknow Cantt', district: 'Lucknow', village: 'Rampur', totalVoters: 650 },
+      { partNumber: 201, name: 'Public Library, Krishnanagar', assemblyConstituency: 'Lucknow North', district: 'Lucknow', village: 'Krishnanagar', totalVoters: 780 },
+      { partNumber: 202, name: 'Government High School, Aminabad', assemblyConstituency: 'Lucknow North', district: 'Lucknow', village: 'Aminabad', totalVoters: 950 },
     ];
-
-    for (const data of boothData) {
-      const booth = await Booth.create({
-        ...data,
-        address: `${data.name}, ${data.village}`,
-        facilities: {
-          power: true,
-          water: Math.random() > 0.3,
-          shade: Math.random() > 0.2,
-          accessibilityRamp: Math.random() > 0.5,
-        },
-      });
+    const booths: any[] = [];
+    for (const b of boothData) {
+      const booth = await Booth.create({ ...b, state: 'Uttar Pradesh', address: `${b.name}, ${b.village}` });
       booths.push(booth);
     }
-    console.log('Created 10 Booths');
+    console.log(`Created ${booths.length} booths`);
 
-    // Create Booth Assignments
-    // Zone-A supervisors -> Zone-A booths
-    const zoneABooths = booths.filter((b) => b.zone === 'Zone-A');
-    const zoneASupervisors = supervisors.filter((s) => s.zone === 'Zone-A');
-    const zoneBBooths = booths.filter((b) => b.zone === 'Zone-B');
-    const zoneBSupervisors = supervisors.filter((s) => s.zone === 'Zone-B');
-
-    for (let i = 0; i < zoneABooths.length; i++) {
-      const supervisor = zoneASupervisors[i % zoneASupervisors.length];
-      await BoothAssignment.create({
-        boothId: zoneABooths[i]._id,
-        staffId: supervisor._id,
-        type: 'primary',
-        assignedBy: zoneIncharge1._id,
-        isActive: true,
-      });
+    // --- Sample voters (3 per booth) ---
+    let voterCount = 0;
+    const castes = ['Brahmin', 'Kshatriya', 'Yadav', 'Kurmi', 'Jatav'];
+    const religions = ['Hindu', 'Muslim', 'Hindu', 'Sikh', 'Hindu'];
+    for (const booth of booths) {
+      for (let i = 1; i <= 3; i++) {
+        await Voter.create({
+          voterSerialNumber: i,
+          epicNumber: `ABC${String(booth.partNumber).padStart(4, '0')}${i}`,
+          fullName: `Voter ${booth.partNumber}-${i}`,
+          fatherOrHusbandName: `Father ${i}`,
+          gender: i % 3 === 0 ? 'F' : 'M',
+          age: 25 + i * 5,
+          address: `House ${i}, ${booth.village}`,
+          boothId: booth._id,
+          partNumber: booth.partNumber,
+          assemblyConstituency: booth.assemblyConstituency,
+          caste: castes[i % castes.length],
+          religion: religions[i % religions.length],
+          verificationStatus: false,
+        });
+        voterCount++;
+      }
     }
+    console.log(`Created ${voterCount} seed voters`);
 
-    for (let i = 0; i < zoneBBooths.length; i++) {
-      const supervisor = zoneBSupervisors[i % zoneBSupervisors.length];
-      await BoothAssignment.create({
-        boothId: zoneBBooths[i]._id,
-        staffId: supervisor._id,
-        type: 'primary',
-        assignedBy: zoneIncharge2._id,
-        isActive: true,
-      });
-    }
-    console.log('Created Booth Assignments');
+    // --- Assign booths to staff ---
+    await VoterAssignment.create({
+      staffId: staffUsers[0]._id,
+      boothId: booths[0]._id,
+      assignedBy: superAdmin._id,
+      isActive: true,
+      totalVoters: 3,
+      completedCount: 0,
+    });
+    await VoterAssignment.create({
+      staffId: staffUsers[1]._id,
+      boothId: booths[1]._id,
+      assignedBy: superAdmin._id,
+      isActive: true,
+      totalVoters: 3,
+      completedCount: 0,
+    });
+    await VoterAssignment.create({
+      staffId: staffUsers[2]._id,
+      boothId: booths[3]._id,
+      assignedBy: superAdmin._id,
+      isActive: true,
+      totalVoters: 3,
+      completedCount: 0,
+    });
+    console.log('Created 3 voter assignments');
 
-    console.log('\n--- Seed Complete ---');
-    console.log('Login credentials:');
-    console.log('  Super Admin: admin@election.com / Admin@123 (requires OTP - check console)');
-    console.log('  Zone In-charge A: rajesh@election.com / Zone@123 (requires OTP)');
-    console.log('  Zone In-charge B: priya@election.com / Zone@123 (requires OTP)');
-    console.log('  Booth Supervisors: amit@election.com / Staff@123 (no OTP)');
-    console.log('                     neha@election.com / Staff@123');
-    console.log('                     vikram@election.com / Staff@123');
-    console.log('                     sunita@election.com / Staff@123');
-    console.log('                     manoj@election.com / Staff@123');
+    // --- Demo politician subscription (active Premium) ---
+    const now = new Date();
+    await Subscription.create({
+      politicianId: politician._id,
+      tier: 'premium',
+      status: 'active',
+      assemblyConstituency: 'Lucknow Cantt',
+      startDate: now,
+      endDate: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000),
+      amount: 49999,
+      currency: 'INR',
+      paidAt: now,
+    });
+    console.log('Created active Premium subscription for politician');
+
+    console.log('\n--- POLLSTICS seed complete ---');
+    console.log('Logins:');
+    console.log('  Super Admin  : admin@pollstics.com / Admin@123   (no OTP)');
+    console.log('  Staff 1      : ramesh@pollstics.com / Staff@123  (OTP required)');
+    console.log('  Staff 2      : suresh@pollstics.com / Staff@123  (OTP required)');
+    console.log('  Staff 3      : anita@pollstics.com  / Staff@123  (OTP required)');
+    console.log('  Politician   : rajiv@pollstics.com  / Leader@123 (OTP required)');
 
     await mongoose.disconnect();
-    console.log('\nDisconnected from MongoDB');
     process.exit(0);
   } catch (error) {
     console.error('Seed error:', error);

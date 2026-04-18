@@ -10,10 +10,12 @@
   "scripts": {
     "dev:api": "cd packages/api && npm run dev",
     "dev:web": "cd packages/web && npm run dev",
-    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:mobile": "cd packages/mobile && npm start",
+    "dev": "concurrently -n api,web,mobile -c cyan,green,magenta \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:mobile\"",
     "build:api": "cd packages/api && npm run build",
     "build:web": "cd packages/web && npm run build",
-    "seed": "cd packages/api && npm run seed"
+    "seed": "cd packages/api && npm run seed",
+    "setup": "npm install && cd packages/mobile && npm install"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

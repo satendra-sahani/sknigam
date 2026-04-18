@@ -18,7 +18,8 @@ export interface AuthUser {
   email: string;
   phone: string;
   role: string;
-  zone?: string;
+  assemblyConstituency?: string;
+  district?: string;
   isVerified: boolean;
   isActive: boolean;
   lastLoginAt?: string;

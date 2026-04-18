@@ -1,28 +1,30 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcrypt';
 
+export type UserRole = 'super_admin' | 'staff' | 'politician';
+
 export interface IUserDocument extends Document {
   name: string;
   email: string;
   phone: string;
-  role: string;
+  role: UserRole;
   hashedPassword: string;
-  voterId?: string;
   profilePhoto?: string;
   idProofUrl?: string;
-  partyMembershipId?: string;
-  emergencyContact?: string;
-  trainingCompleted: boolean;
+  // POLLSTICS scoping
+  assemblyConstituency?: string;
+  district?: string;
+  // Politician-specific
+  partyAffiliation?: string;
+  // Lifecycle
   isVerified: boolean;
   isActive: boolean;
-  zone?: string;
   otpRequired: boolean;
   failedLoginAttempts: number;
   lockedUntil?: Date;
   lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  profileCompleteness: number;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -34,19 +36,17 @@ const UserSchema = new Schema<IUserDocument>(
     role: {
       type: String,
       required: true,
-      enum: ['super_admin', 'zone_incharge', 'booth_supervisor', 'data_entry_operator', 'observer'],
+      enum: ['super_admin', 'staff', 'politician'],
     },
     hashedPassword: { type: String, required: true },
-    voterId: { type: String, sparse: true, unique: true },
     profilePhoto: { type: String },
     idProofUrl: { type: String },
-    partyMembershipId: { type: String },
-    emergencyContact: { type: String },
-    trainingCompleted: { type: Boolean, default: false },
+    assemblyConstituency: { type: String, trim: true },
+    district: { type: String, trim: true },
+    partyAffiliation: { type: String, trim: true },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
-    zone: { type: String },
-    otpRequired: { type: Boolean, default: false },
+    otpRequired: { type: Boolean, default: true },
     failedLoginAttempts: { type: Number, default: 0 },
     lockedUntil: { type: Date },
     lastLoginAt: { type: Date },
@@ -60,21 +60,8 @@ const UserSchema = new Schema<IUserDocument>(
 
 UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ phone: 1 }, { unique: true });
-UserSchema.index({ voterId: 1 }, { unique: true, sparse: true });
 UserSchema.index({ role: 1 });
-UserSchema.index({ zone: 1 });
-
-UserSchema.virtual('profileCompleteness').get(function (this: IUserDocument) {
-  const fields = [
-    'name', 'email', 'phone', 'role', 'voterId', 'profilePhoto',
-    'idProofUrl', 'partyMembershipId', 'emergencyContact',
-  ];
-  const filled = fields.filter((f) => {
-    const val = (this as any)[f];
-    return val !== undefined && val !== null && val !== '';
-  });
-  return Math.round((filled.length / fields.length) * 100);
-});
+UserSchema.index({ assemblyConstituency: 1 });
 
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('hashedPassword')) return next();

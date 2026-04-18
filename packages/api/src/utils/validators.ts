@@ -5,8 +5,7 @@ export const registerValidation = [
   body('email').isEmail().withMessage('Valid email is required'),
   body('phone').matches(/^[0-9]{10}$/).withMessage('Phone must be 10 digits'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('role').isIn(['super_admin', 'zone_incharge', 'booth_supervisor', 'data_entry_operator', 'observer'])
-    .withMessage('Invalid role'),
+  body('role').isIn(['super_admin', 'staff', 'politician']).withMessage('Invalid role'),
 ];
 
 export const loginValidation = [
@@ -24,51 +23,35 @@ export const refreshTokenValidation = [
 ];
 
 export const boothValidation = [
-  body('name').trim().notEmpty().withMessage('Booth name is required'),
   body('partNumber').isInt({ min: 1 }).withMessage('Part number must be a positive integer'),
-  body('zone').trim().notEmpty().withMessage('Zone is required'),
-  body('totalRegisteredVoters').isInt({ min: 0 }).withMessage('Total registered voters must be non-negative'),
+  body('name').trim().notEmpty().withMessage('Booth name is required'),
+  body('assemblyConstituency').trim().notEmpty().withMessage('Assembly constituency is required'),
+  body('district').trim().notEmpty().withMessage('District is required'),
 ];
 
-export const boothAssignmentValidation = [
-  body('boothId').notEmpty().withMessage('Booth ID is required'),
+export const voterAssignmentValidation = [
   body('staffId').notEmpty().withMessage('Staff ID is required'),
-  body('type').isIn(['primary', 'backup']).withMessage('Type must be primary or backup'),
-];
-
-export const voterCountValidation = [
   body('boothId').notEmpty().withMessage('Booth ID is required'),
-  body('slot').isIn(['09:00', '11:00', '13:00', '15:00', '17:00']).withMessage('Invalid slot time'),
-  body('electionDate').isISO8601().withMessage('Valid election date is required'),
-  body('maleCount').isInt({ min: 0 }).withMessage('Male count must be non-negative'),
-  body('femaleCount').isInt({ min: 0 }).withMessage('Female count must be non-negative'),
-  body('otherCount').isInt({ min: 0 }).withMessage('Other count must be non-negative'),
+  body('voterSerialFrom').optional().isInt({ min: 1 }),
+  body('voterSerialTo').optional().isInt({ min: 1 }),
 ];
 
-export const checkInValidation = [
-  body('latitude').isFloat({ min: -90, max: 90 }).withMessage('Valid latitude required'),
-  body('longitude').isFloat({ min: -180, max: 180 }).withMessage('Valid longitude required'),
+export const voterUpdateValidation = [
+  body('mobileNumber').optional().matches(/^[0-9]{10}$/).withMessage('Mobile must be 10 digits'),
+  body('whatsappNumber').optional().matches(/^[0-9]{10}$/).withMessage('WhatsApp must be 10 digits'),
+  body('email').optional().isEmail().withMessage('Valid email required'),
+  body('gender').optional().isIn(['M', 'F', 'T']),
 ];
 
-export const incidentValidation = [
-  body('boothId').notEmpty().withMessage('Booth ID is required'),
-  body('category').isIn(['technical', 'security', 'administrative', 'other']).withMessage('Invalid category'),
-  body('severity').isIn(['low', 'medium', 'high', 'critical']).withMessage('Invalid severity'),
-  body('description').trim().notEmpty().withMessage('Description is required'),
+export const subscriptionValidation = [
+  body('tier').isIn(['basic', 'standard', 'premium']).withMessage('Invalid tier'),
+  body('assemblyConstituency').trim().notEmpty().withMessage('Assembly constituency is required'),
 ];
 
 export const notificationValidation = [
   body('title').trim().notEmpty().withMessage('Title is required'),
   body('message').trim().notEmpty().withMessage('Message is required'),
-  body('type').isIn(['system', 'zone_broadcast', 'report_update', 'incident_update', 'urgent'])
-    .withMessage('Invalid notification type'),
-];
-
-export const staffSwapValidation = [
-  body('currentStaffId').notEmpty().withMessage('Current staff ID is required'),
-  body('replacementStaffId').notEmpty().withMessage('Replacement staff ID is required'),
-  body('boothId').notEmpty().withMessage('Booth ID is required'),
-  body('reason').trim().notEmpty().withMessage('Reason is required'),
+  body('type').isIn(['system', 'assignment', 'subscription', 'urgent']).withMessage('Invalid type'),
 ];
 
 export const mongoIdParam = [

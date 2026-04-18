@@ -15,9 +15,10 @@ export interface LoginResponse {
 
 export interface OtpVerifyResponse {
   success: boolean;
-  accessToken: string;
-  refreshToken: string;
-  user: UserProfile;
+  user?: UserProfile;
+  accessToken?: string;
+  refreshToken?: string;
+  message?: string;
 }
 
 export interface UserProfile {
@@ -25,129 +26,91 @@ export interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  role: string;
+  role: 'super_admin' | 'staff' | 'politician';
   profilePhoto?: string;
-  zone?: string;
+  assemblyConstituency?: string;
+  district?: string;
+  partyAffiliation?: string;
   isVerified: boolean;
-  trainingCompleted: boolean;
+  isActive?: boolean;
 }
 
 export interface BoothInfo {
   _id: string;
   name: string;
   partNumber: number;
-  zone: string;
+  assemblyConstituency: string;
+  district: string;
+  state: string;
   village?: string;
   address?: string;
   latitude?: number;
   longitude?: number;
-  totalRegisteredVoters: number;
-  facilities?: {
-    power: boolean;
-    water: boolean;
-    shade: boolean;
-    accessibilityRamp: boolean;
-  };
-}
-
-export interface AssignmentInfo {
-  _id: string;
-  boothId: string;
-  staffId: string;
-  type: string;
-  isActive: boolean;
-  booth: BoothInfo;
-}
-
-export interface CheckInData {
-  _id: string;
-  staffId: string;
-  boothId: string;
-  latitude: number;
-  longitude: number;
-  selfieUrl: string;
-  distanceFromBooth: number;
-  isWithinRadius: boolean;
-  overrideReason?: string;
-  checkedInAt: string;
-}
-
-export interface VoterCountData {
-  _id: string;
-  boothId: string;
-  staffId: string;
-  slot: string;
-  electionDate: string;
   totalVoters: number;
-  maleCount: number;
-  femaleCount: number;
-  otherCount: number;
-  status: string;
-  reviewedBy?: string;
-  rejectionReason?: string;
-  submittedAt: string;
 }
 
-export interface IncidentData {
+export interface VoterAssignmentInfo {
   _id: string;
   boothId: string;
-  reportedBy: string;
-  category: string;
-  severity: string;
-  status: string;
-  description: string;
-  photos: string[];
-  resolvedBy?: string;
-  resolvedAt?: string;
-  createdAt: string;
-}
-
-export interface NotificationData {
-  _id: string;
-  title: string;
-  message: string;
-  type: string;
-  sentBy: string;
-  recipients: string[];
-  targetZone?: string;
-  readBy: string[];
-  createdAt: string;
+  staffId: string;
+  voterSerialFrom?: number;
+  voterSerialTo?: number;
+  isActive: boolean;
+  totalVoters: number;
+  completedCount: number;
+  booth?: BoothInfo;
 }
 
 export interface VoterData {
   _id: string;
-  voterId: string;
-  name: string;
-  mobileNumber: string;
-  email?: string;
-  photoUrl?: string;
-  cast: string;
-  subCast: string;
-  party: string;
+  voterSerialNumber: number;
+  epicNumber: string;
+  fullName: string;
+  fatherOrHusbandName: string;
+  gender: 'M' | 'F' | 'T';
+  age: number;
+  address: string;
   boothId: string;
-  addedBy: string;
-  createdAt: string;
+  partNumber: number;
+  assemblyConstituency: string;
+  caste?: string;
+  subCaste?: string;
+  religion?: string;
+  mobileNumber?: string;
+  whatsappNumber?: string;
+  email?: string;
+  voterPhoto?: string;
+  verificationStatus: boolean;
+  visitDate?: string;
+  staffRemarks?: string;
+  visitedBy?: string;
+  favouriteCandidate?: string;
+  partySupport?: string;
+  votingIntention?: string;
 }
 
-export interface OfflineQueueItem {
+export interface QueuedVisit {
   id: string;
-  type: 'voter_count' | 'check_in' | 'incident' | 'voter';
-  data: any;
+  voterId: string;
+  voterName: string;
+  boothId: string;
+  payload: Record<string, any>;
+  photoUri?: string;
   createdAt: string;
-  retryCount: number;
+  attempts: number;
+  lastError?: string;
 }
 
 export type RootStackParamList = {
   Login: undefined;
   OtpVerification: { email: string; tempToken: string };
   MainTabs: undefined;
+  BoothVoters: { assignmentId: string; boothId: string; boothName: string; partNumber: number };
+  VoterVisit: { voterId: string };
 };
 
 export type MainTabParamList = {
   Home: undefined;
-  CheckIn: undefined;
-  Submit: undefined;
-  Voters: undefined;
-  Incidents: undefined;
-  Notifications: undefined;
+  Assignments: undefined;
+  Queue: undefined;
 };

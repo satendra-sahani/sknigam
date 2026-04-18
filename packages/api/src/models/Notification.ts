@@ -4,11 +4,8 @@ export interface INotificationDocument extends Document {
   title: string;
   message: string;
   type: string;
-  sentBy: mongoose.Types.ObjectId;
+  sentBy?: mongoose.Types.ObjectId;
   recipients: mongoose.Types.ObjectId[];
-  targetZone?: string;
-  targetRole?: string;
-  targetBoothId?: mongoose.Types.ObjectId;
   readBy: mongoose.Types.ObjectId[];
   createdAt: Date;
 }
@@ -20,16 +17,10 @@ const NotificationSchema = new Schema<INotificationDocument>(
     type: {
       type: String,
       required: true,
-      enum: ['system', 'zone_broadcast', 'report_update', 'incident_update', 'urgent'],
+      enum: ['system', 'assignment', 'subscription', 'urgent'],
     },
-    sentBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    sentBy: { type: Schema.Types.ObjectId, ref: 'User' },
     recipients: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    targetZone: { type: String },
-    targetRole: {
-      type: String,
-      enum: ['super_admin', 'zone_incharge', 'booth_supervisor', 'data_entry_operator', 'observer'],
-    },
-    targetBoothId: { type: Schema.Types.ObjectId, ref: 'Booth' },
     readBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   },
   { timestamps: true }

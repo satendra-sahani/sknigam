@@ -4,11 +4,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from './hooks/useAuth';
 import AppNavigator from './navigation/AppNavigator';
-import { setupAutoSync } from './services/offlineQueue';
 import { COLORS } from './utils/constants';
+import { startAutoFlush } from './services/visitQueue';
 
-// Enable Network Inspection in Chrome DevTools
-// This makes XHR/fetch requests visible in the Network tab
 if (__DEV__) {
   // @ts-ignore
   global.XMLHttpRequest = global.originalXMLHttpRequest || global.XMLHttpRequest;
@@ -20,7 +18,6 @@ if (__DEV__) {
   global.FileReader = global.originalFileReader || global.FileReader;
 }
 
-// Suppress known harmless warnings
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
   'VirtualizedLists should never be nested',
@@ -28,14 +25,8 @@ LogBox.ignoreLogs([
 
 const App: React.FC = () => {
   useEffect(() => {
-    // Set up auto-sync for offline queue when connectivity is restored
-    const unsubscribe = setupAutoSync((syncedCount) => {
-      console.log(`[OfflineSync] Synced ${syncedCount} queued items`);
-    });
-
-    return () => {
-      unsubscribe();
-    };
+    const stop = startAutoFlush();
+    return stop;
   }, []);
 
   return (

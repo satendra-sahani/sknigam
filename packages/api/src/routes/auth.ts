@@ -17,7 +17,15 @@ import {
 
 const router = Router();
 
-// POST /api/auth/register
+function signAccessToken(user: any): string {
+  return jwt.sign(
+    { userId: user._id, role: user.role, assemblyConstituency: user.assemblyConstituency },
+    process.env.JWT_SECRET || 'secret',
+    { expiresIn: (process.env.JWT_EXPIRY || '30m') as any }
+  );
+}
+
+// POST /api/auth/register (politician self-signup, staff is created by admin)
 router.post('/register', registerValidation, async (req: Request, res: Response): Promise<void> => {
   try {
     const errors = validationResult(req);
@@ -26,7 +34,13 @@ router.post('/register', registerValidation, async (req: Request, res: Response)
       return;
     }
 
-    const { name, email, phone, password, role, zone, voterId } = req.body;
+    const { name, email, phone, password, role, assemblyConstituency, district, partyAffiliation } = req.body;
+
+    // Self-registration only allowed for politicians
+    if (role !== 'politician') {
+      res.status(403).json({ success: false, error: 'Self-registration is only available for politicians' });
+      return;
+    }
 
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
@@ -34,30 +48,25 @@ router.post('/register', registerValidation, async (req: Request, res: Response)
       return;
     }
 
-    const otpRequired = ['super_admin', 'zone_incharge'].includes(role);
-
     const user = await User.create({
       name,
       email,
       phone,
       hashedPassword: password,
       role,
-      zone,
-      voterId,
-      otpRequired,
+      assemblyConstituency,
+      district,
+      partyAffiliation,
+      otpRequired: true,
     });
 
     const userData = user.toObject();
     delete (userData as any).hashedPassword;
 
-    res.status(201).json({
-      success: true,
-      data: userData,
-      message: 'User registered successfully',
-    });
+    res.status(201).json({ success: true, data: userData, message: 'Politician registered. Please login with OTP.' });
   } catch (error: any) {
     if (error.code === 11000) {
-      res.status(409).json({ success: false, error: 'Duplicate key error. Email, phone, or voterId already exists.' });
+      res.status(409).json({ success: false, error: 'Email or phone already in use' });
       return;
     }
     res.status(500).json({ success: false, error: error.message });
@@ -86,17 +95,11 @@ router.post('/login', loginValidation, async (req: AuthRequest, res: Response): 
       return;
     }
 
-    // Check if account is locked
     if (user.failedLoginAttempts >= 5 && user.lockedUntil && user.lockedUntil > new Date()) {
-      res.status(423).json({
-        success: false,
-        error: 'Account is locked. Try again later.',
-        data: { lockedUntil: user.lockedUntil },
-      });
+      res.status(423).json({ success: false, error: 'Account is locked. Try again later.', data: { lockedUntil: user.lockedUntil } });
       return;
     }
 
-    // If lock period expired, reset
     if (user.lockedUntil && user.lockedUntil <= new Date()) {
       user.failedLoginAttempts = 0;
       user.lockedUntil = undefined;
@@ -106,22 +109,20 @@ router.post('/login', loginValidation, async (req: AuthRequest, res: Response): 
     if (!isMatch) {
       user.failedLoginAttempts += 1;
       if (user.failedLoginAttempts >= 5) {
-        user.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // Lock for 30 minutes
+        user.lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
       }
       await user.save();
-
       await createAuditLog(user._id.toString(), user.role, 'login_failed', req, user._id.toString());
-
       res.status(401).json({ success: false, error: 'Invalid credentials' });
       return;
     }
 
-    // Reset failed attempts on successful password check
     user.failedLoginAttempts = 0;
     user.lockedUntil = undefined;
 
-    // Check if OTP is required
-    if (user.otpRequired || ['super_admin', 'zone_incharge'].includes(user.role)) {
+    // OTP required for staff and politician; super_admin uses password directly
+    const needsOtp = user.otpRequired && user.role !== 'super_admin';
+    if (needsOtp) {
       const otpCode = generateOTP();
       await OtpToken.create({
         userId: user._id,
@@ -129,36 +130,26 @@ router.post('/login', loginValidation, async (req: AuthRequest, res: Response): 
         expiresAt: getOTPExpiryDate(),
         verified: false,
       });
-
       await createAuditLog(user._id.toString(), user.role, 'otp_sent', req, user._id.toString());
-
       await user.save();
-
       res.json({
         success: true,
         data: { requiresOtp: true, userId: user._id },
-        message: 'OTP sent. Check console for code.',
+        message: 'OTP sent. Check server console for the code.',
       });
       return;
     }
 
-    // Generate tokens directly
-    const accessToken = jwt.sign(
-      { userId: user._id, role: user.role, zone: user.zone },
-      process.env.JWT_SECRET || 'secret',
-      { expiresIn: (process.env.JWT_EXPIRY || '30m') as any }
-    );
-
+    const accessToken = signAccessToken(user);
     const refreshTokenValue = crypto.randomBytes(64).toString('hex');
     await RefreshToken.create({
       userId: user._id,
       token: refreshTokenValue,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
     user.lastLoginAt = new Date();
     await user.save();
-
     await createAuditLog(user._id.toString(), user.role, 'login', req, user._id.toString());
 
     const userData = user.toObject();
@@ -166,11 +157,7 @@ router.post('/login', loginValidation, async (req: AuthRequest, res: Response): 
 
     res.json({
       success: true,
-      data: {
-        user: userData,
-        accessToken,
-        refreshToken: refreshTokenValue,
-      },
+      data: { user: userData, accessToken, refreshToken: refreshTokenValue },
       message: 'Login successful',
     });
   } catch (error: any) {
@@ -189,21 +176,15 @@ router.post('/verify-otp', otpValidation, async (req: AuthRequest, res: Response
 
     const { userId, code } = req.body;
 
-    const otpRecord = await OtpToken.findOne({
-      userId,
-      verified: false,
-    }).sort({ createdAt: -1 });
-
+    const otpRecord = await OtpToken.findOne({ userId, verified: false }).sort({ createdAt: -1 });
     if (!otpRecord) {
       res.status(400).json({ success: false, error: 'No OTP found for this user' });
       return;
     }
-
     if (otpRecord.expiresAt < new Date()) {
       res.status(400).json({ success: false, error: 'OTP has expired' });
       return;
     }
-
     if (otpRecord.code !== code) {
       res.status(400).json({ success: false, error: 'Invalid OTP code' });
       return;
@@ -218,12 +199,7 @@ router.post('/verify-otp', otpValidation, async (req: AuthRequest, res: Response
       return;
     }
 
-    const accessToken = jwt.sign(
-      { userId: user._id, role: user.role, zone: user.zone },
-      process.env.JWT_SECRET || 'secret',
-      { expiresIn: (process.env.JWT_EXPIRY || '30m') as any }
-    );
-
+    const accessToken = signAccessToken(user);
     const refreshTokenValue = crypto.randomBytes(64).toString('hex');
     await RefreshToken.create({
       userId: user._id,
@@ -243,11 +219,7 @@ router.post('/verify-otp', otpValidation, async (req: AuthRequest, res: Response
 
     res.json({
       success: true,
-      data: {
-        user: userData,
-        accessToken,
-        refreshToken: refreshTokenValue,
-      },
+      data: { user: userData, accessToken, refreshToken: refreshTokenValue },
       message: 'OTP verified. Login successful.',
     });
   } catch (error: any) {
@@ -265,13 +237,11 @@ router.post('/refresh', refreshTokenValidation, async (req: Request, res: Respon
     }
 
     const { refreshToken } = req.body;
-
     const tokenRecord = await RefreshToken.findOne({ token: refreshToken });
     if (!tokenRecord) {
       res.status(401).json({ success: false, error: 'Invalid refresh token' });
       return;
     }
-
     if (tokenRecord.expiresAt < new Date()) {
       await RefreshToken.deleteOne({ _id: tokenRecord._id });
       res.status(401).json({ success: false, error: 'Refresh token expired' });
@@ -284,17 +254,8 @@ router.post('/refresh', refreshTokenValidation, async (req: Request, res: Respon
       return;
     }
 
-    const accessToken = jwt.sign(
-      { userId: user._id, role: user.role, zone: user.zone },
-      process.env.JWT_SECRET || 'secret',
-      { expiresIn: (process.env.JWT_EXPIRY || '30m') as any }
-    );
-
-    res.json({
-      success: true,
-      data: { accessToken },
-      message: 'Token refreshed',
-    });
+    const accessToken = signAccessToken(user);
+    res.json({ success: true, data: { accessToken }, message: 'Token refreshed' });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -304,18 +265,26 @@ router.post('/refresh', refreshTokenValidation, async (req: Request, res: Respon
 router.post('/logout', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { refreshToken } = req.body;
-
-    if (refreshToken) {
-      await RefreshToken.deleteOne({ token: refreshToken });
-    }
-
-    // Delete all refresh tokens for this user
+    if (refreshToken) await RefreshToken.deleteOne({ token: refreshToken });
     if (req.user) {
       await RefreshToken.deleteMany({ userId: req.user.userId });
       await createAuditLog(req.user.userId, req.user.role, 'logout', req);
     }
-
     res.json({ success: true, message: 'Logged out successfully' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/auth/me
+router.get('/me', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const user = await User.findById(req.user!.userId).select('-hashedPassword');
+    if (!user) {
+      res.status(404).json({ success: false, error: 'User not found' });
+      return;
+    }
+    res.json({ success: true, data: user });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

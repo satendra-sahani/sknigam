@@ -9,10 +9,8 @@ import SessionTimer from './SessionTimer';
 
 const roleLabels: Record<string, string> = {
   super_admin: 'Super Admin',
-  zone_incharge: 'Zone Incharge',
-  booth_supervisor: 'Booth Supervisor',
-  data_entry_operator: 'Data Entry',
-  observer: 'Observer',
+  staff: 'Field Staff',
+  politician: 'Politician',
 };
 
 /* ── Page Titles ────────────────────────────────────────── */
@@ -20,9 +18,11 @@ const roleLabels: Record<string, string> = {
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/booths': 'Booths',
+  '/voters': 'Voters',
   '/staff': 'Staff',
-  '/incidents': 'Incidents',
-  '/notifications': 'Notifications',
+  '/assignments': 'Assignments',
+  '/analytics': 'Analytics',
+  '/subscriptions': 'Subscriptions',
   '/audit-log': 'Audit Log',
 };
 

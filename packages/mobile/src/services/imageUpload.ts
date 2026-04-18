@@ -67,7 +67,7 @@ export async function uploadImage(
  */
 export async function uploadMultipleImages(
   images: Array<{ uri: string; fileName: string }>,
-  folder: string = '/election/incidents',
+  folder: string = '/pollstics/uploads',
 ): Promise<UploadResult[]> {
   const uploadPromises = images.map((img) =>
     uploadImage(img.uri, img.fileName, folder),

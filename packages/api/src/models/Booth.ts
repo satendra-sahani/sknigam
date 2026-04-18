@@ -1,45 +1,38 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IBoothDocument extends Document {
-  name: string;
   partNumber: number;
-  zone: string;
+  name: string;
+  assemblyConstituency: string;
+  district: string;
+  state: string;
   village?: string;
   address?: string;
   latitude?: number;
   longitude?: number;
-  totalRegisteredVoters: number;
-  facilities?: {
-    power: boolean;
-    water: boolean;
-    shade: boolean;
-    accessibilityRamp: boolean;
-  };
+  totalVoters: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const BoothSchema = new Schema<IBoothDocument>(
   {
+    partNumber: { type: Number, required: true },
     name: { type: String, required: true, trim: true },
-    partNumber: { type: Number, required: true, unique: true },
-    zone: { type: String, required: true, trim: true },
+    assemblyConstituency: { type: String, required: true, trim: true },
+    district: { type: String, required: true, trim: true },
+    state: { type: String, required: true, trim: true, default: 'Uttar Pradesh' },
     village: { type: String, trim: true },
     address: { type: String, trim: true },
     latitude: { type: Number },
     longitude: { type: Number },
-    totalRegisteredVoters: { type: Number, required: true, min: 0 },
-    facilities: {
-      power: { type: Boolean, default: false },
-      water: { type: Boolean, default: false },
-      shade: { type: Boolean, default: false },
-      accessibilityRamp: { type: Boolean, default: false },
-    },
+    totalVoters: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true }
 );
 
-BoothSchema.index({ partNumber: 1 }, { unique: true });
-BoothSchema.index({ zone: 1 });
+BoothSchema.index({ partNumber: 1, assemblyConstituency: 1 }, { unique: true });
+BoothSchema.index({ assemblyConstituency: 1 });
+BoothSchema.index({ district: 1 });
 
 export default mongoose.model<IBoothDocument>('Booth', BoothSchema);

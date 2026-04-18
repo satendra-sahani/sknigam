@@ -66,7 +66,6 @@ export async function logout(): Promise<void> {
       STORAGE_KEYS.ACCESS_TOKEN,
       STORAGE_KEYS.REFRESH_TOKEN,
       STORAGE_KEYS.USER_DATA,
-      STORAGE_KEYS.BOOTH_DATA,
     ]);
   }
 }

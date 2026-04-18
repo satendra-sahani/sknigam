@@ -1,566 +1,239 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  RefreshControl,
   TouchableOpacity,
-  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import type { CompositeNavigationProp } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
-import { COLORS, SLOT_TIMES } from '../utils/constants';
-import { getTodayDateString, getSlotStatusLabel } from '../utils/helpers';
-import { AssignmentInfo, VoterCountData, CheckInData, NotificationData } from '../types';
-import CountdownTimer from '../components/CountdownTimer';
-import StatusBadge from '../components/StatusBadge';
-import { getQueueCount } from '../services/offlineQueue';
+import { subscribe } from '../services/visitQueue';
+import { COLORS } from '../utils/constants';
+import type { MainTabParamList, RootStackParamList, QueuedVisit } from '../types';
 
-const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+const roleLabels: Record<string, string> = {
+  super_admin: 'Super Admin',
+  staff: 'Field Staff',
+  politician: 'Politician',
+};
+
+type Nav = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList, 'Home'>,
+  StackNavigationProp<RootStackParamList>
+>;
+
+interface Props {
+  navigation: Nav;
+}
+
+const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const { user, logout } = useAuth();
-  const [assignment, setAssignment] = useState<AssignmentInfo | null>(null);
-  const [checkIn, setCheckIn] = useState<CheckInData | null>(null);
-  const [submissions, setSubmissions] = useState<VoterCountData[]>([]);
-  const [latestNotification, setLatestNotification] = useState<NotificationData | null>(null);
-  const [offlineCount, setOfflineCount] = useState(0);
+  const [assignmentsTotal, setAssignmentsTotal] = useState(0);
+  const [completed, setCompleted] = useState(0);
+  const [target, setTarget] = useState(0);
+  const [queueCount, setQueueCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  const load = useCallback(async () => {
     try {
-      const [assignmentRes, checkInRes, submissionsRes, notifRes] =
-        await Promise.allSettled([
-          api.get('/assignments/my'),
-          api.get('/check-ins/today'),
-          api.get(`/voter-counts/my?date=${getTodayDateString()}`),
-          api.get('/notifications?limit=1'),
-        ]);
-
-      if (assignmentRes.status === 'fulfilled') {
-        setAssignment(assignmentRes.value.data.data);
-      }
-      if (checkInRes.status === 'fulfilled') {
-        setCheckIn(checkInRes.value.data.data);
-      }
-      if (submissionsRes.status === 'fulfilled') {
-        setSubmissions(submissionsRes.value.data.data || []);
-      }
-      if (notifRes.status === 'fulfilled') {
-        const payload = notifRes.value.data.data;
-        const notifs = payload?.notifications || payload || [];
-        if (Array.isArray(notifs) && notifs.length > 0) {
-          setLatestNotification(notifs[0]);
-        }
-      }
-
-      const queueCount = await getQueueCount();
-      setOfflineCount(queueCount);
-    } catch (error) {
-      console.log('[Home] Fetch error:', error);
-    } finally {
-      setLoading(false);
+      const res = await api.get('/voter-assignments', { params: { limit: 100 } });
+      const assignments = res.data.data.assignments || [];
+      setAssignmentsTotal(assignments.length);
+      setCompleted(assignments.reduce((s: number, a: any) => s + (a.completedCount || 0), 0));
+      setTarget(assignments.reduce((s: number, a: any) => s + (a.totalVoters || 0), 0));
+    } catch {
+      // stay silent on home
     }
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    load();
+    const unsub = navigation.addListener('focus', load);
+    return unsub;
+  }, [load, navigation]);
 
-  const onRefresh = async () => {
+  useEffect(() => {
+    const unsub = subscribe((q: QueuedVisit[]) => setQueueCount(q.length));
+    return unsub;
+  }, []);
+
+  async function onRefresh() {
     setRefreshing(true);
-    await fetchData();
+    await load();
     setRefreshing(false);
-  };
-
-  const getSlotSubmission = (slotKey: string): VoterCountData | undefined => {
-    return submissions.find((s) => s.slot === slotKey);
-  };
-
-  const getSlotCircleColor = (slotKey: string): string => {
-    const sub = getSlotSubmission(slotKey);
-    if (!sub) return COLORS.grey300;
-    switch (sub.status) {
-      case 'approved':
-        return COLORS.success;
-      case 'pending':
-        return COLORS.primary;
-      case 'rejected':
-      case 'revision_requested':
-        return COLORS.danger;
-      default:
-        return COLORS.grey300;
-    }
-  };
-
-  const totalSubmittedVoters = submissions.reduce(
-    (sum, s) => sum + s.totalVoters,
-    0,
-  );
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
   }
+
+  const pct = target > 0 ? Math.round((completed / target) * 100) : 0;
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={[COLORS.primary]}
-        />
-      }>
-      {/* Header */}
+      contentContainerStyle={styles.content}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Welcome back,</Text>
-          <Text style={styles.userName}>{user?.name || 'Staff'}</Text>
+          <Text style={styles.greeting}>Welcome back</Text>
+          <Text style={styles.userName}>{user?.name || 'User'}</Text>
+          {user?.role && <Text style={styles.role}>{roleLabels[user.role] || user.role}</Text>}
         </View>
-        <View style={styles.headerActions}>
-          {offlineCount > 0 && (
-            <View style={styles.syncBadge}>
-              <Icon name="cloud-upload" size={16} color={COLORS.warning} />
-              <Text style={styles.syncCount}>{offlineCount}</Text>
-            </View>
-          )}
-          <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
-            <Icon name="logout" size={22} color={COLORS.grey500} />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
+          <Icon name="logout" size={22} color={COLORS.grey500} />
+        </TouchableOpacity>
       </View>
 
-      {/* Booth Card */}
-      {assignment ? (
-        <View style={styles.boothCard}>
-          <View style={styles.boothHeader}>
-            <Icon name="map-marker" size={22} color={COLORS.primary} />
-            <Text style={styles.boothTitle}>My Booth</Text>
+      {user?.assemblyConstituency && (
+        <View style={styles.card}>
+          <View style={styles.cardRow}>
+            <Icon name="map-marker" size={18} color={COLORS.primary} />
+            <Text style={styles.cardLabel}>Constituency</Text>
           </View>
-          <Text style={styles.boothName}>{assignment.booth.name}</Text>
-          <View style={styles.boothDetails}>
-            <View style={styles.boothDetailItem}>
-              <Text style={styles.boothDetailLabel}>Part No.</Text>
-              <Text style={styles.boothDetailValue}>
-                {assignment.booth.partNumber}
-              </Text>
-            </View>
-            <View style={styles.boothDetailItem}>
-              <Text style={styles.boothDetailLabel}>Zone</Text>
-              <Text style={styles.boothDetailValue}>
-                {assignment.booth.zone}
-              </Text>
-            </View>
-            <View style={styles.boothDetailItem}>
-              <Text style={styles.boothDetailLabel}>Voters</Text>
-              <Text style={styles.boothDetailValue}>
-                {assignment.booth.totalRegisteredVoters}
-              </Text>
-            </View>
-          </View>
-        </View>
-      ) : (
-        <View style={styles.noAssignmentCard}>
-          <Icon name="alert-circle-outline" size={32} color={COLORS.warning} />
-          <Text style={styles.noAssignmentText}>
-            No booth assigned. Contact your zone in-charge.
-          </Text>
+          <Text style={styles.cardValue}>{user.assemblyConstituency}</Text>
+          {user.district && <Text style={styles.cardSub}>{user.district}, Uttar Pradesh</Text>}
         </View>
       )}
 
-      {/* Check-In Status */}
-      <View style={styles.checkInCard}>
-        <View style={styles.checkInRow}>
-          <View style={styles.checkInInfo}>
-            <Text style={styles.sectionTitle}>Check-In Status</Text>
-            {checkIn ? (
-              <Text style={styles.checkInTime}>
-                Checked in at{' '}
-                {new Date(checkIn.checkedInAt).toLocaleTimeString('en-IN', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </Text>
-            ) : (
-              <Text style={styles.pendingText}>Not yet checked in</Text>
-            )}
-          </View>
-          <View
-            style={[
-              styles.checkInStatusIcon,
-              {
-                backgroundColor: checkIn
-                  ? COLORS.successLight
-                  : COLORS.dangerLight,
-              },
-            ]}>
-            <Icon
-              name={checkIn ? 'check-circle' : 'close-circle'}
-              size={28}
-              color={checkIn ? COLORS.success : COLORS.danger}
-            />
-          </View>
-        </View>
+      <View style={styles.statsRow}>
+        <StatBox label="Assignments" value={String(assignmentsTotal)} icon="clipboard-check" />
+        <StatBox label="Done" value={String(completed)} icon="account-check" color={COLORS.success} />
+        <StatBox label="Pending" value={String(Math.max(0, target - completed))} icon="account-clock" color={COLORS.warning} />
       </View>
 
-      {/* Countdown Timer */}
-      <CountdownTimer />
-
-      {/* Slot Progress */}
-      <View style={styles.slotProgressSection}>
-        <Text style={styles.sectionTitle}>Slot Progress</Text>
-        <View style={styles.slotCircles}>
-          {SLOT_TIMES.map((slot, index) => (
-            <View key={slot.key} style={styles.slotCircleWrapper}>
-              <View
-                style={[
-                  styles.slotCircle,
-                  { backgroundColor: getSlotCircleColor(slot.key) },
-                ]}>
-                <Text style={styles.slotCircleNumber}>{index + 1}</Text>
-              </View>
-              <Text style={styles.slotCircleLabel}>{slot.label}</Text>
-              <Text style={styles.slotCircleStatus}>
-                {getSlotStatusLabel(getSlotSubmission(slot.key)?.status)}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      {/* Today's Summary */}
-      <View style={styles.summaryCard}>
-        <View style={styles.summaryHeader}>
-          <Icon name="chart-bar" size={20} color={COLORS.primary} />
-          <Text style={styles.sectionTitle}>Today's Summary</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryNumber}>{submissions.length}</Text>
-            <Text style={styles.summaryLabel}>Slots Submitted</Text>
+      {target > 0 && (
+        <View style={styles.card}>
+          <View style={styles.cardRow}>
+            <Icon name="chart-line" size={18} color={COLORS.primary} />
+            <Text style={styles.cardLabel}>Overall Progress</Text>
           </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryNumber}>{totalSubmittedVoters}</Text>
-            <Text style={styles.summaryLabel}>Total Voters</Text>
+          <Text style={styles.cardValue}>
+            {completed.toLocaleString('en-IN')} / {target.toLocaleString('en-IN')}
+          </Text>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${pct}%` }]} />
           </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryNumber}>
-              {submissions.filter((s) => s.status === 'approved').length}
-            </Text>
-            <Text style={styles.summaryLabel}>Approved</Text>
-          </View>
+          <Text style={styles.cardSub}>{pct}% complete across {assignmentsTotal} booth{assignmentsTotal === 1 ? '' : 's'}</Text>
         </View>
-      </View>
+      )}
 
-      {/* Latest Notification */}
-      {latestNotification && (
+      <TouchableOpacity
+        activeOpacity={0.85}
+        style={styles.primaryCta}
+        onPress={() => navigation.navigate('Assignments')}>
+        <Icon name="view-list" size={22} color={COLORS.white} />
+        <Text style={styles.primaryCtaText}>Open My Booths</Text>
+        <Icon name="chevron-right" size={22} color={COLORS.white} />
+      </TouchableOpacity>
+
+      {queueCount > 0 && (
         <TouchableOpacity
-          style={styles.notifCard}
-          onPress={() => navigation.navigate('Notifications')}
-          activeOpacity={0.7}>
-          <View style={styles.notifHeader}>
-            <Icon name="bell-outline" size={18} color={COLORS.primary} />
-            <Text style={styles.notifHeaderText}>Latest Notification</Text>
-            <Icon name="chevron-right" size={18} color={COLORS.grey400} />
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('Queue')}
+          style={styles.queueCta}>
+          <Icon name="cloud-upload" size={22} color={COLORS.warning} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.queueTitle}>
+              {queueCount} visit{queueCount > 1 ? 's' : ''} pending sync
+            </Text>
+            <Text style={styles.queueSub}>Tap to review and upload</Text>
           </View>
-          <Text style={styles.notifTitle} numberOfLines={1}>
-            {latestNotification.title}
-          </Text>
-          <Text style={styles.notifMessage} numberOfLines={2}>
-            {latestNotification.message}
-          </Text>
+          <Icon name="chevron-right" size={22} color={COLORS.grey500} />
         </TouchableOpacity>
       )}
     </ScrollView>
   );
 };
 
+function StatBox({
+  label,
+  value,
+  icon,
+  color = COLORS.primary,
+}: {
+  label: string;
+  value: string;
+  icon: string;
+  color?: string;
+}) {
+  return (
+    <View style={styles.statBox}>
+      <Icon name={icon} size={20} color={color} />
+      <Text style={[styles.statValue, { color }]}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  contentContainer: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  greeting: {
-    fontSize: 14,
-    color: COLORS.grey500,
-  },
-  userName: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: COLORS.grey800,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  syncBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.warningLight,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 16,
-    gap: 4,
-  },
-  syncCount: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.warning,
-  },
-  logoutBtn: {
-    padding: 4,
-  },
-  boothCard: {
+  container: { flex: 1, backgroundColor: COLORS.background },
+  content: { padding: 16, paddingBottom: 32, gap: 14 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  greeting: { fontSize: 13, color: COLORS.grey500 },
+  userName: { fontSize: 22, fontWeight: '800', color: COLORS.grey800, marginTop: 2 },
+  role: { fontSize: 12, color: COLORS.primary, fontWeight: '600', marginTop: 2 },
+  logoutBtn: { padding: 4 },
+  card: {
     backgroundColor: COLORS.white,
     borderRadius: 14,
-    padding: 18,
-    marginBottom: 14,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 2,
   },
-  boothHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  boothTitle: {
-    fontSize: 13,
+  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  cardLabel: {
+    fontSize: 11,
     fontWeight: '700',
     color: COLORS.primary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  boothName: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.grey800,
-    marginBottom: 14,
-  },
-  boothDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: COLORS.grey100,
-    borderRadius: 10,
+  cardValue: { fontSize: 18, fontWeight: '700', color: COLORS.grey800, marginTop: 2 },
+  cardSub: { fontSize: 12, color: COLORS.grey500, marginTop: 6 },
+  statsRow: { flexDirection: 'row', gap: 10 },
+  statBox: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
     padding: 12,
+    alignItems: 'flex-start',
+    gap: 6,
   },
-  boothDetailItem: {
+  statValue: { fontSize: 20, fontWeight: '800' },
+  statLabel: { fontSize: 11, color: COLORS.grey500, fontWeight: '600', textTransform: 'uppercase' },
+  progressBar: {
+    height: 6,
+    backgroundColor: COLORS.grey200,
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginTop: 10,
+  },
+  progressFill: { height: '100%', backgroundColor: COLORS.primary },
+  primaryCta: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
+    backgroundColor: COLORS.primary,
+    borderRadius: 14,
+    padding: 16,
   },
-  boothDetailLabel: {
-    fontSize: 11,
-    color: COLORS.grey500,
-    marginBottom: 4,
-    fontWeight: '500',
-  },
-  boothDetailValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.grey700,
-  },
-  noAssignmentCard: {
+  primaryCtaText: { flex: 1, color: COLORS.white, fontSize: 15, fontWeight: '700' },
+  queueCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     backgroundColor: COLORS.warningLight,
     borderRadius: 14,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 14,
-    gap: 8,
+    padding: 14,
   },
-  noAssignmentText: {
-    fontSize: 14,
-    color: COLORS.grey600,
-    textAlign: 'center',
-  },
-  checkInCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  checkInRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  checkInInfo: {
-    flex: 1,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.grey700,
-    marginBottom: 4,
-  },
-  checkInTime: {
-    fontSize: 14,
-    color: COLORS.success,
-    fontWeight: '500',
-  },
-  pendingText: {
-    fontSize: 14,
-    color: COLORS.danger,
-    fontWeight: '500',
-  },
-  checkInStatusIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  slotProgressSection: {
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 16,
-    marginTop: 14,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  slotCircles: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  slotCircleWrapper: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  slotCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  slotCircleNumber: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.white,
-  },
-  slotCircleLabel: {
-    fontSize: 10,
-    color: COLORS.grey500,
-    fontWeight: '500',
-  },
-  slotCircleStatus: {
-    fontSize: 9,
-    color: COLORS.grey400,
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  summaryCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  summaryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  summaryItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  summaryDivider: {
-    width: 1,
-    height: 36,
-    backgroundColor: COLORS.grey200,
-  },
-  summaryNumber: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: COLORS.grey800,
-  },
-  summaryLabel: {
-    fontSize: 11,
-    color: COLORS.grey500,
-    marginTop: 2,
-    fontWeight: '500',
-  },
-  notifCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  notifHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
-  },
-  notifHeaderText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.primary,
-    flex: 1,
-  },
-  notifTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.grey800,
-    marginBottom: 4,
-  },
-  notifMessage: {
-    fontSize: 13,
-    color: COLORS.grey500,
-    lineHeight: 18,
-  },
+  queueTitle: { fontSize: 14, fontWeight: '700', color: COLORS.grey800 },
+  queueSub: { fontSize: 12, color: COLORS.grey600, marginTop: 2 },
 });
 
 export default HomeScreen;

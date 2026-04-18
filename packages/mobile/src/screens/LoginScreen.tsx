@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
   },
   otpInputFilled: {
     borderColor: COLORS.primary,
-    backgroundColor: COLORS.blue50,
+    backgroundColor: COLORS.primaryLight,
   },
 });
 

@@ -2,57 +2,98 @@
 
 export enum UserRole {
   SUPER_ADMIN = 'super_admin',
-  ZONE_INCHARGE = 'zone_incharge',
-  BOOTH_SUPERVISOR = 'booth_supervisor',
-  DATA_ENTRY_OPERATOR = 'data_entry_operator',
-  OBSERVER = 'observer',
+  STAFF = 'staff',
+  POLITICIAN = 'politician',
 }
 
-export enum IncidentCategory {
-  TECHNICAL = 'technical',
-  SECURITY = 'security',
-  ADMINISTRATIVE = 'administrative',
-  OTHER = 'other',
+export enum Gender {
+  MALE = 'M',
+  FEMALE = 'F',
+  TRANSGENDER = 'T',
 }
 
-export enum IncidentSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+export enum Religion {
+  HINDU = 'Hindu',
+  MUSLIM = 'Muslim',
+  CHRISTIAN = 'Christian',
+  SIKH = 'Sikh',
+  BUDDHIST = 'Buddhist',
+  JAIN = 'Jain',
+  OTHER = 'Other',
 }
 
-export enum IncidentStatus {
-  OPEN = 'open',
-  ACKNOWLEDGED = 'acknowledged',
-  RESOLVED = 'resolved',
+export enum EducationLevel {
+  ILLITERATE = 'Illiterate',
+  PRIMARY = 'Primary',
+  SECONDARY = 'Secondary',
+  GRADUATE = 'Graduate',
+  POST_GRADUATE = 'Post-Graduate',
 }
 
-export enum SubmissionStatus {
+export enum IncomeRange {
+  BELOW_1L = 'Below 1L',
+  RANGE_1_3L = '1-3L',
+  RANGE_3_6L = '3-6L',
+  RANGE_6_10L = '6-10L',
+  ABOVE_10L = 'Above 10L',
+}
+
+export enum HouseType {
+  PUCCA = 'Pucca',
+  SEMI_PUCCA = 'Semi-Pucca',
+  KUCCHA = 'Kuccha',
+}
+
+export enum RationCardType {
+  APL = 'APL',
+  BPL = 'BPL',
+  AAY = 'AAY',
+  NONE = 'None',
+}
+
+export enum VotingIntention {
+  WILL_VOTE = 'Will Vote',
+  MAY_VOTE = 'May Vote',
+  WONT_VOTE = "Won't Vote",
+  FIRST_TIME = 'First-Time Voter',
+}
+
+export enum InfluenceLevel {
+  INFLUENCER = 'Influencer',
+  NEUTRAL = 'Neutral',
+  OPPONENT = 'Opponent',
+}
+
+export enum GrievanceCategory {
+  ROADS = 'Roads',
+  WATER = 'Water',
+  ELECTRICITY = 'Electricity',
+  EMPLOYMENT = 'Employment',
+  EDUCATION = 'Education',
+  HEALTH = 'Health',
+  PENSION = 'Pension',
+  CORRUPTION = 'Corruption',
+  LAW_AND_ORDER = 'LawAndOrder',
+  OTHER = 'Other',
+}
+
+export enum SubscriptionTier {
+  BASIC = 'basic',
+  STANDARD = 'standard',
+  PREMIUM = 'premium',
+}
+
+export enum SubscriptionStatus {
   PENDING = 'pending',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  REVISION_REQUESTED = 'revision_requested',
-}
-
-export enum SlotTime {
-  SLOT_9AM = '09:00',
-  SLOT_11AM = '11:00',
-  SLOT_1PM = '13:00',
-  SLOT_3PM = '15:00',
-  SLOT_5PM = '17:00',
-}
-
-export enum AssignmentType {
-  PRIMARY = 'primary',
-  BACKUP = 'backup',
+  ACTIVE = 'active',
+  EXPIRED = 'expired',
+  CANCELLED = 'cancelled',
 }
 
 export enum NotificationType {
   SYSTEM = 'system',
-  ZONE_BROADCAST = 'zone_broadcast',
-  REPORT_UPDATE = 'report_update',
-  INCIDENT_UPDATE = 'incident_update',
+  ASSIGNMENT = 'assignment',
+  SUBSCRIPTION = 'subscription',
   URGENT = 'urgent',
 }
 
@@ -60,23 +101,22 @@ export enum AuditAction {
   LOGIN = 'login',
   LOGOUT = 'logout',
   LOGIN_FAILED = 'login_failed',
-  STAFF_CREATE = 'staff_create',
-  STAFF_UPDATE = 'staff_update',
-  STAFF_DELETE = 'staff_delete',
-  BOOTH_CREATE = 'booth_create',
-  BOOTH_UPDATE = 'booth_update',
-  ASSIGNMENT_CREATE = 'assignment_create',
-  ASSIGNMENT_UPDATE = 'assignment_update',
-  VOTER_COUNT_SUBMIT = 'voter_count_submit',
-  VOTER_COUNT_APPROVE = 'voter_count_approve',
-  VOTER_COUNT_REJECT = 'voter_count_reject',
-  CHECK_IN = 'check_in',
-  INCIDENT_CREATE = 'incident_create',
-  INCIDENT_UPDATE = 'incident_update',
-  NOTIFICATION_SEND = 'notification_send',
-  STAFF_SWAP = 'staff_swap',
   OTP_SENT = 'otp_sent',
   OTP_VERIFIED = 'otp_verified',
+  USER_CREATE = 'user_create',
+  USER_UPDATE = 'user_update',
+  USER_DELETE = 'user_delete',
+  BOOTH_CREATE = 'booth_create',
+  BOOTH_UPDATE = 'booth_update',
+  VOTER_IMPORT = 'voter_import',
+  VOTER_UPDATE = 'voter_update',
+  VOTER_VISIT = 'voter_visit',
+  ASSIGNMENT_CREATE = 'assignment_create',
+  ASSIGNMENT_UPDATE = 'assignment_update',
+  ASSIGNMENT_DELETE = 'assignment_delete',
+  SUBSCRIPTION_CREATE = 'subscription_create',
+  SUBSCRIPTION_PAYMENT = 'subscription_payment',
+  SUBSCRIPTION_CANCEL = 'subscription_cancel',
 }
 
 // ============ INTERFACES ============
@@ -87,19 +127,14 @@ export interface IUser {
   email: string;
   phone: string;
   role: UserRole;
-  hashedPassword: string;
-  voterId?: string;
   profilePhoto?: string;
   idProofUrl?: string;
-  partyMembershipId?: string;
-  emergencyContact?: string;
-  trainingCompleted: boolean;
+  assemblyConstituency?: string;
+  district?: string;
+  partyAffiliation?: string;
   isVerified: boolean;
   isActive: boolean;
-  zone?: string;
   otpRequired: boolean;
-  failedLoginAttempts: number;
-  lockedUntil?: Date;
   lastLoginAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -107,79 +142,93 @@ export interface IUser {
 
 export interface IBooth {
   _id?: string;
-  name: string;
   partNumber: number;
-  zone: string;
+  name: string;
+  assemblyConstituency: string;
+  district: string;
+  state: string;
   village?: string;
   address?: string;
   latitude?: number;
   longitude?: number;
-  totalRegisteredVoters: number;
-  facilities?: {
-    power: boolean;
-    water: boolean;
-    shade: boolean;
-    accessibilityRamp: boolean;
-  };
+  totalVoters: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export interface IBoothAssignment {
+export interface IVoter {
   _id?: string;
+  // Official
+  voterSerialNumber: number;
+  epicNumber: string;
+  fullName: string;
+  fatherOrHusbandName?: string;
+  gender: 'M' | 'F' | 'T';
+  dateOfBirth?: Date;
+  age?: number;
+  address: string;
   boothId: string;
+  partNumber: number;
+  assemblyConstituency: string;
+  // Social
+  caste?: string;
+  subCaste?: string;
+  religion?: Religion;
+  bloodGroup?: string;
+  educationLevel?: EducationLevel;
+  profession?: string;
+  annualIncome?: IncomeRange;
+  houseType?: HouseType;
+  bplCardHolder?: boolean;
+  rationCardType?: RationCardType;
+  aadharLinked?: boolean;
+  // Contact
+  mobileNumber?: string;
+  whatsappNumber?: string;
+  email?: string;
+  voterPhoto?: string;
+  verificationStatus: boolean;
+  visitDate?: Date;
+  staffRemarks?: string;
+  visitedBy?: string;
+  // Political
+  favouriteCandidate?: string;
+  partySupport?: string;
+  votingIntention?: VotingIntention;
+  grievances?: GrievanceCategory[];
+  problemDescription?: string;
+  influenceLevel?: InfluenceLevel;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface IVoterAssignment {
+  _id?: string;
   staffId: string;
-  type: AssignmentType;
+  boothId: string;
+  voterSerialFrom?: number;
+  voterSerialTo?: number;
   assignedBy: string;
   isActive: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-export interface IVoterCount {
-  _id?: string;
-  boothId: string;
-  staffId: string;
-  slot: SlotTime;
-  electionDate: string;
   totalVoters: number;
-  maleCount: number;
-  femaleCount: number;
-  otherCount: number;
-  status: SubmissionStatus;
-  reviewedBy?: string;
-  rejectionReason?: string;
-  submittedAt?: Date;
+  completedCount: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export interface ICheckIn {
+export interface ISubscription {
   _id?: string;
-  staffId: string;
-  boothId: string;
-  latitude: number;
-  longitude: number;
-  selfieUrl: string;
-  distanceFromBooth: number;
-  isWithinRadius: boolean;
-  overrideReason?: string;
-  supervisorApproval?: boolean;
-  checkedInAt: Date;
-  createdAt?: Date;
-}
-
-export interface IIncident {
-  _id?: string;
-  boothId: string;
-  reportedBy: string;
-  category: IncidentCategory;
-  severity: IncidentSeverity;
-  status: IncidentStatus;
-  description: string;
-  photos: string[];
-  resolvedBy?: string;
-  resolvedAt?: Date;
+  politicianId: string;
+  tier: SubscriptionTier;
+  status: SubscriptionStatus;
+  assemblyConstituency: string;
+  startDate: Date;
+  endDate: Date;
+  amount: number;
+  currency: string;
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  paidAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -189,11 +238,8 @@ export interface INotification {
   title: string;
   message: string;
   type: NotificationType;
-  sentBy: string;
+  sentBy?: string;
   recipients: string[];
-  targetZone?: string;
-  targetRole?: UserRole;
-  targetBoothId?: string;
   readBy: string[];
   createdAt?: Date;
 }
@@ -217,7 +263,6 @@ export interface IOtpToken {
   code: string;
   expiresAt: Date;
   verified: boolean;
-  createdAt?: Date;
 }
 
 export interface IRefreshToken {
@@ -225,7 +270,6 @@ export interface IRefreshToken {
   userId: string;
   token: string;
   expiresAt: Date;
-  createdAt?: Date;
 }
 
 // ============ API RESPONSE TYPES ============
@@ -237,28 +281,37 @@ export interface ApiResponse<T = any> {
   error?: string;
 }
 
-export interface DashboardKPIs {
-  overallTurnoutPercent: number;
-  boothsReporting: number;
+// ============ ANALYTICS RESPONSE TYPES ============
+
+export interface AnalyticsOverview {
+  totalVoters: number;
+  verified: number;
+  unverified: number;
+  verificationRate: number;
   totalBooths: number;
-  staffCheckedIn: number;
-  totalStaff: number;
-  openIncidents: number;
-  pendingApprovals: number;
+  activeAssignments: number;
 }
 
-export interface HourlyTurnout {
-  hour: string;
-  cumulativeVoters: number;
-  cumulativePercent: number;
+export interface AnalyticsGroupRow {
+  key: string;
+  count: number;
+  verified?: number;
 }
 
-export interface StaffScorecard {
-  staffId: string;
-  name: string;
-  checkInScore: number;
-  submissionScore: number;
-  approvalScore: number;
-  incidentScore: number;
-  totalScore: number;
+export interface BoothProgressRow {
+  _id: string;
+  total: number;
+  verified: number;
+  partNumber?: number;
+  name?: string;
+  assemblyConstituency?: string;
+}
+
+export interface StaffProgressRow {
+  _id: string;
+  name?: string;
+  phone?: string;
+  assignments: number;
+  totalVoters: number;
+  completedCount: number;
 }
