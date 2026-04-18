@@ -63,8 +63,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <View style={styles.logoCircle}>
             <Icon name="vote" size={48} color={COLORS.primary} />
           </View>
-          <Text style={styles.title}>Election Campaign</Text>
-          <Text style={styles.subtitle}>Management System</Text>
+          <Text style={styles.title}>POLLSTICS</Text>
+          <Text style={styles.subtitle}>Booth Outreach · Uttar Pradesh</Text>
         </View>
 
         <View style={styles.form}>
@@ -136,9 +136,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.footerText}>
-          Election Campaign Management System v1.0
-        </Text>
+        <Text style={styles.footerText}>POLLSTICS · v1.0</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

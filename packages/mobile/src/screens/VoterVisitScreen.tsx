@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -24,7 +25,13 @@ interface Props {
   navigation: StackNavigationProp<RootStackParamList, 'VoterVisit'>;
 }
 
-const INTENTIONS = ['Will Vote', 'May Vote', "Won't Vote", 'First-Time Voter'] as const;
+const INTENTIONS = [
+  { key: 'Will Vote', icon: 'thumb-up', tone: COLORS.success },
+  { key: 'May Vote', icon: 'help-circle-outline', tone: COLORS.warning },
+  { key: "Won't Vote", icon: 'thumb-down', tone: COLORS.danger },
+  { key: 'First-Time Voter', icon: 'star-outline', tone: COLORS.accent },
+] as const;
+
 const GRIEVANCES = [
   'Roads',
   'Water',
@@ -89,7 +96,7 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
   async function save() {
     if (!voter) return;
     if (!votingIntention) {
-      Alert.alert('Required', 'Select a voting intention');
+      Alert.alert('Required', 'Please select a voting intention');
       return;
     }
     setSaving(true);
@@ -111,9 +118,9 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
         photoUri,
       });
       if (result.submitted) {
-        Alert.alert('Saved', 'Visit recorded.');
+        Alert.alert('Saved', 'Visit recorded successfully.');
       } else {
-        Alert.alert('Queued', 'No connection — saved locally. It will sync when online.');
+        Alert.alert('Queued', 'No internet. Saved locally — will sync when back online.');
       }
       navigation.goBack();
     } catch (err: any) {
@@ -126,50 +133,78 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
   if (loading || !voter) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color={COLORS.primary} />
+        <ActivityIndicator color={COLORS.primary} size="large" />
+        <Text style={styles.loadingText}>Loading voter details...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Icon name="arrow-left" size={22} color={COLORS.grey700} />
+          <Icon name="arrow-left" size={22} color={COLORS.grey800} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
-          <Text style={styles.title} numberOfLines={1}>{voter.fullName}</Text>
+          <Text style={styles.title} numberOfLines={1}>
+            {voter.fullName}
+          </Text>
           <Text style={styles.subtitle}>
-            Serial {voter.voterSerialNumber} · {voter.epicNumber}
+            #{voter.voterSerialNumber} · {voter.epicNumber}
           </Text>
         </View>
         {voter.verificationStatus && (
           <View style={styles.doneBadge}>
-            <Icon name="check" size={14} color={COLORS.white} />
+            <Icon name="check" size={12} color={COLORS.white} />
             <Text style={styles.doneBadgeText}>Done</Text>
           </View>
         )}
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <Section title="Voter Info">
-          <InfoRow label="Father/Husband" value={voter.fatherOrHusbandName} />
-          <InfoRow label="Gender · Age" value={`${voter.gender} · ${voter.age}y`} />
-          <InfoRow label="Address" value={voter.address} />
-          {voter.caste && <InfoRow label="Caste" value={voter.caste} />}
-          {voter.religion && <InfoRow label="Religion" value={voter.religion} />}
-        </Section>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.voterCard}>
+          <View style={styles.voterHero}>
+            {voter.voterPhoto ? (
+              <Image source={{ uri: voter.voterPhoto }} style={styles.voterPhoto} />
+            ) : (
+              <View style={styles.voterAvatar}>
+                <Text style={styles.voterInitial}>{voter.fullName.charAt(0).toUpperCase()}</Text>
+              </View>
+            )}
+            <View style={{ flex: 1 }}>
+              <Text style={styles.voterHeroName}>{voter.fullName}</Text>
+              <Text style={styles.voterHeroMeta}>
+                {voter.gender === 'M' ? 'Male' : voter.gender === 'F' ? 'Female' : 'Other'} · {voter.age} years
+              </Text>
+            </View>
+          </View>
+          <View style={styles.voterGrid}>
+            <InfoCell label="Father / Husband" value={voter.fatherOrHusbandName} />
+            {voter.caste && <InfoCell label="Caste" value={voter.caste} />}
+            {voter.religion && <InfoCell label="Religion" value={voter.religion} />}
+            <InfoCell label="Address" value={voter.address} full />
+          </View>
+        </View>
 
-        <Section title="Voting Intention *">
-          <View style={styles.chipRow}>
-            {INTENTIONS.map((i) => (
-              <TouchableOpacity
-                key={i}
-                onPress={() => setVotingIntention(i)}
-                style={[styles.chip, votingIntention === i && styles.chipActive]}>
-                <Text style={[styles.chipText, votingIntention === i && styles.chipTextActive]}>{i}</Text>
-              </TouchableOpacity>
-            ))}
+        <Section title="Voting Intention" required>
+          <View style={styles.intentionGrid}>
+            {INTENTIONS.map((i) => {
+              const active = votingIntention === i.key;
+              return (
+                <TouchableOpacity
+                  key={i.key}
+                  activeOpacity={0.8}
+                  onPress={() => setVotingIntention(i.key)}
+                  style={[
+                    styles.intentionCard,
+                    active && { backgroundColor: i.tone, borderColor: i.tone },
+                  ]}>
+                  <Icon name={i.icon} size={22} color={active ? COLORS.white : i.tone} />
+                  <Text style={[styles.intentionText, active && { color: COLORS.white }]}>{i.key}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </Section>
 
@@ -184,27 +219,35 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
         </Section>
 
         <Section title="Mobile Number">
-          <TextInput
-            value={mobileNumber}
-            onChangeText={setMobileNumber}
-            placeholder="10 digits"
-            placeholderTextColor={COLORS.grey400}
-            keyboardType="phone-pad"
-            maxLength={10}
-            style={styles.input}
-          />
+          <View style={styles.inputWithIcon}>
+            <Icon name="phone-outline" size={18} color={COLORS.grey400} />
+            <TextInput
+              value={mobileNumber}
+              onChangeText={setMobileNumber}
+              placeholder="10 digits"
+              placeholderTextColor={COLORS.grey400}
+              keyboardType="phone-pad"
+              maxLength={10}
+              style={styles.inputInner}
+            />
+          </View>
         </Section>
 
-        <Section title="Grievances">
+        <Section title="Grievances" helper={grievances.length > 0 ? `${grievances.length} selected` : undefined}>
           <View style={styles.chipRow}>
-            {GRIEVANCES.map((g) => (
-              <TouchableOpacity
-                key={g}
-                onPress={() => toggleGrievance(g)}
-                style={[styles.chip, grievances.includes(g) && styles.chipActive]}>
-                <Text style={[styles.chipText, grievances.includes(g) && styles.chipTextActive]}>{g}</Text>
-              </TouchableOpacity>
-            ))}
+            {GRIEVANCES.map((g) => {
+              const active = grievances.includes(g);
+              return (
+                <TouchableOpacity
+                  key={g}
+                  activeOpacity={0.8}
+                  onPress={() => toggleGrievance(g)}
+                  style={[styles.chip, active && styles.chipActive]}>
+                  {active && <Icon name="check" size={12} color={COLORS.white} />}
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>{g}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </Section>
 
@@ -212,7 +255,7 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
           <TextInput
             value={staffRemarks}
             onChangeText={setStaffRemarks}
-            placeholder="Optional notes from the visit"
+            placeholder="Optional notes from this visit..."
             placeholderTextColor={COLORS.grey400}
             multiline
             style={[styles.input, styles.textarea]}
@@ -224,19 +267,17 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
             <View style={styles.photoBox}>
               <Image source={{ uri: photoUri }} style={styles.photo} />
               <TouchableOpacity onPress={() => setPhotoUri(undefined)} style={styles.photoRemove}>
-                <Icon name="close-circle" size={22} color={COLORS.danger} />
+                <Icon name="close" size={18} color={COLORS.white} />
               </TouchableOpacity>
             </View>
-          ) : voter.voterPhoto ? (
-            <Image source={{ uri: voter.voterPhoto }} style={styles.photo} />
           ) : null}
           <View style={styles.photoBtnRow}>
             <TouchableOpacity style={styles.secondaryBtn} onPress={() => pickPhoto('camera')}>
-              <Icon name="camera" size={18} color={COLORS.primary} />
+              <Icon name="camera-outline" size={18} color={COLORS.primary} />
               <Text style={styles.secondaryBtnText}>Camera</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondaryBtn} onPress={() => pickPhoto('library')}>
-              <Icon name="image-multiple" size={18} color={COLORS.primary} />
+              <Icon name="image-outline" size={18} color={COLORS.primary} />
               <Text style={styles.secondaryBtnText}>Gallery</Text>
             </TouchableOpacity>
           </View>
@@ -249,7 +290,7 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
             <ActivityIndicator color={COLORS.white} />
           ) : (
             <>
-              <Icon name="check" size={18} color={COLORS.white} />
+              <Icon name="check-circle" size={20} color={COLORS.white} />
               <Text style={styles.saveBtnText}>Save Visit</Text>
             </>
           )}
@@ -259,19 +300,35 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
   );
 };
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  required,
+  helper,
+}: {
+  title: string;
+  children: React.ReactNode;
+  required?: boolean;
+  helper?: string;
+}) {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>
+          {title}
+          {required && <Text style={styles.required}> *</Text>}
+        </Text>
+        {helper && <Text style={styles.sectionHelper}>{helper}</Text>}
+      </View>
       {children}
     </View>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value?: string }) {
+function InfoCell({ label, value, full }: { label: string; value?: string; full?: boolean }) {
   if (!value) return null;
   return (
-    <View style={styles.infoRow}>
+    <View style={[styles.infoCell, full && { width: '100%' }]}>
       <Text style={styles.infoLabel}>{label}</Text>
       <Text style={styles.infoValue}>{value}</Text>
     </View>
@@ -280,70 +337,143 @@ function InfoRow({ label, value }: { label: string; value?: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  loadingText: { fontSize: 13, color: COLORS.grey500 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.grey200,
   },
-  backBtn: { padding: 6 },
-  title: { fontSize: 17, fontWeight: '700', color: COLORS.grey800 },
-  subtitle: { fontSize: 12, color: COLORS.grey500 },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.grey100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: { fontSize: 17, fontWeight: '800', color: COLORS.grey800 },
+  subtitle: { fontSize: 12, color: COLORS.grey500, marginTop: 2, fontFamily: 'monospace' },
   doneBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
     backgroundColor: COLORS.success,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
   },
   doneBadgeText: { color: COLORS.white, fontSize: 11, fontWeight: '700' },
   scroll: { flex: 1 },
   scrollContent: { padding: 14, paddingBottom: 30 },
+  voterCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.grey200,
+  },
+  voterHero: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: COLORS.grey100 },
+  voterPhoto: { width: 56, height: 56, borderRadius: 28, backgroundColor: COLORS.grey100 },
+  voterAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  voterInitial: { fontSize: 22, fontWeight: '800', color: COLORS.primary },
+  voterHeroName: { fontSize: 17, fontWeight: '800', color: COLORS.grey800 },
+  voterHeroMeta: { fontSize: 13, color: COLORS.grey500, marginTop: 3 },
+  voterGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingTop: 12, gap: 14 },
+  infoCell: { width: '45%' },
+  infoLabel: { fontSize: 10, color: COLORS.grey500, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  infoValue: { fontSize: 13, color: COLORS.grey800, fontWeight: '600', marginTop: 3 },
   section: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 16,
+    padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.grey200,
   },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.primary,
+    fontWeight: '800',
+    color: COLORS.grey800,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 10,
   },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, marginBottom: 6 },
-  infoLabel: { fontSize: 12, color: COLORS.grey500 },
-  infoValue: { fontSize: 13, color: COLORS.grey800, fontWeight: '600', flex: 1, textAlign: 'right' },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: {
+  required: { color: COLORS.primary },
+  sectionHelper: { fontSize: 11, color: COLORS.primary, fontWeight: '700' },
+  intentionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  intentionCard: {
+    width: '48%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 14,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: COLORS.grey100,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.grey200,
+    backgroundColor: COLORS.white,
   },
-  chipActive: { backgroundColor: COLORS.primary },
-  chipText: { fontSize: 12, color: COLORS.grey700, fontWeight: '600' },
-  chipTextActive: { color: COLORS.white },
+  intentionText: { fontSize: 12, fontWeight: '700', color: COLORS.grey800, flex: 1 },
   input: {
     backgroundColor: COLORS.grey100,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 14,
     color: COLORS.grey800,
   },
+  inputWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: COLORS.grey100,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+  },
+  inputInner: { flex: 1, paddingVertical: 12, fontSize: 14, color: COLORS.grey800 },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
-  photoBox: { position: 'relative' },
-  photo: { width: '100%', height: 180, borderRadius: 10, marginBottom: 10, backgroundColor: COLORS.grey100 },
-  photoRemove: { position: 'absolute', top: 6, right: 6, backgroundColor: COLORS.white, borderRadius: 12 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.grey100,
+    borderWidth: 1,
+    borderColor: COLORS.grey200,
+  },
+  chipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  chipText: { fontSize: 12, color: COLORS.grey700, fontWeight: '600' },
+  chipTextActive: { color: COLORS.white },
+  photoBox: { position: 'relative', marginBottom: 10 },
+  photo: { width: '100%', height: 200, borderRadius: 12, backgroundColor: COLORS.grey100 },
+  photoRemove: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   photoBtnRow: { flexDirection: 'row', gap: 10 },
   secondaryBtn: {
     flex: 1,
@@ -351,15 +481,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: COLORS.primaryLight,
-    borderRadius: 10,
+    paddingVertical: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    borderRadius: 12,
     backgroundColor: COLORS.primaryLight,
   },
   secondaryBtnText: { color: COLORS.primary, fontSize: 13, fontWeight: '700' },
   footer: {
     padding: 14,
+    paddingBottom: 18,
     backgroundColor: COLORS.white,
     borderTopWidth: 1,
     borderTopColor: COLORS.grey200,
@@ -368,12 +499,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 14,
-    borderRadius: 12,
+    gap: 8,
+    paddingVertical: 15,
+    borderRadius: 14,
     backgroundColor: COLORS.primary,
   },
-  saveBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700' },
+  saveBtnText: { color: COLORS.white, fontSize: 16, fontWeight: '800' },
 });
 
 export default VoterVisitScreen;

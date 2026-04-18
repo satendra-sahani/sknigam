@@ -1,5 +1,7 @@
-export const API_URL = 'http://192.168.1.17:9003/api';
-export const SOCKET_URL = 'http://192.168.1.17:9003';
+// Change API_URL to your laptop's LAN IP if your Wi-Fi changes.
+// Android emulator can also use 10.0.2.2 to reach the host.
+export const API_URL = 'http://192.168.1.11:9003/api';
+export const SOCKET_URL = 'http://192.168.1.11:9003';
 export const IMAGEKIT_PUBLIC_KEY = 'public_Lve3HzTkm0sFK1RfoosMkz+yDMk=';
 export const IMAGEKIT_URL_ENDPOINT = 'https://ik.imagekit.io/aiwats';
 
@@ -7,23 +9,32 @@ export const COLORS = {
   primary: '#dc2626',
   primaryDark: '#b91c1c',
   primaryLight: '#fee2e2',
-  success: '#22c55e',
+  primaryMuted: '#fef2f2',
+  accent: '#2563eb',
+  accentLight: '#dbeafe',
+  success: '#16a34a',
   successLight: '#dcfce7',
-  warning: '#f59e0b',
+  warning: '#d97706',
   warningLight: '#fef3c7',
   danger: '#ef4444',
   dangerLight: '#fee2e2',
-  background: '#f3f4f6',
+  info: '#0891b2',
+  infoLight: '#cffafe',
+  background: '#f8fafc',
+  surface: '#ffffff',
+  surfaceMuted: '#f1f5f9',
   white: '#ffffff',
-  black: '#111827',
-  grey100: '#f3f4f6',
-  grey200: '#e5e7eb',
-  grey300: '#d1d5db',
-  grey400: '#9ca3af',
-  grey500: '#6b7280',
-  grey600: '#4b5563',
-  grey700: '#374151',
-  grey800: '#1f2937',
+  black: '#0f172a',
+  hero: '#0f172a',
+  heroAccent: '#1e293b',
+  grey100: '#f1f5f9',
+  grey200: '#e2e8f0',
+  grey300: '#cbd5e1',
+  grey400: '#94a3b8',
+  grey500: '#64748b',
+  grey600: '#475569',
+  grey700: '#334155',
+  grey800: '#1e293b',
 };
 
 export const STORAGE_KEYS = {

@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import type { RouteProp } from '@react-navigation/native';
@@ -35,9 +36,9 @@ interface Props {
 }
 
 const filters = [
-  { key: 'all', label: 'All' },
-  { key: 'pending', label: 'Pending' },
-  { key: 'verified', label: 'Done' },
+  { key: 'all', label: 'All', icon: 'account-group' },
+  { key: 'pending', label: 'Pending', icon: 'clock-outline' },
+  { key: 'verified', label: 'Done', icon: 'check-circle' },
 ] as const;
 
 type FilterKey = (typeof filters)[number]['key'];
@@ -109,27 +110,41 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
   }
 
   function renderItem({ item }: { item: VoterRow }) {
+    const genderTone = item.gender === 'F' ? '#db2777' : item.gender === 'M' ? COLORS.accent : COLORS.grey500;
     return (
       <TouchableOpacity
-        activeOpacity={0.8}
+        activeOpacity={0.7}
         onPress={() => navigation.navigate('VoterVisit', { voterId: item._id })}
         style={styles.row}>
-        <View style={styles.serialBox}>
-          <Text style={styles.serialText}>{item.voterSerialNumber}</Text>
+        <View style={[styles.serialBox, item.verificationStatus && styles.serialBoxDone]}>
+          <Text style={[styles.serialText, item.verificationStatus && { color: COLORS.white }]}>
+            {item.voterSerialNumber}
+          </Text>
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.voterName} numberOfLines={1}>
             {item.fullName}
           </Text>
-          <Text style={styles.voterMeta} numberOfLines={1}>
-            {item.gender} · {item.age}y · {item.fatherOrHusbandName}
+          <View style={styles.voterMetaRow}>
+            <View style={[styles.genderPill, { backgroundColor: `${genderTone}15` }]}>
+              <Text style={[styles.genderText, { color: genderTone }]}>
+                {item.gender === 'M' ? 'Male' : item.gender === 'F' ? 'Female' : 'Other'} · {item.age}y
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.voterSub} numberOfLines={1}>
+            s/o {item.fatherOrHusbandName}
           </Text>
           <Text style={styles.epicText}>{item.epicNumber}</Text>
         </View>
         {item.verificationStatus ? (
-          <Icon name="check-circle" size={22} color={COLORS.success} />
+          <View style={styles.statusDone}>
+            <Icon name="check-circle" size={20} color={COLORS.success} />
+          </View>
         ) : (
-          <Icon name="clock-outline" size={22} color={COLORS.grey400} />
+          <View style={styles.statusPending}>
+            <Icon name="chevron-right" size={18} color={COLORS.grey400} />
+          </View>
         )}
       </TouchableOpacity>
     );
@@ -137,28 +152,39 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Icon name="arrow-left" size={22} color={COLORS.grey700} />
+          <Icon name="arrow-left" size={22} color={COLORS.grey800} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
-          <Text style={styles.title} numberOfLines={1}>{boothName}</Text>
-          <Text style={styles.subtitle}>Part {partNumber}</Text>
+          <Text style={styles.title} numberOfLines={1}>
+            {boothName}
+          </Text>
+          <View style={styles.subtitleRow}>
+            <Icon name="map-marker" size={11} color={COLORS.grey500} />
+            <Text style={styles.subtitle}>Part {partNumber}</Text>
+          </View>
         </View>
       </View>
 
-      <View style={styles.filterRow}>
+      <View style={styles.searchWrap}>
         <View style={styles.searchBox}>
           <Icon name="magnify" size={18} color={COLORS.grey400} />
           <TextInput
             value={search}
             onChangeText={setSearch}
             onSubmitEditing={onSearchSubmit}
-            placeholder="Name, EPIC, serial"
+            placeholder="Name, EPIC, or serial"
             placeholderTextColor={COLORS.grey400}
             style={styles.searchInput}
             returnKeyType="search"
           />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => { setSearch(''); onSearchSubmit(); }}>
+              <Icon name="close-circle" size={16} color={COLORS.grey400} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -168,6 +194,7 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
             key={f.key}
             onPress={() => setFilter(f.key)}
             style={[styles.tab, filter === f.key && styles.tabActive]}>
+            <Icon name={f.icon} size={14} color={filter === f.key ? COLORS.white : COLORS.grey500} />
             <Text style={[styles.tabText, filter === f.key && styles.tabTextActive]}>{f.label}</Text>
           </TouchableOpacity>
         ))}
@@ -181,16 +208,20 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
         onEndReached={() => hasMore && !loading && load()}
         onEndReachedThreshold={0.4}
-        ListFooterComponent={loading ? <ActivityIndicator style={{ margin: 16 }} color={COLORS.primary} /> : null}
+        ListFooterComponent={
+          loading && voters.length > 0 ? <ActivityIndicator style={{ margin: 20 }} color={COLORS.primary} /> : null
+        }
         ListEmptyComponent={
           !loading ? (
             <View style={styles.empty}>
-              <Icon name="account-search-outline" size={42} color={COLORS.grey300} />
+              <View style={styles.emptyIcon}>
+                <Icon name="account-search-outline" size={38} color={COLORS.grey400} />
+              </View>
               <Text style={styles.emptyText}>No voters found</Text>
+              <Text style={styles.emptySub}>Try a different filter or search term</Text>
             </View>
           ) : null
         }
-        ItemSeparatorComponent={() => <View style={styles.sep} />}
       />
     </View>
   );
@@ -202,70 +233,112 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.grey200,
   },
-  backBtn: { padding: 6 },
-  title: { fontSize: 17, fontWeight: '700', color: COLORS.grey800 },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.grey100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: { fontSize: 17, fontWeight: '800', color: COLORS.grey800 },
+  subtitleRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 },
   subtitle: { fontSize: 12, color: COLORS.grey500 },
-  filterRow: {
-    padding: 12,
+  searchWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
     paddingBottom: 8,
     backgroundColor: COLORS.white,
   },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     backgroundColor: COLORS.grey100,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
   },
   searchInput: { flex: 1, fontSize: 14, color: COLORS.grey800, padding: 0 },
   tabsRow: {
     flexDirection: 'row',
     gap: 8,
-    paddingHorizontal: 12,
-    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.grey200,
   },
   tab: {
-    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 8,
     paddingHorizontal: 14,
-    borderRadius: 20,
+    borderRadius: 10,
     backgroundColor: COLORS.grey100,
   },
   tabActive: { backgroundColor: COLORS.primary },
-  tabText: { fontSize: 12, color: COLORS.grey600, fontWeight: '600' },
+  tabText: { fontSize: 12, color: COLORS.grey600, fontWeight: '700' },
   tabTextActive: { color: COLORS.white },
-  listContent: { paddingVertical: 6 },
+  listContent: { padding: 12, paddingBottom: 24 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     backgroundColor: COLORS.white,
     padding: 12,
+    marginBottom: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.grey200,
   },
-  sep: { height: 1, backgroundColor: COLORS.grey100 },
   serialBox: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 12,
     backgroundColor: COLORS.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  serialText: { fontSize: 13, fontWeight: '800', color: COLORS.primary },
+  serialBoxDone: { backgroundColor: COLORS.success },
+  serialText: { fontSize: 14, fontWeight: '800', color: COLORS.primary },
   voterName: { fontSize: 15, fontWeight: '700', color: COLORS.grey800 },
-  voterMeta: { fontSize: 12, color: COLORS.grey500, marginTop: 2 },
-  epicText: { fontSize: 11, color: COLORS.grey400, marginTop: 2, fontFamily: 'monospace' },
-  empty: { alignItems: 'center', paddingTop: 60, gap: 10 },
-  emptyText: { fontSize: 14, color: COLORS.grey500 },
+  voterMetaRow: { flexDirection: 'row', marginTop: 4 },
+  genderPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  genderText: { fontSize: 10, fontWeight: '700' },
+  voterSub: { fontSize: 11, color: COLORS.grey500, marginTop: 3 },
+  epicText: { fontSize: 10, color: COLORS.grey400, marginTop: 2, fontFamily: 'monospace' },
+  statusDone: { justifyContent: 'center', alignItems: 'center' },
+  statusPending: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.grey100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  empty: { alignItems: 'center', paddingTop: 80, gap: 10 },
+  emptyIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.grey100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: { fontSize: 15, color: COLORS.grey700, fontWeight: '700' },
+  emptySub: { fontSize: 12, color: COLORS.grey500 },
 });
 
 export default BoothVotersScreen;

@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -69,9 +70,17 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
     return unsub;
   }, [load, navigation]);
 
+  const totals = assignments.reduce(
+    (acc, a) => ({ done: acc.done + a.completedCount, target: acc.target + a.totalVoters }),
+    { done: 0, target: 0 },
+  );
+  const overallPct = totals.target > 0 ? Math.round((totals.done / totals.target) * 100) : 0;
+
   function renderItem({ item }: { item: Assignment }) {
     const booth = typeof item.boothId === 'object' ? item.boothId : null;
     const pct = item.totalVoters > 0 ? Math.round((item.completedCount / item.totalVoters) * 100) : 0;
+    const isDone = pct === 100;
+    const tone = isDone ? COLORS.success : pct >= 50 ? COLORS.primary : COLORS.warning;
     return (
       <TouchableOpacity
         activeOpacity={0.8}
@@ -86,32 +95,50 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
         }}
         style={styles.card}>
         <View style={styles.cardTop}>
-          <View style={styles.partBadge}>
-            <Text style={styles.partNum}>{booth?.partNumber ?? '—'}</Text>
+          <View style={[styles.partBadge, { backgroundColor: `${tone}1A` }]}>
+            <Text style={[styles.partLabel, { color: tone }]}>PART</Text>
+            <Text style={[styles.partNum, { color: tone }]}>{booth?.partNumber ?? '—'}</Text>
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.boothName} numberOfLines={1}>
               {booth?.name || 'Unknown booth'}
             </Text>
-            <Text style={styles.boothMeta} numberOfLines={1}>
-              {booth?.assemblyConstituency}
-              {booth?.village ? ` · ${booth.village}` : ''}
+            <View style={styles.metaRow}>
+              <Icon name="map-marker" size={12} color={COLORS.grey400} />
+              <Text style={styles.boothMeta} numberOfLines={1}>
+                {booth?.assemblyConstituency}
+                {booth?.village ? ` · ${booth.village}` : ''}
+              </Text>
+            </View>
+          </View>
+          {isDone ? (
+            <View style={styles.doneBadge}>
+              <Icon name="check" size={12} color={COLORS.white} />
+            </View>
+          ) : (
+            <Icon name="chevron-right" size={22} color={COLORS.grey400} />
+          )}
+        </View>
+
+        <View style={styles.progressSection}>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${pct}%`, backgroundColor: tone }]} />
+          </View>
+          <View style={styles.progressRow}>
+            <Text style={[styles.progressPct, { color: tone }]}>{pct}%</Text>
+            <Text style={styles.progressText}>
+              {item.completedCount} of {item.totalVoters} voters
             </Text>
           </View>
-          <Icon name="chevron-right" size={22} color={COLORS.grey400} />
         </View>
-        <View style={styles.progressRow}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${pct}%` }]} />
-          </View>
-          <Text style={styles.progressText}>
-            {item.completedCount} / {item.totalVoters}
-          </Text>
-        </View>
+
         {(item.voterSerialFrom || item.voterSerialTo) && (
-          <Text style={styles.rangeText}>
-            Serial {item.voterSerialFrom ?? '1'} – {item.voterSerialTo ?? '∞'}
-          </Text>
+          <View style={styles.rangeChip}>
+            <Icon name="tag-outline" size={11} color={COLORS.grey500} />
+            <Text style={styles.rangeText}>
+              Serial {item.voterSerialFrom ?? '1'} – {item.voterSerialTo ?? '∞'}
+            </Text>
+          </View>
         )}
       </TouchableOpacity>
     );
@@ -119,13 +146,28 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <View style={styles.header}>
         <Text style={styles.title}>My Assignments</Text>
-        <Text style={styles.subtitle}>{assignments.length} active</Text>
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryPill}>
+            <Icon name="map-marker-multiple" size={12} color={COLORS.primary} />
+            <Text style={styles.summaryText}>{assignments.length} booths</Text>
+          </View>
+          {totals.target > 0 && (
+            <View style={[styles.summaryPill, { backgroundColor: COLORS.accentLight }]}>
+              <Icon name="chart-line" size={12} color={COLORS.accent} />
+              <Text style={[styles.summaryText, { color: COLORS.accent }]}>
+                {overallPct}% overall
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
       {loading && assignments.length === 0 ? (
         <View style={styles.center}>
-          <ActivityIndicator color={COLORS.primary} />
+          <ActivityIndicator color={COLORS.primary} size="large" />
+          <Text style={styles.loadingText}>Loading your booths...</Text>
         </View>
       ) : (
         <FlatList
@@ -133,15 +175,18 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={COLORS.primary} />
           }
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Icon name="clipboard-text-off" size={48} color={COLORS.grey300} />
-              <Text style={styles.emptyText}>No assignments yet</Text>
+              <View style={styles.emptyIcon}>
+                <Icon name="clipboard-text-off-outline" size={40} color={COLORS.grey400} />
+              </View>
+              <Text style={styles.emptyText}>No booths assigned yet</Text>
               <Text style={styles.emptySub}>
-                Ask your admin to assign a booth. Pull down to refresh.
+                Ask your admin to assign a booth. Pull down to refresh when done.
               </Text>
             </View>
           }
@@ -154,58 +199,91 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: {
-    padding: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 14,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.grey200,
   },
-  title: { fontSize: 20, fontWeight: '800', color: COLORS.grey800 },
-  subtitle: { fontSize: 12, color: COLORS.grey500, marginTop: 2 },
-  listContent: { padding: 16, gap: 12 },
+  title: { fontSize: 24, fontWeight: '800', color: COLORS.grey800 },
+  summaryRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  summaryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.primaryLight,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  summaryText: { fontSize: 11, color: COLORS.primary, fontWeight: '700' },
+  listContent: { padding: 16, paddingBottom: 24 },
   card: {
     backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.grey200,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   partBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: COLORS.primaryLight,
+    width: 52,
+    height: 52,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  partNum: { fontSize: 13, fontWeight: '800', color: COLORS.primary },
-  boothName: { fontSize: 15, fontWeight: '700', color: COLORS.grey800 },
-  boothMeta: { fontSize: 12, color: COLORS.grey500, marginTop: 2 },
-  progressRow: {
-    flexDirection: 'row',
+  partLabel: { fontSize: 8, fontWeight: '800', letterSpacing: 0.8 },
+  partNum: { fontSize: 17, fontWeight: '800', lineHeight: 20 },
+  boothName: { fontSize: 16, fontWeight: '700', color: COLORS.grey800 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 3 },
+  boothMeta: { fontSize: 12, color: COLORS.grey500, flex: 1 },
+  doneBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.success,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 10,
-    marginTop: 12,
   },
+  progressSection: { marginTop: 14 },
   progressBar: {
-    flex: 1,
     height: 6,
     borderRadius: 3,
     backgroundColor: COLORS.grey200,
     overflow: 'hidden',
   },
-  progressFill: { height: '100%', backgroundColor: COLORS.primary },
+  progressFill: { height: '100%', borderRadius: 3 },
+  progressRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
+  progressPct: { fontSize: 15, fontWeight: '800' },
   progressText: { fontSize: 12, color: COLORS.grey600, fontWeight: '600' },
-  rangeText: { fontSize: 11, color: COLORS.grey500, marginTop: 6 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  empty: { alignItems: 'center', paddingTop: 60, gap: 10 },
-  emptyText: { fontSize: 15, color: COLORS.grey600, fontWeight: '600' },
-  emptySub: { fontSize: 12, color: COLORS.grey400, textAlign: 'center', paddingHorizontal: 40 },
+  rangeChip: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 10,
+    backgroundColor: COLORS.grey100,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  rangeText: { fontSize: 11, color: COLORS.grey600, fontWeight: '600' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  loadingText: { fontSize: 13, color: COLORS.grey500 },
+  empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
+  emptyIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.grey100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: { fontSize: 16, color: COLORS.grey700, fontWeight: '700' },
+  emptySub: { fontSize: 13, color: COLORS.grey500, textAlign: 'center', paddingHorizontal: 40, lineHeight: 18 },
 });
 
 export default AssignmentsScreen;

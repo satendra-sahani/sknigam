@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import NetInfo from '@react-native-community/netinfo';
@@ -37,9 +38,9 @@ const QueueScreen: React.FC = () => {
       if (res.flushed > 0) {
         Alert.alert('Synced', `${res.flushed} visit${res.flushed > 1 ? 's' : ''} uploaded.`);
       } else if (!online) {
-        Alert.alert('Offline', 'No internet. The queue will sync when online.');
+        Alert.alert('Offline', 'No internet. The queue will sync automatically when back online.');
       } else if (res.remaining > 0) {
-        Alert.alert('Still pending', 'Some items could not be submitted. Check errors.');
+        Alert.alert('Still pending', 'Some items could not be submitted. Check error details.');
       } else {
         Alert.alert('All clear', 'Nothing to sync.');
       }
@@ -56,24 +57,30 @@ const QueueScreen: React.FC = () => {
   }
 
   function renderItem({ item }: { item: QueuedVisit }) {
+    const hasError = !!item.lastError;
+    const tone = hasError ? COLORS.danger : COLORS.accent;
+    const toneLight = hasError ? COLORS.dangerLight : COLORS.accentLight;
     return (
       <View style={styles.row}>
-        <View style={styles.rowIcon}>
-          <Icon
-            name={item.lastError ? 'alert-circle' : 'cloud-upload-outline'}
-            size={22}
-            color={item.lastError ? COLORS.danger : COLORS.primary}
-          />
+        <View style={[styles.rowIcon, { backgroundColor: toneLight }]}>
+          <Icon name={hasError ? 'alert-circle' : 'cloud-upload-outline'} size={22} color={tone} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.voterName}>{item.voterName}</Text>
           <Text style={styles.meta}>
-            Queued {new Date(item.createdAt).toLocaleString()} · {item.attempts} tries
+            {new Date(item.createdAt).toLocaleString()} · {item.attempts} tr{item.attempts === 1 ? 'y' : 'ies'}
           </Text>
-          {item.lastError && <Text style={styles.error}>{item.lastError}</Text>}
+          {hasError && (
+            <View style={styles.errorBox}>
+              <Icon name="alert" size={11} color={COLORS.danger} />
+              <Text style={styles.errorText} numberOfLines={2}>
+                {item.lastError}
+              </Text>
+            </View>
+          )}
         </View>
         <TouchableOpacity onPress={() => onDelete(item)} style={styles.deleteBtn}>
-          <Icon name="trash-can-outline" size={20} color={COLORS.grey500} />
+          <Icon name="trash-can-outline" size={18} color={COLORS.grey500} />
         </TouchableOpacity>
       </View>
     );
@@ -81,19 +88,23 @@ const QueueScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.title}>Sync Queue</Text>
-          <Text style={styles.subtitle}>
-            {queue.length} pending · {online ? 'online' : 'offline'}
-          </Text>
+          <View style={styles.statusRow}>
+            <View style={[styles.statusDot, { backgroundColor: online ? COLORS.success : COLORS.grey400 }]} />
+            <Text style={styles.subtitle}>
+              {queue.length} pending · {online ? 'online' : 'offline'}
+            </Text>
+          </View>
         </View>
         <TouchableOpacity
           onPress={onFlush}
           disabled={flushing || queue.length === 0}
-          style={[styles.flushBtn, (flushing || queue.length === 0) && { opacity: 0.5 }]}>
+          style={[styles.flushBtn, (flushing || queue.length === 0) && { opacity: 0.4 }]}>
           {flushing ? (
-            <ActivityIndicator color={COLORS.white} />
+            <ActivityIndicator color={COLORS.white} size="small" />
           ) : (
             <>
               <Icon name="sync" size={16} color={COLORS.white} />
@@ -102,16 +113,31 @@ const QueueScreen: React.FC = () => {
           )}
         </TouchableOpacity>
       </View>
+
+      {!online && queue.length > 0 && (
+        <View style={styles.offlineBanner}>
+          <Icon name="wifi-off" size={16} color={COLORS.warning} />
+          <Text style={styles.offlineText}>
+            You're offline. Visits are saved locally and will upload automatically.
+          </Text>
+        </View>
+      )}
+
       <FlatList
         data={queue}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        ItemSeparatorComponent={() => <View style={styles.sep} />}
+        contentContainerStyle={styles.listContent}
         refreshControl={<RefreshControl refreshing={flushing} onRefresh={onFlush} tintColor={COLORS.primary} />}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Icon name="cloud-check" size={48} color={COLORS.grey300} />
+            <View style={[styles.emptyIcon, { backgroundColor: COLORS.successLight }]}>
+              <Icon name="cloud-check-outline" size={42} color={COLORS.success} />
+            </View>
             <Text style={styles.emptyText}>All visits synced</Text>
+            <Text style={styles.emptySub}>
+              Every visit you record goes straight to the server when you're online.
+            </Text>
           </View>
         }
       />
@@ -125,45 +151,88 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.grey200,
   },
-  title: { fontSize: 20, fontWeight: '800', color: COLORS.grey800 },
-  subtitle: { fontSize: 12, color: COLORS.grey500, marginTop: 2 },
+  title: { fontSize: 22, fontWeight: '800', color: COLORS.grey800 },
+  statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  subtitle: { fontSize: 12, color: COLORS.grey500, fontWeight: '600' },
   flushBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     backgroundColor: COLORS.primary,
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
   },
   flushBtnText: { color: COLORS.white, fontSize: 13, fontWeight: '700' },
+  offlineBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: COLORS.warningLight,
+    borderRadius: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.warning,
+  },
+  offlineText: { flex: 1, fontSize: 12, color: COLORS.grey700, fontWeight: '600' },
+  listContent: { padding: 16, gap: 10 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     padding: 14,
+    marginBottom: 10,
     backgroundColor: COLORS.white,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.grey200,
   },
   rowIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.grey100,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  voterName: { fontSize: 14, fontWeight: '700', color: COLORS.grey800 },
-  meta: { fontSize: 12, color: COLORS.grey500, marginTop: 2 },
-  error: { fontSize: 11, color: COLORS.danger, marginTop: 2 },
-  deleteBtn: { padding: 6 },
-  sep: { height: 1, backgroundColor: COLORS.grey100 },
-  empty: { alignItems: 'center', paddingTop: 60, gap: 10 },
-  emptyText: { fontSize: 14, color: COLORS.grey500 },
+  voterName: { fontSize: 15, fontWeight: '700', color: COLORS.grey800 },
+  meta: { fontSize: 12, color: COLORS.grey500, marginTop: 3 },
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 4,
+    marginTop: 6,
+    padding: 6,
+    backgroundColor: COLORS.dangerLight,
+    borderRadius: 6,
+  },
+  errorText: { flex: 1, fontSize: 11, color: COLORS.danger, fontWeight: '600' },
+  deleteBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: COLORS.grey100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  empty: { alignItems: 'center', paddingTop: 80, gap: 14, paddingHorizontal: 40 },
+  emptyIcon: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: { fontSize: 16, color: COLORS.grey800, fontWeight: '700' },
+  emptySub: { fontSize: 13, color: COLORS.grey500, textAlign: 'center', lineHeight: 18 },
 });
 
 export default QueueScreen;
