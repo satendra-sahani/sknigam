@@ -13,15 +13,16 @@ import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../hooks/useAuth';
+import { useI18n } from '../i18n';
 import api from '../services/api';
 import { subscribe } from '../services/visitQueue';
 import { COLORS } from '../utils/constants';
 import type { MainTabParamList, RootStackParamList, QueuedVisit } from '../types';
 
-const roleLabels: Record<string, string> = {
-  super_admin: 'Super Admin',
-  staff: 'Field Staff',
-  politician: 'Politician',
+const roleKeyMap: Record<string, string> = {
+  super_admin: 'home_role_super',
+  staff: 'home_role_staff',
+  politician: 'home_role_politician',
 };
 
 type Nav = CompositeNavigationProp<
@@ -35,11 +36,14 @@ interface Props {
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const { user, logout } = useAuth();
+  const { lang, toggle, t } = useI18n();
   const [assignmentsTotal, setAssignmentsTotal] = useState(0);
   const [completed, setCompleted] = useState(0);
   const [target, setTarget] = useState(0);
   const [queueCount, setQueueCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -48,8 +52,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       setAssignmentsTotal(assignments.length);
       setCompleted(assignments.reduce((s: number, a: any) => s + (a.completedCount || 0), 0));
       setTarget(assignments.reduce((s: number, a: any) => s + (a.totalVoters || 0), 0));
-    } catch {
-      // stay silent on home
+      setLoadError(null);
+    } catch (err: any) {
+      // Surface a compact hint instead of silently showing "0 booths" —
+      // that's what made past debugging so painful on field devices.
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.error;
+      if (status) setLoadError(`${status}: ${msg || 'Server error'}`);
+      else if (err?.code === 'ECONNABORTED') setLoadError('Request timed out. Check Wi-Fi / server.');
+      else setLoadError(`Cannot reach API (${err?.message || 'network error'})`);
     }
   }, []);
 
@@ -82,20 +93,32 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.hero}>
           <View style={styles.heroTop}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.greeting}>Namaste</Text>
+              <Text style={styles.greeting}>{t('home_greeting')}</Text>
               <Text style={styles.userName} numberOfLines={1}>
-                {user?.name || 'User'}
+                {user?.name || t('home_user_fallback')}
               </Text>
               {user?.role && (
                 <View style={styles.rolePill}>
                   <Icon name="shield-check" size={12} color={COLORS.primary} />
-                  <Text style={styles.rolePillText}>{roleLabels[user.role] || user.role}</Text>
+                  <Text style={styles.rolePillText}>
+                    {roleKeyMap[user.role] ? t(roleKeyMap[user.role]) : user.role}
+                  </Text>
                 </View>
               )}
             </View>
-            <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
-              <Icon name="logout" size={20} color={COLORS.grey300} />
-            </TouchableOpacity>
+            <View style={styles.heroActions}>
+              <TouchableOpacity
+                onPress={toggle}
+                accessibilityLabel={t('lang_switch_tooltip')}
+                style={styles.langBtn}>
+                <Text style={styles.langBtnText}>
+                  {lang === 'en' ? 'EN' : 'हि'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
+                <Icon name="logout" size={20} color={COLORS.grey300} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {user?.assemblyConstituency && (
@@ -109,12 +132,21 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           )}
 
           <View style={styles.heroStatsRow}>
-            <HeroStat label="Booths" value={String(assignmentsTotal)} icon="map-marker-multiple" />
+            <HeroStat label={t('home_stat_booths')} value={String(assignmentsTotal)} icon="map-marker-multiple" />
             <View style={styles.heroDivider} />
-            <HeroStat label="Done" value={String(completed)} icon="check-circle" />
+            <HeroStat label={t('home_stat_done')} value={String(completed)} icon="check-circle" />
             <View style={styles.heroDivider} />
-            <HeroStat label="Pending" value={String(pending)} icon="clock-outline" />
+            <HeroStat label={t('home_stat_pending')} value={String(pending)} icon="clock-outline" />
           </View>
+
+          {loadError && (
+            <View style={styles.errorBanner}>
+              <Icon name="alert-circle" size={14} color={COLORS.warning} />
+              <Text style={styles.errorBannerText} numberOfLines={2}>
+                {loadError}
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.content}>
@@ -122,7 +154,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.progressCard}>
               <View style={styles.progressHeader}>
                 <View>
-                  <Text style={styles.progressLabel}>Overall progress</Text>
+                  <Text style={styles.progressLabel}>{t('home_overall_progress')}</Text>
                   <Text style={styles.progressValue}>{pct}%</Text>
                 </View>
                 <View style={styles.progressCount}>
@@ -135,7 +167,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={[styles.progressFill, { width: `${pct}%` }]} />
               </View>
               <Text style={styles.progressFootnote}>
-                Across {assignmentsTotal} booth{assignmentsTotal === 1 ? '' : 's'}
+                {assignmentsTotal === 1
+                  ? t('home_across_one')
+                  : t('home_across_many', { n: assignmentsTotal })}
               </Text>
             </View>
           )}
@@ -150,15 +184,17 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.queueTitle}>
-                  {queueCount} visit{queueCount > 1 ? 's' : ''} waiting to sync
+                  {queueCount === 1
+                    ? t('home_queue_waiting_one')
+                    : t('home_queue_waiting_many', { n: queueCount })}
                 </Text>
-                <Text style={styles.queueSub}>Tap to review and upload</Text>
+                <Text style={styles.queueSub}>{t('home_queue_sub')}</Text>
               </View>
               <Icon name="chevron-right" size={22} color={COLORS.grey400} />
             </TouchableOpacity>
           )}
 
-          <Text style={styles.sectionTitle}>Quick actions</Text>
+          <Text style={styles.sectionTitle}>{t('home_quick_actions')}</Text>
 
           <TouchableOpacity
             activeOpacity={0.85}
@@ -168,8 +204,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               <Icon name="map-marker-multiple" size={22} color={COLORS.white} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.primaryCtaText}>Open my booths</Text>
-              <Text style={styles.primaryCtaSub}>Visit voters and verify</Text>
+              <Text style={styles.primaryCtaText}>{t('home_open_booths')}</Text>
+              <Text style={styles.primaryCtaSub}>{t('home_open_booths_sub')}</Text>
             </View>
             <Icon name="chevron-right" size={22} color={COLORS.white} />
           </TouchableOpacity>
@@ -182,9 +218,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               <Icon name="cloud-sync" size={22} color={COLORS.accent} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.secondaryCtaText}>Sync queue</Text>
+              <Text style={styles.secondaryCtaText}>{t('home_sync_queue')}</Text>
               <Text style={styles.secondaryCtaSub}>
-                {queueCount > 0 ? `${queueCount} pending upload${queueCount > 1 ? 's' : ''}` : 'All clear'}
+                {queueCount === 0
+                  ? t('home_sync_queue_all_clear')
+                  : queueCount === 1
+                    ? t('home_sync_queue_pending_one')
+                    : t('home_sync_queue_pending_many', { n: queueCount })}
               </Text>
             </View>
             <Icon name="chevron-right" size={22} color={COLORS.grey400} />
@@ -230,6 +270,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   rolePillText: { fontSize: 11, color: COLORS.primary, fontWeight: '700' },
+  heroActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  langBtn: {
+    paddingHorizontal: 12,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.heroAccent,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 44,
+  },
+  langBtnText: { color: COLORS.white, fontSize: 13, fontWeight: '800', letterSpacing: 0.5 },
   logoutBtn: {
     width: 40,
     height: 40,
@@ -263,6 +314,17 @@ const styles = StyleSheet.create({
   heroDivider: { width: 1, height: 30, backgroundColor: COLORS.grey700 },
   heroStatValue: { fontSize: 20, color: COLORS.white, fontWeight: '800' },
   heroStatLabel: { fontSize: 10, color: COLORS.grey400, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: COLORS.warningLight,
+  },
+  errorBannerText: { flex: 1, fontSize: 12, color: COLORS.warning, fontWeight: '600' },
   content: { padding: 16, paddingTop: 20, paddingBottom: 32, gap: 12 },
   progressCard: {
     backgroundColor: COLORS.white,

@@ -15,6 +15,8 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import api from '../services/api';
+import { useI18n } from '../i18n';
+import { boothDisplay } from '../utils/hindify';
 import { COLORS } from '../utils/constants';
 import type { MainTabParamList, RootStackParamList } from '../types';
 
@@ -46,6 +48,7 @@ interface Props {
 }
 
 const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
+  const { t, lang } = useI18n();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -57,7 +60,14 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
       const res = await api.get('/voter-assignments', { params: { limit: 100 } });
       setAssignments(res.data.data.assignments);
     } catch (err: any) {
-      Alert.alert('Error', err.response?.data?.error || 'Failed to load assignments');
+      const status = err?.response?.status;
+      const serverMsg = err?.response?.data?.error;
+      const detail = status
+        ? `HTTP ${status}: ${serverMsg || 'Server error'}`
+        : err?.code === 'ECONNABORTED'
+          ? 'Request timed out. Check Wi-Fi / server.'
+          : `Cannot reach API (${err?.message || 'network error'}).\n\nAPI URL: ${api.defaults.baseURL}`;
+      Alert.alert(t('assignments_failed'), detail);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -96,18 +106,18 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.card}>
         <View style={styles.cardTop}>
           <View style={[styles.partBadge, { backgroundColor: `${tone}1A` }]}>
-            <Text style={[styles.partLabel, { color: tone }]}>PART</Text>
+            <Text style={[styles.partLabel, { color: tone }]}>{t('assignments_part')}</Text>
             <Text style={[styles.partNum, { color: tone }]}>{booth?.partNumber ?? '—'}</Text>
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.boothName} numberOfLines={1}>
-              {booth?.name || 'Unknown booth'}
+              {booth?.name ? boothDisplay(booth.name, lang) : t('assignments_unknown_booth')}
             </Text>
             <View style={styles.metaRow}>
               <Icon name="map-marker" size={12} color={COLORS.grey400} />
               <Text style={styles.boothMeta} numberOfLines={1}>
                 {booth?.assemblyConstituency}
-                {booth?.village ? ` · ${booth.village}` : ''}
+                {booth?.village ? ` · ${boothDisplay(booth.village, lang)}` : ''}
               </Text>
             </View>
           </View>
@@ -127,7 +137,7 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.progressRow}>
             <Text style={[styles.progressPct, { color: tone }]}>{pct}%</Text>
             <Text style={styles.progressText}>
-              {item.completedCount} of {item.totalVoters} voters
+              {t('assignments_of_voters', { done: item.completedCount, total: item.totalVoters })}
             </Text>
           </View>
         </View>
@@ -136,7 +146,10 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.rangeChip}>
             <Icon name="tag-outline" size={11} color={COLORS.grey500} />
             <Text style={styles.rangeText}>
-              Serial {item.voterSerialFrom ?? '1'} – {item.voterSerialTo ?? '∞'}
+              {t('assignments_serial', {
+                from: item.voterSerialFrom ?? '1',
+                to: item.voterSerialTo ?? '∞',
+              })}
             </Text>
           </View>
         )}
@@ -148,17 +161,21 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <View style={styles.header}>
-        <Text style={styles.title}>My Assignments</Text>
+        <Text style={styles.title}>{t('assignments_title')}</Text>
         <View style={styles.summaryRow}>
           <View style={styles.summaryPill}>
             <Icon name="map-marker-multiple" size={12} color={COLORS.primary} />
-            <Text style={styles.summaryText}>{assignments.length} booths</Text>
+            <Text style={styles.summaryText}>
+              {assignments.length === 1
+                ? t('assignments_count_one')
+                : t('assignments_count_many', { n: assignments.length })}
+            </Text>
           </View>
           {totals.target > 0 && (
             <View style={[styles.summaryPill, { backgroundColor: COLORS.accentLight }]}>
               <Icon name="chart-line" size={12} color={COLORS.accent} />
               <Text style={[styles.summaryText, { color: COLORS.accent }]}>
-                {overallPct}% overall
+                {t('assignments_overall', { n: overallPct })}
               </Text>
             </View>
           )}
@@ -167,7 +184,7 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
       {loading && assignments.length === 0 ? (
         <View style={styles.center}>
           <ActivityIndicator color={COLORS.primary} size="large" />
-          <Text style={styles.loadingText}>Loading your booths...</Text>
+          <Text style={styles.loadingText}>{t('assignments_loading')}</Text>
         </View>
       ) : (
         <FlatList
@@ -184,10 +201,8 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
               <View style={styles.emptyIcon}>
                 <Icon name="clipboard-text-off-outline" size={40} color={COLORS.grey400} />
               </View>
-              <Text style={styles.emptyText}>No booths assigned yet</Text>
-              <Text style={styles.emptySub}>
-                Ask your admin to assign a booth. Pull down to refresh when done.
-              </Text>
+              <Text style={styles.emptyText}>{t('assignments_empty')}</Text>
+              <Text style={styles.emptySub}>{t('assignments_empty_sub')}</Text>
             </View>
           }
         />

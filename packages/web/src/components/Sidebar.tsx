@@ -13,6 +13,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Campaign', href: '/explore' },
   { label: 'Booths', href: '/booths', roles: ['super_admin'] },
   { label: 'Voters', href: '/voters', roles: ['super_admin', 'staff'] },
   { label: 'Staff', href: '/staff', roles: ['super_admin'] },
@@ -60,12 +61,13 @@ export default function Sidebar() {
       }`}
     >
       <div className={`flex items-center gap-3 border-b border-white/10 ${collapsed ? 'px-4 py-5 justify-center' : 'px-6 py-5'}`}>
-        <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-red-600 flex items-center justify-center font-bold text-white">P</div>
+        <img
+          src="/transhparent-background.png"
+          alt="Pollstics"
+          className="flex-shrink-0 w-10 h-10 object-contain"
+        />
         {!collapsed && (
-          <div>
-            <h1 className="text-base font-bold tracking-tight text-white">POLLSTICS</h1>
-            <p className="text-[11px] text-slate-400 leading-none mt-0.5">Voter Campaign Platform</p>
-          </div>
+          <p className="text-[11px] text-slate-400 leading-tight">Pollstics</p>
         )}
       </div>
 

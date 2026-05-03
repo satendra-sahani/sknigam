@@ -25,12 +25,15 @@ export interface IVoterDocument extends Document {
   // A) Official data (auto-imported)
   voterSerialNumber: number;
   epicNumber: string;
-  fullName: string;
+  fullName: string;              // English / Latin script (transliterated from Hindi when source is Hindi roll)
+  fullNameHi?: string;           // Original Hindi / Devanagari as printed on the roll
   fatherOrHusbandName?: string;
+  fatherOrHusbandNameHi?: string;
   gender: Gender;
   dateOfBirth?: Date;
   age?: number;
   address: string;
+  addressHi?: string;
   boothId: mongoose.Types.ObjectId;
   partNumber: number;
   assemblyConstituency: string;
@@ -47,6 +50,7 @@ export interface IVoterDocument extends Document {
   bplCardHolder?: boolean;
   rationCardType?: RationCardType;
   aadharLinked?: boolean;
+  aadhaarNumber?: string;
 
   // C) Contact & verification
   mobileNumber?: string;
@@ -60,10 +64,13 @@ export interface IVoterDocument extends Document {
 
   // D) Political preference
   favouriteCandidate?: string;
+  favouriteCandidateHi?: string;
   partySupport?: string;
   votingIntention?: VotingIntention;
   grievances?: GrievanceCategory[];
   problemDescription?: string;
+  problemDescriptionHi?: string;
+  staffRemarksHi?: string;
   influenceLevel?: InfluenceLevel;
 
   createdAt: Date;
@@ -76,11 +83,14 @@ const VoterSchema = new Schema<IVoterDocument>(
     voterSerialNumber: { type: Number, required: true },
     epicNumber: { type: String, required: true, trim: true, uppercase: true },
     fullName: { type: String, required: true, trim: true },
+    fullNameHi: { type: String, trim: true },
     fatherOrHusbandName: { type: String, trim: true },
+    fatherOrHusbandNameHi: { type: String, trim: true },
     gender: { type: String, enum: ['M', 'F', 'T'], required: true },
     dateOfBirth: { type: Date },
     age: { type: Number, min: 0, max: 130 },
     address: { type: String, required: true, trim: true },
+    addressHi: { type: String, trim: true },
     boothId: { type: Schema.Types.ObjectId, ref: 'Booth', required: true },
     partNumber: { type: Number, required: true },
     assemblyConstituency: { type: String, required: true, trim: true },
@@ -97,6 +107,7 @@ const VoterSchema = new Schema<IVoterDocument>(
     bplCardHolder: { type: Boolean },
     rationCardType: { type: String, enum: ['APL', 'BPL', 'AAY', 'None'] },
     aadharLinked: { type: Boolean },
+    aadhaarNumber: { type: String, trim: true, match: /^[0-9]{12}$/ },
 
     // Contact
     mobileNumber: { type: String, trim: true, match: /^[0-9]{10}$/ },
@@ -110,6 +121,7 @@ const VoterSchema = new Schema<IVoterDocument>(
 
     // Political
     favouriteCandidate: { type: String, trim: true },
+    favouriteCandidateHi: { type: String, trim: true },
     partySupport: { type: String, trim: true },
     votingIntention: { type: String, enum: ['Will Vote', 'May Vote', "Won't Vote", 'First-Time Voter'] },
     grievances: [
@@ -119,6 +131,8 @@ const VoterSchema = new Schema<IVoterDocument>(
       },
     ],
     problemDescription: { type: String, trim: true },
+    problemDescriptionHi: { type: String, trim: true },
+    staffRemarksHi: { type: String, trim: true },
     influenceLevel: { type: String, enum: ['Influencer', 'Neutral', 'Opponent'] },
   },
   { timestamps: true }
@@ -132,5 +146,7 @@ VoterSchema.index({ religion: 1 });
 VoterSchema.index({ favouriteCandidate: 1 });
 VoterSchema.index({ verificationStatus: 1 });
 VoterSchema.index({ visitedBy: 1 });
+VoterSchema.index({ fullNameHi: 1 });
+VoterSchema.index({ fatherOrHusbandNameHi: 1 });
 
 export default mongoose.model<IVoterDocument>('Voter', VoterSchema);

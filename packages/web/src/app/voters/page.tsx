@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import ImportVotersModal from '@/components/ImportVotersModal';
+import { SkeletonTable } from '@/components/Skeleton';
 
 interface BoothSummary {
   _id: string;
@@ -42,13 +44,15 @@ const PAGE_SIZE = 25;
 
 export default function VotersPage() {
   const { user } = useAuth();
+  const params = useSearchParams();
+  const boothIdFromUrl = params.get('boothId') || '';
   const [voters, setVoters] = useState<VoterRow[]>([]);
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: PAGE_SIZE, total: 0, pages: 0 });
   const [loading, setLoading] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
 
   const [search, setSearch] = useState('');
-  const [constituency, setConstituency] = useState('');
+  const [constituency, setConstituency] = useState(params.get('assemblyConstituency') || '');
   const [gender, setGender] = useState('');
   const [verified, setVerified] = useState<'all' | 'true' | 'false'>('all');
   const [page, setPage] = useState(1);
@@ -64,6 +68,7 @@ export default function VotersPage() {
       };
       if (search) params.search = search;
       if (constituency) params.assemblyConstituency = constituency;
+      if (boothIdFromUrl) params.boothId = boothIdFromUrl;
       if (gender) params.gender = gender;
       if (verified !== 'all') params.verificationStatus = verified;
       const res = await api.get('/voters', { params });
@@ -74,7 +79,7 @@ export default function VotersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, constituency, gender, verified]);
+  }, [page, search, constituency, boothIdFromUrl, gender, verified]);
 
   useEffect(() => {
     load();
@@ -179,11 +184,10 @@ export default function VotersPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && (
-                <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-slate-400">
-                    Loading voters…
-                  </td>
-                </tr>
+                <SkeletonTable
+                  rows={8}
+                  columns={['110px', { w: '160px', lines: 2 }, '140px', '60px', { w: '140px', lines: 2 }, '80px', '110px', '70px', { w: '60px', alignRight: true }]}
+                />
               )}
               {!loading && voters.length === 0 && (
                 <tr>

@@ -5,6 +5,7 @@ import Script from 'next/script';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
+import { SkeletonTable } from '@/components/Skeleton';
 
 interface Tier {
   key: 'basic' | 'standard' | 'premium';
@@ -205,7 +206,23 @@ export default function SubscriptionsPage() {
 
       {isPolitician && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {loading && <p className="text-sm text-slate-500">Loading plans…</p>}
+          {loading && tiers.length === 0 &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={`plan-sk-${i}`}
+                className="rounded-2xl border border-slate-200/60 p-6 bg-white"
+                style={{ animation: 'fadeInUp 0.4s ease-out both', animationDelay: `${i * 80}ms` }}>
+                <div className="skeleton h-5 w-32" />
+                <div className="skeleton h-8 w-40 mt-3" />
+                <div className="space-y-2 mt-5">
+                  <div className="skeleton h-3 w-full" />
+                  <div className="skeleton h-3 w-5/6" />
+                  <div className="skeleton h-3 w-4/6" />
+                  <div className="skeleton h-3 w-5/6" />
+                </div>
+                <div className="skeleton h-9 w-full mt-5 rounded-lg" />
+              </div>
+            ))}
           {tiers.map((t) => {
             const isCurrent = mine?.tier === t.key && mine?.status === 'active';
             return (
@@ -269,11 +286,10 @@ export default function SubscriptionsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading && (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
-                      Loading…
-                    </td>
-                  </tr>
+                  <SkeletonTable
+                    rows={5}
+                    columns={[{ w: '140px', lines: 2 }, '130px', '90px', { w: '80px', alignRight: true }, '80px', '110px', { w: '70px', alignRight: true }]}
+                  />
                 )}
                 {!loading && all.length === 0 && (
                   <tr>

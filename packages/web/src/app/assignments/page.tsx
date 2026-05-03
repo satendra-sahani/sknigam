@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import AssignmentFormModal from '@/components/AssignmentFormModal';
+import { SkeletonTable } from '@/components/Skeleton';
 
 interface Assignment {
   _id: string;
@@ -119,11 +120,10 @@ export default function AssignmentsPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
-                    Loading…
-                  </td>
-                </tr>
+                <SkeletonTable
+                  rows={6}
+                  columns={[{ w: '140px', lines: 2 }, { w: '160px', lines: 2 }, '100px', { w: '120px', alignRight: true }, '80px', { w: '80px', alignRight: true }]}
+                />
               )}
               {!loading && assignments.length === 0 && (
                 <tr>

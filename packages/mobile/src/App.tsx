@@ -3,6 +3,7 @@ import { StatusBar, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from './hooks/useAuth';
+import { I18nProvider } from './i18n';
 import AppNavigator from './navigation/AppNavigator';
 import { COLORS } from './utils/constants';
 import { startAutoFlush } from './services/visitQueue';
@@ -37,9 +38,11 @@ const App: React.FC = () => {
           backgroundColor={COLORS.white}
           translucent={false}
         />
-        <AuthProvider>
-          <AppNavigator />
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <AppNavigator />
+          </AuthProvider>
+        </I18nProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

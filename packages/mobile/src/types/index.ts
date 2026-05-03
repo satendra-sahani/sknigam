@@ -87,6 +87,9 @@ export interface VoterData {
   favouriteCandidate?: string;
   partySupport?: string;
   votingIntention?: string;
+  problemDescription?: string;
+  aadhaarNumber?: string;
+  grievances?: string[];
 }
 
 export interface QueuedVisit {
@@ -105,12 +108,51 @@ export type RootStackParamList = {
   Login: undefined;
   OtpVerification: { email: string; tempToken: string };
   MainTabs: undefined;
-  BoothVoters: { assignmentId: string; boothId: string; boothName: string; partNumber: number };
+  BoothVoters: { assignmentId?: string; boothId: string; boothName: string; partNumber: number };
   VoterVisit: { voterId: string };
+  Districts: { state: string };
+  Constituencies: { district: string };
+  BoothsInAc: { district: string; assemblyConstituency: string };
 };
 
 export type MainTabParamList = {
   Home: undefined;
   Assignments: undefined;
+  Explore: undefined;
   Queue: undefined;
 };
+
+export interface HierarchyStateSummary {
+  state: string;
+  booths: number;
+  districts: number;
+  constituencies: number;
+  totalVoters: number;
+  verified: number;
+}
+
+export interface HierarchyDistrictRow {
+  district: string;
+  booths: number;
+  totalVoters: number;
+  verified: number;
+}
+
+export interface HierarchyAcRow {
+  assemblyConstituency: string;
+  district: string;
+  booths: number;
+  totalVoters: number;
+  verified: number;
+}
+
+export interface HierarchyBoothRow {
+  _id: string;
+  name: string;
+  partNumber: number;
+  district: string;
+  assemblyConstituency: string;
+  village?: string;
+  totalVoters: number;
+  verified: number;
+}

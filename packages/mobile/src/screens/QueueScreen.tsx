@@ -13,10 +13,12 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import NetInfo from '@react-native-community/netinfo';
 import { subscribe, flushQueue, removeFromQueue } from '../services/visitQueue';
+import { useI18n } from '../i18n';
 import { COLORS } from '../utils/constants';
 import type { QueuedVisit } from '../types';
 
 const QueueScreen: React.FC = () => {
+  const { t } = useI18n();
   const [queue, setQueue] = useState<QueuedVisit[]>([]);
   const [flushing, setFlushing] = useState(false);
   const [online, setOnline] = useState(true);
@@ -36,13 +38,16 @@ const QueueScreen: React.FC = () => {
     try {
       const res = await flushQueue();
       if (res.flushed > 0) {
-        Alert.alert('Synced', `${res.flushed} visit${res.flushed > 1 ? 's' : ''} uploaded.`);
+        Alert.alert(
+          t('queue_synced_title'),
+          res.flushed === 1 ? t('queue_synced_one') : t('queue_synced_many', { n: res.flushed }),
+        );
       } else if (!online) {
-        Alert.alert('Offline', 'No internet. The queue will sync automatically when back online.');
+        Alert.alert(t('queue_offline_title'), t('queue_offline_body'));
       } else if (res.remaining > 0) {
-        Alert.alert('Still pending', 'Some items could not be submitted. Check error details.');
+        Alert.alert(t('queue_pending_title'), t('queue_pending_body'));
       } else {
-        Alert.alert('All clear', 'Nothing to sync.');
+        Alert.alert(t('queue_all_clear_title'), t('queue_all_clear_body'));
       }
     } finally {
       setFlushing(false);
@@ -50,9 +55,9 @@ const QueueScreen: React.FC = () => {
   }
 
   function onDelete(item: QueuedVisit) {
-    Alert.alert('Delete queued visit?', `Discard the saved visit for ${item.voterName}?`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => removeFromQueue(item.id) },
+    Alert.alert(t('queue_delete_title'), t('queue_delete_body', { name: item.voterName }), [
+      { text: t('cancel'), style: 'cancel' },
+      { text: t('queue_delete_btn'), style: 'destructive', onPress: () => removeFromQueue(item.id) },
     ]);
   }
 
@@ -68,7 +73,7 @@ const QueueScreen: React.FC = () => {
         <View style={{ flex: 1 }}>
           <Text style={styles.voterName}>{item.voterName}</Text>
           <Text style={styles.meta}>
-            {new Date(item.createdAt).toLocaleString()} · {item.attempts} tr{item.attempts === 1 ? 'y' : 'ies'}
+            {new Date(item.createdAt).toLocaleString()} · {item.attempts === 1 ? t('queue_try_one') : t('queue_try_many', { n: item.attempts })}
           </Text>
           {hasError && (
             <View style={styles.errorBox}>
@@ -91,11 +96,13 @@ const QueueScreen: React.FC = () => {
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.title}>Sync Queue</Text>
+          <Text style={styles.title}>{t('queue_title')}</Text>
           <View style={styles.statusRow}>
             <View style={[styles.statusDot, { backgroundColor: online ? COLORS.success : COLORS.grey400 }]} />
             <Text style={styles.subtitle}>
-              {queue.length} pending · {online ? 'online' : 'offline'}
+              {queue.length === 1
+                ? t('queue_status_one', { state: online ? t('queue_online') : t('queue_offline') })
+                : t('queue_status_many', { n: queue.length, state: online ? t('queue_online') : t('queue_offline') })}
             </Text>
           </View>
         </View>
@@ -108,7 +115,7 @@ const QueueScreen: React.FC = () => {
           ) : (
             <>
               <Icon name="sync" size={16} color={COLORS.white} />
-              <Text style={styles.flushBtnText}>Sync now</Text>
+              <Text style={styles.flushBtnText}>{t('queue_sync_now')}</Text>
             </>
           )}
         </TouchableOpacity>
@@ -117,9 +124,7 @@ const QueueScreen: React.FC = () => {
       {!online && queue.length > 0 && (
         <View style={styles.offlineBanner}>
           <Icon name="wifi-off" size={16} color={COLORS.warning} />
-          <Text style={styles.offlineText}>
-            You're offline. Visits are saved locally and will upload automatically.
-          </Text>
+          <Text style={styles.offlineText}>{t('queue_offline_banner')}</Text>
         </View>
       )}
 
@@ -134,10 +139,8 @@ const QueueScreen: React.FC = () => {
             <View style={[styles.emptyIcon, { backgroundColor: COLORS.successLight }]}>
               <Icon name="cloud-check-outline" size={42} color={COLORS.success} />
             </View>
-            <Text style={styles.emptyText}>All visits synced</Text>
-            <Text style={styles.emptySub}>
-              Every visit you record goes straight to the server when you're online.
-            </Text>
+            <Text style={styles.emptyText}>{t('queue_empty')}</Text>
+            <Text style={styles.emptySub}>{t('queue_empty_sub')}</Text>
           </View>
         }
       />

@@ -50,34 +50,53 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl border border-slate-200/60 p-6 shadow-sm">
-        <h1 className="text-xl font-semibold text-slate-900">Welcome to POLLSTICS</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Signed in as <span className="font-medium text-slate-700">{user?.name}</span>
-          {user?.role && <> &middot; {roleLabels[user.role] || user.role}</>}
-          {user?.assemblyConstituency && <> &middot; {user.assemblyConstituency}</>}
-        </p>
+      <div className="bg-white rounded-xl border border-slate-200/60 p-6 shadow-sm flex items-center gap-4 animate-count">
+        <img
+          src="/white-background.png"
+          alt="Pollstics"
+          className="w-14 h-14 rounded-xl object-contain flex-shrink-0"
+        />
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-semibold text-slate-900">Welcome</h1>
+          {user ? (
+            <p className="mt-1 text-sm text-slate-500">
+              Signed in as <span className="font-medium text-slate-700">{user?.name}</span>
+              {user?.role && <> &middot; {roleLabels[user.role] || user.role}</>}
+              {user?.assemblyConstituency && <> &middot; {user.assemblyConstituency}</>}
+            </p>
+          ) : (
+            <div className="skeleton h-3 w-64 mt-2" />
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Stat label="Voters" value={loading ? '…' : overview?.totalVoters.toLocaleString('en-IN') || '0'} tone="slate" />
-        <Stat label="Verified" value={loading ? '…' : overview?.verified.toLocaleString('en-IN') || '0'} tone="emerald" />
-        <Stat label="Pending" value={loading ? '…' : overview?.unverified.toLocaleString('en-IN') || '0'} tone="amber" />
-        <Stat label="Verification" value={loading ? '…' : `${overview?.verificationRate ?? 0}%`} tone="red" />
-        <Stat label="Booths" value={loading ? '…' : overview?.totalBooths.toLocaleString('en-IN') || '0'} tone="slate" />
-        <Stat label="Assignments" value={loading ? '…' : overview?.activeAssignments.toLocaleString('en-IN') || '0'} tone="sky" />
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => <StatSkeleton key={i} delay={i * 60} />)
+        ) : (
+          <>
+            <Stat label="Voters" value={overview?.totalVoters.toLocaleString('en-IN') || '0'} tone="slate" />
+            <Stat label="Verified" value={overview?.verified.toLocaleString('en-IN') || '0'} tone="emerald" />
+            <Stat label="Pending" value={overview?.unverified.toLocaleString('en-IN') || '0'} tone="amber" />
+            <Stat label="Verification" value={`${overview?.verificationRate ?? 0}%`} tone="red" />
+            <Stat label="Booths" value={overview?.totalBooths.toLocaleString('en-IN') || '0'} tone="slate" />
+            <Stat label="Assignments" value={overview?.activeAssignments.toLocaleString('en-IN') || '0'} tone="sky" />
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {cards.map((c) => (
-          <a
-            key={c.href}
-            href={c.href}
-            className="block bg-white rounded-xl border border-slate-200/60 p-5 shadow-sm hover:shadow-md hover:border-red-200 transition">
-            <p className="text-sm font-semibold text-slate-900">{c.label}</p>
-            <p className="mt-1 text-xs text-slate-500">{c.desc}</p>
-          </a>
-        ))}
+        {loading
+          ? Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} delay={i * 80} />)
+          : cards.map((c) => (
+              <a
+                key={c.href}
+                href={c.href}
+                className="block bg-white rounded-xl border border-slate-200/60 p-5 shadow-sm hover:shadow-md hover:border-red-200 transition animate-count">
+                <p className="text-sm font-semibold text-slate-900">{c.label}</p>
+                <p className="mt-1 text-xs text-slate-500">{c.desc}</p>
+              </a>
+            ))}
       </div>
     </div>
   );
@@ -92,9 +111,34 @@ function Stat({ label, value, tone }: { label: string; value: string; tone: 'sla
     sky: 'text-sky-600',
   };
   return (
-    <div className="bg-white rounded-xl border border-slate-200/60 p-4">
+    <div className="bg-white rounded-xl border border-slate-200/60 p-4 animate-count">
       <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">{label}</p>
       <p className={`mt-1 text-2xl font-bold ${tones[tone]}`}>{value}</p>
+    </div>
+  );
+}
+
+function StatSkeleton({ delay = 0 }: { delay?: number }) {
+  return (
+    <div
+      className="bg-white rounded-xl border border-slate-200/60 p-4"
+      style={{ animation: `fadeInUp 0.35s ease-out both`, animationDelay: `${delay}ms` }}
+    >
+      <div className="skeleton h-3 w-16" />
+      <div className="skeleton h-7 w-24 mt-2" />
+    </div>
+  );
+}
+
+function CardSkeleton({ delay = 0 }: { delay?: number }) {
+  return (
+    <div
+      className="bg-white rounded-xl border border-slate-200/60 p-5 shadow-sm"
+      style={{ animation: `fadeInUp 0.4s ease-out both`, animationDelay: `${delay}ms` }}
+    >
+      <div className="skeleton h-4 w-28" />
+      <div className="skeleton h-3 w-full mt-3" />
+      <div className="skeleton h-3 w-3/4 mt-2" />
     </div>
   );
 }

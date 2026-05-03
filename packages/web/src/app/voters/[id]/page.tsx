@@ -107,7 +107,33 @@ export default function VoterDetailPage() {
   }
 
   if (loading) {
-    return <div className="text-sm text-slate-400">Loading voter…</div>;
+    return (
+      <div className="space-y-5">
+        <div>
+          <div className="skeleton h-3 w-12" />
+          <div className="skeleton h-7 w-64 mt-2" />
+          <div className="skeleton h-3 w-40 mt-2" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-xl border border-slate-200/60 p-5 shadow-sm"
+              style={{ animation: 'fadeInUp 0.4s ease-out both', animationDelay: `${i * 80}ms` }}>
+              <div className="skeleton h-4 w-32" />
+              <div className="mt-4 space-y-3">
+                {Array.from({ length: 4 }).map((__, j) => (
+                  <div key={j}>
+                    <div className="skeleton h-3 w-20" />
+                    <div className="skeleton h-4 w-full mt-1" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
   if (!voter) return null;
 

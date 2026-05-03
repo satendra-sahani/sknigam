@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAuth } from '../hooks/useAuth';
+import { useI18n } from '../i18n';
 import { COLORS } from '../utils/constants';
 
 interface LoginScreenProps {
@@ -21,6 +22,7 @@ interface LoginScreenProps {
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const { login } = useAuth();
+  const { t, lang, toggle } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -42,11 +44,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           tempToken: result.tempToken,
         });
       } else if (!result.success) {
-        Alert.alert('Login Failed', result.message || 'Invalid credentials');
+        Alert.alert(t('login_failed'), result.message || t('login_invalid'));
       }
       // If success without OTP, navigation is handled by auth state change
     } catch (error: any) {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      Alert.alert(t('error'), t('login_generic_error'));
     } finally {
       setIsLoading(false);
     }
@@ -59,16 +61,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">
+        <TouchableOpacity onPress={toggle} style={styles.langToggle} activeOpacity={0.7}>
+          <Icon name="translate" size={14} color={COLORS.grey600} />
+          <Text style={styles.langToggleText}>{lang === 'en' ? 'हिंदी' : 'English'}</Text>
+        </TouchableOpacity>
         <View style={styles.header}>
           <View style={styles.logoCircle}>
             <Icon name="vote" size={48} color={COLORS.primary} />
           </View>
-          <Text style={styles.title}>POLLSTICS</Text>
-          <Text style={styles.subtitle}>Booth Outreach · Uttar Pradesh</Text>
+          <Text style={styles.title}>{t('login_brand')}</Text>
+          <Text style={styles.subtitle}>{t('login_tagline')}</Text>
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.formTitle}>Sign In</Text>
+          <Text style={styles.formTitle}>{t('login_title')}</Text>
 
           <View style={styles.inputContainer}>
             <Icon
@@ -79,7 +85,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             />
             <TextInput
               style={styles.input}
-              placeholder="Email address"
+              placeholder={t('login_email_placeholder')}
               placeholderTextColor={COLORS.grey400}
               value={email}
               onChangeText={setEmail}
@@ -101,7 +107,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             <TextInput
               ref={passwordRef}
               style={[styles.input, { flex: 1 }]}
-              placeholder="Password"
+              placeholder={t('login_password_placeholder')}
               placeholderTextColor={COLORS.grey400}
               value={password}
               onChangeText={setPassword}
@@ -131,12 +137,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             {isLoading ? (
               <ActivityIndicator color={COLORS.white} size="small" />
             ) : (
-              <Text style={styles.loginButtonText}>Sign In</Text>
+              <Text style={styles.loginButtonText}>{t('login_button')}</Text>
             )}
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.footerText}>POLLSTICS · v1.0</Text>
+        <Text style={styles.footerText}>{t('login_footer')}</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -147,6 +153,7 @@ const OtpVerificationScreen: React.FC<{ navigation: any; route: any }> = ({
   route,
 }) => {
   const { verifyOtp } = useAuth();
+  const { t } = useI18n();
   const { email, tempToken } = route.params;
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
@@ -192,12 +199,12 @@ const OtpVerificationScreen: React.FC<{ navigation: any; route: any }> = ({
     try {
       const success = await verifyOtp(tempToken, otpCode);
       if (!success) {
-        Alert.alert('Invalid OTP', 'The code you entered is incorrect. Please try again.');
+        Alert.alert(t('otp_invalid_title'), t('otp_invalid_body'));
         setOtp(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       }
     } catch (error) {
-      Alert.alert('Error', 'Verification failed. Please try again.');
+      Alert.alert(t('error'), t('otp_verify_failed'));
     } finally {
       setIsLoading(false);
     }
@@ -220,9 +227,10 @@ const OtpVerificationScreen: React.FC<{ navigation: any; route: any }> = ({
           <View style={styles.otpIconCircle}>
             <Icon name="shield-check" size={40} color={COLORS.primary} />
           </View>
-          <Text style={styles.otpTitle}>OTP Verification</Text>
+          <Text style={styles.otpTitle}>{t('otp_screen_title')}</Text>
           <Text style={styles.otpSubtitle}>
-            Enter the 6-digit code sent to{'\n'}
+            {t('otp_screen_subtitle', { email: '' }).replace('\n', '')}
+            {'\n'}
             <Text style={styles.otpEmail}>{email}</Text>
           </Text>
         </View>
@@ -260,7 +268,7 @@ const OtpVerificationScreen: React.FC<{ navigation: any; route: any }> = ({
           {isLoading ? (
             <ActivityIndicator color={COLORS.white} size="small" />
           ) : (
-            <Text style={styles.loginButtonText}>Verify</Text>
+            <Text style={styles.loginButtonText}>{t('login_verify')}</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -363,6 +371,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 32,
   },
+  langToggle: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    backgroundColor: COLORS.grey100,
+    borderWidth: 1,
+    borderColor: COLORS.grey200,
+    zIndex: 10,
+  },
+  langToggleText: { fontSize: 12, color: COLORS.grey700, fontWeight: '700' },
   backButton: {
     position: 'absolute',
     top: 16,

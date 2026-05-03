@@ -114,45 +114,45 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950">
       {/* Animated background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900">
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-red-950 to-slate-900">
         {/* Floating geometric shapes */}
         <div
-          className="absolute rounded-full opacity-[0.07] bg-indigo-400"
+          className="absolute rounded-full opacity-[0.07] bg-red-400"
           style={{
             width: 400, height: 400, top: '-5%', left: '-5%',
             animation: 'float1 20s ease-in-out infinite',
           }}
         />
         <div
-          className="absolute rounded-2xl opacity-[0.05] bg-violet-400 rotate-45"
+          className="absolute rounded-2xl opacity-[0.05] bg-red-500 rotate-45"
           style={{
             width: 300, height: 300, top: '60%', right: '-3%',
             animation: 'float2 25s ease-in-out infinite',
           }}
         />
         <div
-          className="absolute rounded-full opacity-[0.06] bg-indigo-300"
+          className="absolute rounded-full opacity-[0.06] bg-red-300"
           style={{
             width: 200, height: 200, bottom: '10%', left: '15%',
             animation: 'float3 18s ease-in-out infinite',
           }}
         />
         <div
-          className="absolute rounded-xl opacity-[0.04] bg-violet-300 rotate-12"
+          className="absolute rounded-xl opacity-[0.04] bg-red-400 rotate-12"
           style={{
             width: 150, height: 150, top: '20%', right: '20%',
             animation: 'float1 22s ease-in-out infinite reverse',
           }}
         />
         <div
-          className="absolute rounded-full opacity-[0.05] bg-indigo-500"
+          className="absolute rounded-full opacity-[0.05] bg-red-500"
           style={{
             width: 120, height: 120, top: '40%', left: '40%',
             animation: 'float2 15s ease-in-out infinite',
           }}
         />
         <div
-          className="absolute rounded-2xl opacity-[0.03] bg-violet-500 -rotate-12"
+          className="absolute rounded-2xl opacity-[0.03] bg-red-600 -rotate-12"
           style={{
             width: 250, height: 250, top: '5%', left: '50%',
             animation: 'float3 28s ease-in-out infinite',
@@ -191,14 +191,12 @@ export default function LoginPage() {
       >
         {/* Brand header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 mb-5">
-            {/* Ballot icon */}
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Election CMS</h1>
-          <p className="text-indigo-300/80 text-sm mt-1.5">Campaign Management System</p>
+          <img
+            src="/transhparent-background.png"
+            alt="Pollstics"
+            className="inline-block w-20 h-20 object-contain mb-4"
+          />
+          <p className="text-red-300/80 text-sm mt-1.5">Pollstics</p>
         </div>
 
         {/* Login card */}
@@ -222,7 +220,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="admin@election.com"
-                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
                       required
                     />
                   </div>
@@ -242,7 +240,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                      className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
                       required
                     />
                     <button
@@ -269,7 +267,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-xl hover:shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                  className="w-full py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-500 rounded-xl hover:shadow-lg hover:shadow-red-500/25 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -288,8 +286,8 @@ export default function LoginPage() {
           ) : (
             <>
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 mb-3">
-                  <svg className="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-red-50 mb-3">
+                  <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                   </svg>
                 </div>
@@ -312,7 +310,7 @@ export default function LoginPage() {
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
                       autoFocus={i === 0}
-                      className="w-12 h-14 text-center text-2xl font-semibold text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                      className="w-12 h-14 text-center text-2xl font-semibold text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
                     />
                   ))}
                 </div>
@@ -320,7 +318,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading || otpCode.length !== 6}
-                  className="w-full py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-xl hover:shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                  className="w-full py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-500 rounded-xl hover:shadow-lg hover:shadow-red-500/25 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -342,7 +340,7 @@ export default function LoginPage() {
                     setOtpDigits(['', '', '', '', '', '']);
                     setOtpUserId('');
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-slate-500 hover:text-indigo-600 transition-colors duration-200"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-slate-500 hover:text-red-600 transition-colors duration-200"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -356,10 +354,10 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="flex items-center justify-center gap-2 mt-8">
-          <svg className="w-3.5 h-3.5 text-indigo-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-3.5 h-3.5 text-red-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
           </svg>
-          <p className="text-xs text-indigo-300/60">
+          <p className="text-xs text-red-300/60">
             Secure Election Campaign Management System
           </p>
         </div>

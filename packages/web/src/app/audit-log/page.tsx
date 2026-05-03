@@ -3,6 +3,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { SkeletonTable } from '@/components/Skeleton';
 
 interface AuditLog {
   _id: string;
@@ -172,11 +173,10 @@ export default function AuditLogPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
-                    Loading…
-                  </td>
-                </tr>
+                <SkeletonTable
+                  rows={8}
+                  columns={['150px', { w: '140px', lines: 2 }, '130px', '180px', '110px', { w: '60px', alignRight: true }]}
+                />
               )}
               {!loading && logs.length === 0 && (
                 <tr>

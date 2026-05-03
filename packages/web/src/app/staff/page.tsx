@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import StaffFormModal from '@/components/StaffFormModal';
+import { SkeletonTable } from '@/components/Skeleton';
 
 export interface StaffUser {
   _id: string;
@@ -155,11 +156,10 @@ export default function StaffPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
-                    Loading…
-                  </td>
-                </tr>
+                <SkeletonTable
+                  rows={6}
+                  columns={[{ w: '140px', lines: 2 }, { w: '140px', lines: 2 }, '140px', '90px', '80px', { w: '90px', alignRight: true }]}
+                />
               )}
               {!loading && staff.length === 0 && (
                 <tr>

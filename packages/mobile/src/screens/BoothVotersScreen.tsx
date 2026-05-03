@@ -15,6 +15,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import api from '../services/api';
+import { useI18n } from '../i18n';
+import { boothDisplay } from '../utils/hindify';
 import { COLORS } from '../utils/constants';
 import type { RootStackParamList } from '../types';
 
@@ -23,7 +25,9 @@ interface VoterRow {
   voterSerialNumber: number;
   epicNumber: string;
   fullName: string;
+  fullNameHi?: string;
   fatherOrHusbandName: string;
+  fatherOrHusbandNameHi?: string;
   gender: 'M' | 'F' | 'T';
   age: number;
   verificationStatus: boolean;
@@ -36,14 +40,15 @@ interface Props {
 }
 
 const filters = [
-  { key: 'all', label: 'All', icon: 'account-group' },
-  { key: 'pending', label: 'Pending', icon: 'clock-outline' },
-  { key: 'verified', label: 'Done', icon: 'check-circle' },
+  { key: 'all', labelKey: 'boothVoters_filter_all', icon: 'account-group' },
+  { key: 'pending', labelKey: 'boothVoters_filter_pending', icon: 'clock-outline' },
+  { key: 'verified', labelKey: 'boothVoters_filter_done', icon: 'check-circle' },
 ] as const;
 
 type FilterKey = (typeof filters)[number]['key'];
 
 const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { t, lang } = useI18n();
   const { boothId, boothName, partNumber } = route.params;
   const [voters, setVoters] = useState<VoterRow[]>([]);
   const [page, setPage] = useState(1);
@@ -73,7 +78,7 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
         setHasMore(pagination.page < pagination.pages);
         setPage((reset ? 1 : page) + 1);
       } catch (err: any) {
-        Alert.alert('Error', err.response?.data?.error || 'Failed to load voters');
+        Alert.alert(t('error'), err.response?.data?.error || t('boothVoters_load_failed'));
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -111,6 +116,15 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
 
   function renderItem({ item }: { item: VoterRow }) {
     const genderTone = item.gender === 'F' ? '#db2777' : item.gender === 'M' ? COLORS.accent : COLORS.grey500;
+    const genderLabel =
+      item.gender === 'M'
+        ? t('visit_gender_male')
+        : item.gender === 'F'
+          ? t('visit_gender_female')
+          : t('visit_gender_other');
+    const displayName = lang === 'hi' ? item.fullNameHi || item.fullName : item.fullName;
+    const displayFather =
+      lang === 'hi' ? item.fatherOrHusbandNameHi || item.fatherOrHusbandName : item.fatherOrHusbandName;
     return (
       <TouchableOpacity
         activeOpacity={0.7}
@@ -123,17 +137,17 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.voterName} numberOfLines={1}>
-            {item.fullName}
+            {displayName}
           </Text>
           <View style={styles.voterMetaRow}>
             <View style={[styles.genderPill, { backgroundColor: `${genderTone}15` }]}>
               <Text style={[styles.genderText, { color: genderTone }]}>
-                {item.gender === 'M' ? 'Male' : item.gender === 'F' ? 'Female' : 'Other'} · {item.age}y
+                {genderLabel} · {item.age}{lang === 'hi' ? '' : 'y'}
               </Text>
             </View>
           </View>
           <Text style={styles.voterSub} numberOfLines={1}>
-            s/o {item.fatherOrHusbandName}
+            {t('boothVoters_father')} {displayFather}
           </Text>
           <Text style={styles.epicText}>{item.epicNumber}</Text>
         </View>
@@ -159,11 +173,11 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <Text style={styles.title} numberOfLines={1}>
-            {boothName}
+            {boothDisplay(boothName, lang)}
           </Text>
           <View style={styles.subtitleRow}>
             <Icon name="map-marker" size={11} color={COLORS.grey500} />
-            <Text style={styles.subtitle}>Part {partNumber}</Text>
+            <Text style={styles.subtitle}>{t('assignments_part')} {partNumber}</Text>
           </View>
         </View>
       </View>
@@ -175,7 +189,7 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
             value={search}
             onChangeText={setSearch}
             onSubmitEditing={onSearchSubmit}
-            placeholder="Name, EPIC, or serial"
+            placeholder={t('boothVoters_search')}
             placeholderTextColor={COLORS.grey400}
             style={styles.searchInput}
             returnKeyType="search"
@@ -195,7 +209,7 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
             onPress={() => setFilter(f.key)}
             style={[styles.tab, filter === f.key && styles.tabActive]}>
             <Icon name={f.icon} size={14} color={filter === f.key ? COLORS.white : COLORS.grey500} />
-            <Text style={[styles.tabText, filter === f.key && styles.tabTextActive]}>{f.label}</Text>
+            <Text style={[styles.tabText, filter === f.key && styles.tabTextActive]}>{t(f.labelKey)}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -217,8 +231,8 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
               <View style={styles.emptyIcon}>
                 <Icon name="account-search-outline" size={38} color={COLORS.grey400} />
               </View>
-              <Text style={styles.emptyText}>No voters found</Text>
-              <Text style={styles.emptySub}>Try a different filter or search term</Text>
+              <Text style={styles.emptyText}>{t('boothVoters_empty')}</Text>
+              <Text style={styles.emptySub}>{t('boothVoters_empty_sub')}</Text>
             </View>
           ) : null
         }

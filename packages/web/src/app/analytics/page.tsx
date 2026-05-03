@@ -146,15 +146,27 @@ export default function AnalyticsPage() {
         </form>
       </div>
 
-      {overview && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <StatCard label="Total Voters" value={overview.totalVoters.toLocaleString('en-IN')} tone="slate" />
-          <StatCard label="Verified" value={overview.verified.toLocaleString('en-IN')} tone="green" />
-          <StatCard label="Pending" value={overview.unverified.toLocaleString('en-IN')} tone="amber" />
-          <StatCard label="Verification %" value={`${overview.verificationRate}%`} tone="red" />
-          <StatCard label="Booths" value={overview.totalBooths.toLocaleString('en-IN')} tone="slate" />
-        </div>
-      )}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        {overview ? (
+          <>
+            <StatCard label="Total Voters" value={overview.totalVoters.toLocaleString('en-IN')} tone="slate" />
+            <StatCard label="Verified" value={overview.verified.toLocaleString('en-IN')} tone="green" />
+            <StatCard label="Pending" value={overview.unverified.toLocaleString('en-IN')} tone="amber" />
+            <StatCard label="Verification %" value={`${overview.verificationRate}%`} tone="red" />
+            <StatCard label="Booths" value={overview.totalBooths.toLocaleString('en-IN')} tone="slate" />
+          </>
+        ) : (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-xl border border-slate-200/60 p-4"
+              style={{ animation: 'fadeInUp 0.35s ease-out both', animationDelay: `${i * 50}ms` }}>
+              <div className="skeleton h-3 w-20" />
+              <div className="skeleton h-7 w-24 mt-2" />
+            </div>
+          ))
+        )}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ChartCard title="Age Distribution" empty={age.length === 0} loading={loading}>
@@ -267,11 +279,23 @@ function ChartCard({
   return (
     <div className="bg-white rounded-xl border border-slate-200/60 p-5">
       <h2 className="text-sm font-semibold text-slate-900 mb-3">{title}</h2>
-      <div className="h-64 flex items-center justify-center">
+      <div className="h-64 flex items-end justify-center">
         {loading ? (
-          <p className="text-xs text-slate-400">Loading…</p>
+          <div className="w-full h-full flex items-end gap-2 px-2 pb-2">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div
+                key={i}
+                className="skeleton flex-1 rounded-t"
+                style={{
+                  height: `${30 + ((i * 17) % 60)}%`,
+                  animation: 'fadeInUp 0.35s ease-out both',
+                  animationDelay: `${i * 40}ms`,
+                }}
+              />
+            ))}
+          </div>
         ) : empty ? (
-          <p className="text-xs text-slate-400">No data</p>
+          <p className="text-xs text-slate-400 m-auto">No data</p>
         ) : (
           <div className="w-full h-full">{children}</div>
         )}

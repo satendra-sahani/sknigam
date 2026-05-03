@@ -17,6 +17,8 @@ import notificationRoutes from './routes/notifications';
 import auditLogRoutes from './routes/auditLogs';
 import analyticsRoutes from './routes/analytics';
 import subscriptionRoutes from './routes/subscriptions';
+import discrepancyRoutes from './routes/discrepancies';
+import imagekitRoutes from './routes/imagekit';
 
 const app = express();
 const server = http.createServer(app);
@@ -43,6 +45,8 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/discrepancies', discrepancyRoutes);
+app.use('/api/imagekit', imagekitRoutes);
 
 // Error handling
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

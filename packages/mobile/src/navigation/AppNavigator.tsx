@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAuth } from '../hooks/useAuth';
+import { useI18n } from '../i18n';
 import { COLORS } from '../utils/constants';
 
 import LoginScreen, { OtpVerificationScreen } from '../screens/LoginScreen';
@@ -13,6 +14,10 @@ import AssignmentsScreen from '../screens/AssignmentsScreen';
 import BoothVotersScreen from '../screens/BoothVotersScreen';
 import VoterVisitScreen from '../screens/VoterVisitScreen';
 import QueueScreen from '../screens/QueueScreen';
+import StateScreen from '../screens/hierarchy/StateScreen';
+import DistrictsScreen from '../screens/hierarchy/DistrictsScreen';
+import ConstituenciesScreen from '../screens/hierarchy/ConstituenciesScreen';
+import BoothsInAcScreen from '../screens/hierarchy/BoothsInAcScreen';
 
 import { RootStackParamList, MainTabParamList } from '../types';
 
@@ -22,10 +27,12 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 function tabIcon(route: keyof MainTabParamList) {
   if (route === 'Home') return 'view-dashboard';
   if (route === 'Assignments') return 'map-marker-multiple';
+  if (route === 'Explore') return 'compass-outline';
   return 'cloud-upload';
 }
 
 function MainTabs() {
+  const { t } = useI18n();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -45,9 +52,10 @@ function MainTabs() {
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         headerShown: false,
       })}>
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Home' }} />
-      <Tab.Screen name="Assignments" component={AssignmentsScreen} options={{ title: 'Booths' }} />
-      <Tab.Screen name="Queue" component={QueueScreen} options={{ title: 'Sync' }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: t('tab_home') }} />
+      <Tab.Screen name="Assignments" component={AssignmentsScreen} options={{ title: t('tab_booths') }} />
+      <Tab.Screen name="Explore" component={StateScreen} options={{ title: t('tab_explore') }} />
+      <Tab.Screen name="Queue" component={QueueScreen} options={{ title: t('tab_sync') }} />
     </Tab.Navigator>
   );
 }
@@ -77,6 +85,9 @@ const AppNavigator: React.FC = () => {
             <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen name="BoothVoters" component={BoothVotersScreen} />
             <Stack.Screen name="VoterVisit" component={VoterVisitScreen} />
+            <Stack.Screen name="Districts" component={DistrictsScreen} />
+            <Stack.Screen name="Constituencies" component={ConstituenciesScreen} />
+            <Stack.Screen name="BoothsInAc" component={BoothsInAcScreen} />
           </>
         )}
       </Stack.Navigator>

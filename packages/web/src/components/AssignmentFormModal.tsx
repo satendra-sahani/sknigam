@@ -7,6 +7,14 @@ import api from '@/lib/api';
 interface Props {
   onClose: () => void;
   onSaved: () => void;
+  /** When set, the booth is pre-selected and the booth picker is hidden —
+   *  used by the /explore page's per-row "Assign" button so the admin
+   *  doesn't have to re-find the booth they just clicked. */
+  defaultBoothId?: string;
+  /** Human-readable label shown in place of the hidden booth dropdown
+   *  (e.g. "Part 42 · Primary School, Deoria").  Pure display — the real
+   *  targeting value is `defaultBoothId`. */
+  defaultBoothLabel?: string;
 }
 
 interface StaffOption {
@@ -24,9 +32,15 @@ interface BoothOption {
   totalVoters: number;
 }
 
-export default function AssignmentFormModal({ onClose, onSaved }: Props) {
+export default function AssignmentFormModal({
+  onClose,
+  onSaved,
+  defaultBoothId,
+  defaultBoothLabel,
+}: Props) {
   const [staffId, setStaffId] = useState('');
-  const [boothId, setBoothId] = useState('');
+  const [boothId, setBoothId] = useState(defaultBoothId ?? '');
+  const boothPreselected = Boolean(defaultBoothId);
   const [serialFrom, setSerialFrom] = useState('');
   const [serialTo, setSerialTo] = useState('');
   const [staffList, setStaffList] = useState<StaffOption[]>([]);
@@ -38,19 +52,24 @@ export default function AssignmentFormModal({ onClose, onSaved }: Props) {
   useEffect(() => {
     (async () => {
       try {
+        // Skip the /booths fetch when a booth is preselected — the full
+        // list isn't needed for rendering and shaves ~50–500 KB off the
+        // modal open on large constituencies.
         const [staffRes, boothRes] = await Promise.all([
           api.get('/staff', { params: { limit: 200, isActive: 'true' } }),
-          api.get('/booths', { params: { limit: 200 } }),
+          boothPreselected
+            ? Promise.resolve(null)
+            : api.get('/booths', { params: { limit: 200 } }),
         ]);
         setStaffList(staffRes.data.data.staff);
-        setBoothList(boothRes.data.data.booths);
+        if (boothRes) setBoothList(boothRes.data.data.booths);
       } catch (err: any) {
         toast.error(err.response?.data?.error || 'Failed to load options');
       } finally {
         setLoadingOptions(false);
       }
     })();
-  }, []);
+  }, [boothPreselected]);
 
   const filteredBooths = boothSearch
     ? boothList.filter((b) => {
@@ -127,34 +146,48 @@ export default function AssignmentFormModal({ onClose, onSaved }: Props) {
                 )}
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Filter Booths</label>
-                <input
-                  value={boothSearch}
-                  onChange={(e) => setBoothSearch(e.target.value)}
-                  placeholder="Search by name, part number or constituency"
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
-                />
-              </div>
+              {boothPreselected ? (
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Booth</label>
+                  <div className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-700">
+                    {defaultBoothLabel || 'Selected booth'}
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Pre-selected from the list — close this dialog and pick a different row to change the booth.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Filter Booths</label>
+                    <input
+                      value={boothSearch}
+                      onChange={(e) => setBoothSearch(e.target.value)}
+                      placeholder="Search by name, part number or constituency"
+                      className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Booth *</label>
-                <select
-                  value={boothId}
-                  onChange={(e) => setBoothId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
-                >
-                  <option value="">— Select booth —</option>
-                  {filteredBooths.map((b) => (
-                    <option key={b._id} value={b._id}>
-                      Part {b.partNumber} · {b.name} · {b.assemblyConstituency} ({b.totalVoters.toLocaleString('en-IN')} voters)
-                    </option>
-                  ))}
-                </select>
-                {boothList.length === 0 && (
-                  <p className="mt-1 text-xs text-slate-400">No booths — create one first.</p>
-                )}
-              </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Booth *</label>
+                    <select
+                      value={boothId}
+                      onChange={(e) => setBoothId(e.target.value)}
+                      className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                    >
+                      <option value="">— Select booth —</option>
+                      {filteredBooths.map((b) => (
+                        <option key={b._id} value={b._id}>
+                          Part {b.partNumber} · {b.name} · {b.assemblyConstituency} ({b.totalVoters.toLocaleString('en-IN')} voters)
+                        </option>
+                      ))}
+                    </select>
+                    {boothList.length === 0 && (
+                      <p className="mt-1 text-xs text-slate-400">No booths — create one first.</p>
+                    )}
+                  </div>
+                </>
+              )}
 
               <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
                 <div>

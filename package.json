@@ -10,8 +10,7 @@
   "scripts": {
     "dev:api": "cd packages/api && npm run dev",
     "dev:web": "cd packages/web && npm run dev",
-    "dev:mobile": "cd packages/mobile && npm start",
-    "dev": "concurrently -n api,web,mobile -c cyan,green,magenta \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:mobile\"",
+    "dev": "concurrently -n api,web,green,magenta \"npm run dev:api\" \"npm run dev:web\"",
     "build:api": "cd packages/api && npm run build",
     "build:web": "cd packages/web && npm run build",
     "seed": "cd packages/api && npm run seed",

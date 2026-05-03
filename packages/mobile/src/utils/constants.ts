@@ -1,7 +1,7 @@
 // Change API_URL to your laptop's LAN IP if your Wi-Fi changes.
 // Android emulator can also use 10.0.2.2 to reach the host.
-export const API_URL = 'http://192.168.1.11:9003/api';
-export const SOCKET_URL = 'http://192.168.1.11:9003';
+export const API_URL = 'http://10.112.193.199:9003/api';
+export const SOCKET_URL = 'http://10.112.193.199:9003';
 export const IMAGEKIT_PUBLIC_KEY = 'public_Lve3HzTkm0sFK1RfoosMkz+yDMk=';
 export const IMAGEKIT_URL_ENDPOINT = 'https://ik.imagekit.io/aiwats';
 

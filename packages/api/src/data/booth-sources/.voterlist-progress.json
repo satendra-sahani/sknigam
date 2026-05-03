@@ -1,0 +1,3627 @@
+{
+  "startedAt": "2026-04-19T02:27:49.792Z",
+  "batchId": "bdb35d63-819c-4bb4-83b7-6364513f7677",
+  "entries": {
+    "1": {
+      "acNumber": 1,
+      "status": "ok",
+      "slug": "behat",
+      "boothsUpserted": 442,
+      "expectedParts": 442,
+      "warnings": [],
+      "at": "2026-04-19T02:27:49.793Z"
+    },
+    "2": {
+      "acNumber": 2,
+      "status": "ok",
+      "slug": "nakur",
+      "boothsUpserted": 433,
+      "expectedParts": 433,
+      "warnings": [],
+      "at": "2026-04-19T02:27:54.461Z"
+    },
+    "3": {
+      "acNumber": 3,
+      "status": "ok",
+      "slug": "saharanpur-nagar",
+      "boothsUpserted": 501,
+      "expectedParts": 501,
+      "warnings": [],
+      "at": "2026-04-19T02:27:56.795Z"
+    },
+    "4": {
+      "acNumber": 4,
+      "status": "ok",
+      "slug": "saharanpur-saharanpur",
+      "boothsUpserted": 424,
+      "expectedParts": 424,
+      "warnings": [],
+      "at": "2026-04-19T02:27:59.096Z"
+    },
+    "5": {
+      "acNumber": 5,
+      "status": "ok",
+      "slug": "deoband",
+      "boothsUpserted": 399,
+      "expectedParts": 399,
+      "warnings": [],
+      "at": "2026-04-19T02:28:01.432Z"
+    },
+    "6": {
+      "acNumber": 6,
+      "status": "ok",
+      "slug": "rampur-maniharan",
+      "boothsUpserted": 362,
+      "expectedParts": 362,
+      "warnings": [],
+      "at": "2026-04-19T02:28:04.003Z"
+    },
+    "7": {
+      "acNumber": 7,
+      "status": "ok",
+      "slug": "gangoh",
+      "boothsUpserted": 457,
+      "expectedParts": 457,
+      "warnings": [],
+      "at": "2026-04-19T02:28:06.692Z"
+    },
+    "8": {
+      "acNumber": 8,
+      "status": "ok",
+      "slug": "kairana",
+      "boothsUpserted": 372,
+      "expectedParts": 372,
+      "warnings": [],
+      "at": "2026-04-19T02:28:09.162Z"
+    },
+    "9": {
+      "acNumber": 9,
+      "status": "ok",
+      "slug": "thana-bhawan",
+      "boothsUpserted": 385,
+      "expectedParts": 385,
+      "warnings": [],
+      "at": "2026-04-19T02:28:11.407Z"
+    },
+    "10": {
+      "acNumber": 10,
+      "status": "ok",
+      "slug": "shamli-shamli",
+      "boothsUpserted": 372,
+      "expectedParts": 372,
+      "warnings": [],
+      "at": "2026-04-19T02:28:13.724Z"
+    },
+    "11": {
+      "acNumber": 11,
+      "status": "ok",
+      "slug": "budhana",
+      "boothsUpserted": 421,
+      "expectedParts": 421,
+      "warnings": [],
+      "at": "2026-04-19T02:28:16.105Z"
+    },
+    "12": {
+      "acNumber": 12,
+      "status": "ok",
+      "slug": "charthawal",
+      "boothsUpserted": 374,
+      "expectedParts": 374,
+      "warnings": [],
+      "at": "2026-04-19T02:28:18.352Z"
+    },
+    "13": {
+      "acNumber": 13,
+      "status": "ok",
+      "slug": "purqazi",
+      "boothsUpserted": 354,
+      "expectedParts": 354,
+      "warnings": [],
+      "at": "2026-04-19T02:28:20.413Z"
+    },
+    "14": {
+      "acNumber": 14,
+      "status": "ok",
+      "slug": "muzaffar-nagar",
+      "boothsUpserted": 370,
+      "expectedParts": 370,
+      "warnings": [],
+      "at": "2026-04-19T02:46:36.044Z"
+    },
+    "15": {
+      "acNumber": 15,
+      "status": "ok",
+      "slug": "khatauli",
+      "boothsUpserted": 355,
+      "expectedParts": 355,
+      "warnings": [],
+      "at": "2026-04-19T02:28:24.271Z"
+    },
+    "16": {
+      "acNumber": 16,
+      "status": "ok",
+      "slug": "meerapur",
+      "boothsUpserted": 361,
+      "expectedParts": 361,
+      "warnings": [],
+      "at": "2026-04-19T02:28:26.330Z"
+    },
+    "17": {
+      "acNumber": 17,
+      "status": "ok",
+      "slug": "najibabad",
+      "boothsUpserted": 382,
+      "expectedParts": 382,
+      "warnings": [],
+      "at": "2026-04-19T02:28:28.699Z"
+    },
+    "18": {
+      "acNumber": 18,
+      "status": "ok",
+      "slug": "nagina",
+      "boothsUpserted": 401,
+      "expectedParts": 401,
+      "warnings": [],
+      "at": "2026-04-19T02:28:31.002Z"
+    },
+    "19": {
+      "acNumber": 19,
+      "status": "ok",
+      "slug": "barhapur",
+      "boothsUpserted": 420,
+      "expectedParts": 420,
+      "warnings": [],
+      "at": "2026-04-19T02:28:33.086Z"
+    },
+    "20": {
+      "acNumber": 20,
+      "status": "ok",
+      "slug": "dhampur",
+      "boothsUpserted": 333,
+      "expectedParts": 333,
+      "warnings": [],
+      "at": "2026-04-19T02:28:35.228Z"
+    },
+    "21": {
+      "acNumber": 21,
+      "status": "ok",
+      "slug": "nehtaur",
+      "boothsUpserted": 364,
+      "expectedParts": 364,
+      "warnings": [],
+      "at": "2026-04-19T02:28:37.246Z"
+    },
+    "22": {
+      "acNumber": 22,
+      "status": "ok",
+      "slug": "bijnor-bijnor",
+      "boothsUpserted": 426,
+      "expectedParts": 426,
+      "warnings": [],
+      "at": "2026-04-19T02:28:39.368Z"
+    },
+    "23": {
+      "acNumber": 23,
+      "status": "ok",
+      "slug": "chandpur",
+      "boothsUpserted": 383,
+      "expectedParts": 383,
+      "warnings": [],
+      "at": "2026-04-19T02:28:42.428Z"
+    },
+    "24": {
+      "acNumber": 24,
+      "status": "ok",
+      "slug": "noorpur",
+      "boothsUpserted": 383,
+      "expectedParts": 383,
+      "warnings": [],
+      "at": "2026-04-19T02:28:45.468Z"
+    },
+    "25": {
+      "acNumber": 25,
+      "status": "ok",
+      "slug": "kanth",
+      "boothsUpserted": 455,
+      "expectedParts": 455,
+      "warnings": [],
+      "at": "2026-04-19T02:28:47.563Z"
+    },
+    "26": {
+      "acNumber": 26,
+      "status": "ok",
+      "slug": "thakurdwara",
+      "boothsUpserted": 433,
+      "expectedParts": 433,
+      "warnings": [],
+      "at": "2026-04-19T02:28:49.606Z"
+    },
+    "27": {
+      "acNumber": 27,
+      "status": "ok",
+      "slug": "moradabad-rural",
+      "boothsUpserted": 433,
+      "expectedParts": 433,
+      "warnings": [],
+      "at": "2026-04-19T02:28:51.925Z"
+    },
+    "28": {
+      "acNumber": 28,
+      "status": "ok",
+      "slug": "moradabad-nagar",
+      "boothsUpserted": 561,
+      "expectedParts": 561,
+      "warnings": [],
+      "at": "2026-04-19T02:28:54.002Z"
+    },
+    "29": {
+      "acNumber": 29,
+      "status": "ok",
+      "slug": "kundarki",
+      "boothsUpserted": 447,
+      "expectedParts": 447,
+      "warnings": [],
+      "at": "2026-04-19T02:28:56.263Z"
+    },
+    "30": {
+      "acNumber": 30,
+      "status": "ok",
+      "slug": "bilari",
+      "boothsUpserted": 431,
+      "expectedParts": 431,
+      "warnings": [],
+      "at": "2026-04-19T02:28:58.776Z"
+    },
+    "31": {
+      "acNumber": 31,
+      "status": "ok",
+      "slug": "chandausi",
+      "boothsUpserted": 417,
+      "expectedParts": 417,
+      "warnings": [],
+      "at": "2026-04-19T02:29:01.224Z"
+    },
+    "32": {
+      "acNumber": 32,
+      "status": "ok",
+      "slug": "asmoli",
+      "boothsUpserted": 457,
+      "expectedParts": 457,
+      "warnings": [],
+      "at": "2026-04-19T02:29:03.577Z"
+    },
+    "33": {
+      "acNumber": 33,
+      "status": "ok",
+      "slug": "sambhal-sambhal",
+      "boothsUpserted": 414,
+      "expectedParts": 414,
+      "warnings": [],
+      "at": "2026-04-19T02:29:05.728Z"
+    },
+    "34": {
+      "acNumber": 34,
+      "status": "ok",
+      "slug": "suar",
+      "boothsUpserted": 380,
+      "expectedParts": 380,
+      "warnings": [],
+      "at": "2026-04-19T02:29:08.114Z"
+    },
+    "35": {
+      "acNumber": 35,
+      "status": "ok",
+      "slug": "chamraua",
+      "boothsUpserted": 373,
+      "expectedParts": 373,
+      "warnings": [],
+      "at": "2026-04-19T02:29:10.508Z"
+    },
+    "36": {
+      "acNumber": 36,
+      "status": "ok",
+      "slug": "bilaspur-rampur",
+      "boothsUpserted": 432,
+      "expectedParts": 432,
+      "warnings": [],
+      "at": "2026-04-19T02:29:12.520Z"
+    },
+    "37": {
+      "acNumber": 37,
+      "status": "ok",
+      "slug": "rampur-rampur",
+      "boothsUpserted": 473,
+      "expectedParts": 473,
+      "warnings": [],
+      "at": "2026-04-19T02:29:14.608Z"
+    },
+    "38": {
+      "acNumber": 38,
+      "status": "ok",
+      "slug": "milak",
+      "boothsUpserted": 456,
+      "expectedParts": 456,
+      "warnings": [],
+      "at": "2026-04-19T02:29:16.712Z"
+    },
+    "39": {
+      "acNumber": 39,
+      "status": "ok",
+      "slug": "dhanaura",
+      "boothsUpserted": 426,
+      "expectedParts": 426,
+      "warnings": [],
+      "at": "2026-04-19T02:29:18.803Z"
+    },
+    "40": {
+      "acNumber": 40,
+      "status": "ok",
+      "slug": "naugawan-sadat",
+      "boothsUpserted": 417,
+      "expectedParts": 417,
+      "warnings": [],
+      "at": "2026-04-19T02:29:21.359Z"
+    },
+    "41": {
+      "acNumber": 41,
+      "status": "ok",
+      "slug": "amroha-amroha",
+      "boothsUpserted": 368,
+      "expectedParts": 368,
+      "warnings": [],
+      "at": "2026-04-19T02:29:23.482Z"
+    },
+    "42": {
+      "acNumber": 42,
+      "status": "ok",
+      "slug": "hasanpur",
+      "boothsUpserted": 423,
+      "expectedParts": 423,
+      "warnings": [],
+      "at": "2026-04-19T02:29:25.602Z"
+    },
+    "43": {
+      "acNumber": 43,
+      "status": "ok",
+      "slug": "siwalkhas",
+      "boothsUpserted": 390,
+      "expectedParts": 390,
+      "warnings": [],
+      "at": "2026-04-19T02:29:27.807Z"
+    },
+    "44": {
+      "acNumber": 44,
+      "status": "ok",
+      "slug": "sardhana",
+      "boothsUpserted": 420,
+      "expectedParts": 420,
+      "warnings": [],
+      "at": "2026-04-19T02:29:29.859Z"
+    },
+    "45": {
+      "acNumber": 45,
+      "status": "ok",
+      "slug": "hastinapur",
+      "boothsUpserted": 397,
+      "expectedParts": 397,
+      "warnings": [],
+      "at": "2026-04-19T02:29:32.393Z"
+    },
+    "46": {
+      "acNumber": 46,
+      "status": "ok",
+      "slug": "kithore",
+      "boothsUpserted": 413,
+      "expectedParts": 413,
+      "warnings": [],
+      "at": "2026-04-19T02:29:34.927Z"
+    },
+    "47": {
+      "acNumber": 47,
+      "status": "ok",
+      "slug": "meerut-cantt",
+      "boothsUpserted": 474,
+      "expectedParts": 474,
+      "warnings": [],
+      "at": "2026-04-19T02:29:37.246Z"
+    },
+    "48": {
+      "acNumber": 48,
+      "status": "ok",
+      "slug": "meerut-meerut",
+      "boothsUpserted": 342,
+      "expectedParts": 342,
+      "warnings": [],
+      "at": "2026-04-19T02:29:39.427Z"
+    },
+    "49": {
+      "acNumber": 49,
+      "status": "ok",
+      "slug": "meerut-south",
+      "boothsUpserted": 545,
+      "expectedParts": 545,
+      "warnings": [],
+      "at": "2026-04-19T02:29:41.513Z"
+    },
+    "50": {
+      "acNumber": 50,
+      "status": "ok",
+      "slug": "chhaprauli",
+      "boothsUpserted": 382,
+      "expectedParts": 382,
+      "warnings": [],
+      "at": "2026-04-19T02:29:43.849Z"
+    },
+    "51": {
+      "acNumber": 51,
+      "status": "ok",
+      "slug": "baraut",
+      "boothsUpserted": 340,
+      "expectedParts": 340,
+      "warnings": [],
+      "at": "2026-04-19T02:29:45.875Z"
+    },
+    "52": {
+      "acNumber": 52,
+      "status": "ok",
+      "slug": "baghpat-baghpat",
+      "boothsUpserted": 359,
+      "expectedParts": 359,
+      "warnings": [],
+      "at": "2026-04-19T02:29:47.832Z"
+    },
+    "53": {
+      "acNumber": 53,
+      "status": "ok",
+      "slug": "loni",
+      "boothsUpserted": 582,
+      "expectedParts": 582,
+      "warnings": [],
+      "at": "2026-04-19T02:29:49.925Z"
+    },
+    "54": {
+      "acNumber": 54,
+      "status": "ok",
+      "slug": "muradnagar",
+      "boothsUpserted": 543,
+      "expectedParts": 543,
+      "warnings": [],
+      "at": "2026-04-19T02:29:52.165Z"
+    },
+    "55": {
+      "acNumber": 55,
+      "status": "ok",
+      "slug": "sahibabad",
+      "boothsUpserted": 1171,
+      "expectedParts": 1171,
+      "warnings": [],
+      "at": "2026-04-19T02:29:54.488Z"
+    },
+    "56": {
+      "acNumber": 56,
+      "status": "ok",
+      "slug": "ghaziabad-ghaziabad",
+      "boothsUpserted": 530,
+      "expectedParts": 530,
+      "warnings": [],
+      "at": "2026-04-19T02:29:57.388Z"
+    },
+    "57": {
+      "acNumber": 57,
+      "status": "ok",
+      "slug": "modi-nagar",
+      "boothsUpserted": 397,
+      "expectedParts": 397,
+      "warnings": [],
+      "at": "2026-04-19T02:30:00.483Z"
+    },
+    "58": {
+      "acNumber": 58,
+      "status": "ok",
+      "slug": "dholana",
+      "boothsUpserted": 469,
+      "expectedParts": 469,
+      "warnings": [],
+      "at": "2026-04-19T02:30:02.938Z"
+    },
+    "59": {
+      "acNumber": 59,
+      "status": "ok",
+      "slug": "hapur-hapur",
+      "boothsUpserted": 413,
+      "expectedParts": 413,
+      "warnings": [],
+      "at": "2026-04-19T02:30:05.083Z"
+    },
+    "60": {
+      "acNumber": 60,
+      "status": "ok",
+      "slug": "garhmukteshwar",
+      "boothsUpserted": 400,
+      "expectedParts": 400,
+      "warnings": [],
+      "at": "2026-04-19T02:30:07.523Z"
+    },
+    "61": {
+      "acNumber": 61,
+      "status": "ok",
+      "slug": "noida",
+      "boothsUpserted": 811,
+      "expectedParts": 811,
+      "warnings": [],
+      "at": "2026-04-19T02:30:09.722Z"
+    },
+    "62": {
+      "acNumber": 62,
+      "status": "ok",
+      "slug": "dadri",
+      "boothsUpserted": 794,
+      "expectedParts": 794,
+      "warnings": [],
+      "at": "2026-04-19T02:30:12.506Z"
+    },
+    "63": {
+      "acNumber": 63,
+      "status": "ok",
+      "slug": "jewar",
+      "boothsUpserted": 419,
+      "expectedParts": 419,
+      "warnings": [],
+      "at": "2026-04-19T02:30:14.938Z"
+    },
+    "64": {
+      "acNumber": 64,
+      "status": "ok",
+      "slug": "sikandrabad",
+      "boothsUpserted": 468,
+      "expectedParts": 468,
+      "warnings": [],
+      "at": "2026-04-19T02:30:17.799Z"
+    },
+    "65": {
+      "acNumber": 65,
+      "status": "ok",
+      "slug": "bulandshahr-bulandshahr",
+      "boothsUpserted": 455,
+      "expectedParts": 455,
+      "warnings": [],
+      "at": "2026-04-19T02:30:20.175Z"
+    },
+    "66": {
+      "acNumber": 66,
+      "status": "ok",
+      "slug": "syana",
+      "boothsUpserted": 429,
+      "expectedParts": 429,
+      "warnings": [],
+      "at": "2026-04-19T02:30:22.313Z"
+    },
+    "67": {
+      "acNumber": 67,
+      "status": "ok",
+      "slug": "anupshahr",
+      "boothsUpserted": 448,
+      "expectedParts": 448,
+      "warnings": [],
+      "at": "2026-04-19T02:30:24.643Z"
+    },
+    "68": {
+      "acNumber": 68,
+      "status": "ok",
+      "slug": "debai",
+      "boothsUpserted": 398,
+      "expectedParts": 398,
+      "warnings": [],
+      "at": "2026-04-19T02:30:27.303Z"
+    },
+    "69": {
+      "acNumber": 69,
+      "status": "ok",
+      "slug": "shikarpur",
+      "boothsUpserted": 391,
+      "expectedParts": 391,
+      "warnings": [],
+      "at": "2026-04-19T02:30:29.405Z"
+    },
+    "70": {
+      "acNumber": 70,
+      "status": "ok",
+      "slug": "khurja",
+      "boothsUpserted": 442,
+      "expectedParts": 442,
+      "warnings": [],
+      "at": "2026-04-19T02:30:31.809Z"
+    },
+    "71": {
+      "acNumber": 71,
+      "status": "ok",
+      "slug": "khair",
+      "boothsUpserted": 461,
+      "expectedParts": 461,
+      "warnings": [],
+      "at": "2026-04-19T02:30:34.129Z"
+    },
+    "72": {
+      "acNumber": 72,
+      "status": "ok",
+      "slug": "barauli",
+      "boothsUpserted": 454,
+      "expectedParts": 454,
+      "warnings": [],
+      "at": "2026-04-19T02:30:36.571Z"
+    },
+    "73": {
+      "acNumber": 73,
+      "status": "ok",
+      "slug": "atrauli",
+      "boothsUpserted": 495,
+      "expectedParts": 495,
+      "warnings": [],
+      "at": "2026-04-19T02:30:38.993Z"
+    },
+    "74": {
+      "acNumber": 74,
+      "status": "ok",
+      "slug": "chharra",
+      "boothsUpserted": 475,
+      "expectedParts": 475,
+      "warnings": [],
+      "at": "2026-04-19T02:30:42.035Z"
+    },
+    "75": {
+      "acNumber": 75,
+      "status": "ok",
+      "slug": "koil",
+      "boothsUpserted": 449,
+      "expectedParts": 449,
+      "warnings": [],
+      "at": "2026-04-19T02:30:44.706Z"
+    },
+    "76": {
+      "acNumber": 76,
+      "status": "ok",
+      "slug": "aligarh-aligarh",
+      "boothsUpserted": 394,
+      "expectedParts": 394,
+      "warnings": [],
+      "at": "2026-04-19T02:30:46.954Z"
+    },
+    "77": {
+      "acNumber": 77,
+      "status": "ok",
+      "slug": "iglas",
+      "boothsUpserted": 506,
+      "expectedParts": 506,
+      "warnings": [],
+      "at": "2026-04-19T02:30:49.413Z"
+    },
+    "78": {
+      "acNumber": 78,
+      "status": "ok",
+      "slug": "hathras-hathras",
+      "boothsUpserted": 475,
+      "expectedParts": 475,
+      "warnings": [],
+      "at": "2026-04-19T02:30:51.961Z"
+    },
+    "79": {
+      "acNumber": 79,
+      "status": "ok",
+      "slug": "sadabad",
+      "boothsUpserted": 463,
+      "expectedParts": 463,
+      "warnings": [],
+      "at": "2026-04-19T02:30:54.179Z"
+    },
+    "80": {
+      "acNumber": 80,
+      "status": "ok",
+      "slug": "sikandra-rao",
+      "boothsUpserted": 452,
+      "expectedParts": 452,
+      "warnings": [],
+      "at": "2026-04-19T02:30:56.802Z"
+    },
+    "81": {
+      "acNumber": 81,
+      "status": "ok",
+      "slug": "chhata",
+      "boothsUpserted": 417,
+      "expectedParts": 417,
+      "warnings": [],
+      "at": "2026-04-19T02:30:59.241Z"
+    },
+    "82": {
+      "acNumber": 82,
+      "status": "ok",
+      "slug": "mant",
+      "boothsUpserted": 458,
+      "expectedParts": 458,
+      "warnings": [],
+      "at": "2026-04-19T02:31:01.479Z"
+    },
+    "83": {
+      "acNumber": 83,
+      "status": "ok",
+      "slug": "goverdhan",
+      "boothsUpserted": 401,
+      "expectedParts": 401,
+      "warnings": [],
+      "at": "2026-04-19T02:31:04.189Z"
+    },
+    "84": {
+      "acNumber": 84,
+      "status": "ok",
+      "slug": "mathura-mathura",
+      "boothsUpserted": 509,
+      "expectedParts": 509,
+      "warnings": [],
+      "at": "2026-04-19T02:31:06.553Z"
+    },
+    "85": {
+      "acNumber": 85,
+      "status": "ok",
+      "slug": "baldev",
+      "boothsUpserted": 481,
+      "expectedParts": 481,
+      "warnings": [],
+      "at": "2026-04-19T02:31:09.024Z"
+    },
+    "86": {
+      "acNumber": 86,
+      "status": "ok",
+      "slug": "etmadpur",
+      "boothsUpserted": 520,
+      "expectedParts": 520,
+      "warnings": [],
+      "at": "2026-04-19T02:31:11.550Z"
+    },
+    "87": {
+      "acNumber": 87,
+      "status": "ok",
+      "slug": "agra-cantt",
+      "boothsUpserted": 480,
+      "expectedParts": 480,
+      "warnings": [],
+      "at": "2026-04-19T02:31:14.247Z"
+    },
+    "88": {
+      "acNumber": 88,
+      "status": "ok",
+      "slug": "agra-south",
+      "boothsUpserted": 393,
+      "expectedParts": 393,
+      "warnings": [],
+      "at": "2026-04-19T02:31:16.704Z"
+    },
+    "89": {
+      "acNumber": 89,
+      "status": "ok",
+      "slug": "agra-north",
+      "boothsUpserted": 451,
+      "expectedParts": 451,
+      "warnings": [],
+      "at": "2026-04-19T02:31:19.355Z"
+    },
+    "90": {
+      "acNumber": 90,
+      "status": "ok",
+      "slug": "agra-rural",
+      "boothsUpserted": 482,
+      "expectedParts": 482,
+      "warnings": [],
+      "at": "2026-04-19T02:31:21.749Z"
+    },
+    "91": {
+      "acNumber": 91,
+      "status": "ok",
+      "slug": "fatehpur-sikri",
+      "boothsUpserted": 420,
+      "expectedParts": 420,
+      "warnings": [],
+      "at": "2026-04-19T02:31:24.535Z"
+    },
+    "92": {
+      "acNumber": 92,
+      "status": "ok",
+      "slug": "kheragarh",
+      "boothsUpserted": 391,
+      "expectedParts": 391,
+      "warnings": [],
+      "at": "2026-04-19T02:31:27.734Z"
+    },
+    "93": {
+      "acNumber": 93,
+      "status": "ok",
+      "slug": "fatehabad-agra",
+      "boothsUpserted": 410,
+      "expectedParts": 410,
+      "warnings": [],
+      "at": "2026-04-19T02:31:30.001Z"
+    },
+    "94": {
+      "acNumber": 94,
+      "status": "ok",
+      "slug": "bah",
+      "boothsUpserted": 385,
+      "expectedParts": 385,
+      "warnings": [],
+      "at": "2026-04-19T02:31:32.524Z"
+    },
+    "95": {
+      "acNumber": 95,
+      "status": "ok",
+      "slug": "tundla",
+      "boothsUpserted": 458,
+      "expectedParts": 458,
+      "warnings": [],
+      "at": "2026-04-19T02:31:34.841Z"
+    },
+    "96": {
+      "acNumber": 96,
+      "status": "ok",
+      "slug": "jasrana",
+      "boothsUpserted": 465,
+      "expectedParts": 465,
+      "warnings": [],
+      "at": "2026-04-19T02:31:37.141Z"
+    },
+    "97": {
+      "acNumber": 97,
+      "status": "ok",
+      "slug": "firozabad-firozabad",
+      "boothsUpserted": 450,
+      "expectedParts": 450,
+      "warnings": [],
+      "at": "2026-04-19T02:31:39.548Z"
+    },
+    "98": {
+      "acNumber": 98,
+      "status": "ok",
+      "slug": "shikohabad",
+      "boothsUpserted": 414,
+      "expectedParts": 414,
+      "warnings": [],
+      "at": "2026-04-19T02:31:41.821Z"
+    },
+    "99": {
+      "acNumber": 99,
+      "status": "ok",
+      "slug": "sirsaganj",
+      "boothsUpserted": 394,
+      "expectedParts": 394,
+      "warnings": [],
+      "at": "2026-04-19T02:31:44.402Z"
+    },
+    "100": {
+      "acNumber": 100,
+      "status": "ok",
+      "slug": "kasganj-kasganj",
+      "boothsUpserted": 437,
+      "expectedParts": 437,
+      "warnings": [],
+      "at": "2026-04-19T02:31:46.604Z"
+    },
+    "101": {
+      "acNumber": 101,
+      "status": "ok",
+      "slug": "amanpur",
+      "boothsUpserted": 376,
+      "expectedParts": 376,
+      "warnings": [],
+      "at": "2026-04-19T02:31:49.173Z"
+    },
+    "102": {
+      "acNumber": 102,
+      "status": "ok",
+      "slug": "patiyali",
+      "boothsUpserted": 418,
+      "expectedParts": 418,
+      "warnings": [],
+      "at": "2026-04-19T02:31:51.383Z"
+    },
+    "103": {
+      "acNumber": 103,
+      "status": "ok",
+      "slug": "aliganj",
+      "boothsUpserted": 439,
+      "expectedParts": 439,
+      "warnings": [],
+      "at": "2026-04-19T02:31:54.113Z"
+    },
+    "104": {
+      "acNumber": 104,
+      "status": "ok",
+      "slug": "etah-etah",
+      "boothsUpserted": 426,
+      "expectedParts": 426,
+      "warnings": [],
+      "at": "2026-04-19T02:31:56.855Z"
+    },
+    "105": {
+      "acNumber": 105,
+      "status": "ok",
+      "slug": "marhara",
+      "boothsUpserted": 392,
+      "expectedParts": 392,
+      "warnings": [],
+      "at": "2026-04-19T02:31:59.495Z"
+    },
+    "106": {
+      "acNumber": 106,
+      "status": "ok",
+      "slug": "jalesar",
+      "boothsUpserted": 387,
+      "expectedParts": 387,
+      "warnings": [],
+      "at": "2026-04-19T02:32:01.784Z"
+    },
+    "107": {
+      "acNumber": 107,
+      "status": "ok",
+      "slug": "mainpuri-mainpuri",
+      "boothsUpserted": 434,
+      "expectedParts": 434,
+      "warnings": [],
+      "at": "2026-04-19T02:32:03.939Z"
+    },
+    "108": {
+      "acNumber": 108,
+      "status": "ok",
+      "slug": "bhongaon",
+      "boothsUpserted": 448,
+      "expectedParts": 448,
+      "warnings": [],
+      "at": "2026-04-19T02:32:06.327Z"
+    },
+    "109": {
+      "acNumber": 109,
+      "status": "ok",
+      "slug": "kishani",
+      "boothsUpserted": 423,
+      "expectedParts": 423,
+      "warnings": [],
+      "at": "2026-04-19T02:32:08.853Z"
+    },
+    "110": {
+      "acNumber": 110,
+      "status": "ok",
+      "slug": "karhal",
+      "boothsUpserted": 503,
+      "expectedParts": 503,
+      "warnings": [],
+      "at": "2026-04-19T02:32:11.211Z"
+    },
+    "111": {
+      "acNumber": 111,
+      "status": "ok",
+      "slug": "gunnaur",
+      "boothsUpserted": 504,
+      "expectedParts": 504,
+      "warnings": [],
+      "at": "2026-04-19T02:32:14.085Z"
+    },
+    "112": {
+      "acNumber": 112,
+      "status": "ok",
+      "slug": "bisauli",
+      "boothsUpserted": 501,
+      "expectedParts": 501,
+      "warnings": [],
+      "at": "2026-04-19T02:32:16.458Z"
+    },
+    "113": {
+      "acNumber": 113,
+      "status": "ok",
+      "slug": "sahaswan",
+      "boothsUpserted": 491,
+      "expectedParts": 491,
+      "warnings": [],
+      "at": "2026-04-19T02:32:19.171Z"
+    },
+    "114": {
+      "acNumber": 114,
+      "status": "ok",
+      "slug": "bilsi",
+      "boothsUpserted": 429,
+      "expectedParts": 429,
+      "warnings": [],
+      "at": "2026-04-19T02:32:22.356Z"
+    },
+    "115": {
+      "acNumber": 115,
+      "status": "ok",
+      "slug": "badaun",
+      "boothsUpserted": 438,
+      "expectedParts": 438,
+      "warnings": [],
+      "at": "2026-04-19T02:32:27.172Z"
+    },
+    "116": {
+      "acNumber": 116,
+      "status": "ok",
+      "slug": "shekhupur",
+      "boothsUpserted": 490,
+      "expectedParts": 490,
+      "warnings": [],
+      "at": "2026-04-19T02:32:29.676Z"
+    },
+    "117": {
+      "acNumber": 117,
+      "status": "ok",
+      "slug": "dataganj",
+      "boothsUpserted": 510,
+      "expectedParts": 510,
+      "warnings": [],
+      "at": "2026-04-19T02:32:32.160Z"
+    },
+    "118": {
+      "acNumber": 118,
+      "status": "ok",
+      "slug": "baheri",
+      "boothsUpserted": 442,
+      "expectedParts": 442,
+      "warnings": [],
+      "at": "2026-04-19T02:32:34.896Z"
+    },
+    "119": {
+      "acNumber": 119,
+      "status": "ok",
+      "slug": "meerganj",
+      "boothsUpserted": 444,
+      "expectedParts": 444,
+      "warnings": [],
+      "at": "2026-04-19T02:32:38.494Z"
+    },
+    "120": {
+      "acNumber": 120,
+      "status": "ok",
+      "slug": "bhojipura",
+      "boothsUpserted": 463,
+      "expectedParts": 463,
+      "warnings": [],
+      "at": "2026-04-19T02:32:45.280Z"
+    },
+    "121": {
+      "acNumber": 121,
+      "status": "ok",
+      "slug": "nawabganj",
+      "boothsUpserted": 392,
+      "expectedParts": 392,
+      "warnings": [],
+      "at": "2026-04-19T02:32:48.715Z"
+    },
+    "122": {
+      "acNumber": 122,
+      "status": "ok",
+      "slug": "faridpur",
+      "boothsUpserted": 410,
+      "expectedParts": 410,
+      "warnings": [],
+      "at": "2026-04-19T02:32:51.271Z"
+    },
+    "123": {
+      "acNumber": 123,
+      "status": "ok",
+      "slug": "bithari-chainpur",
+      "boothsUpserted": 465,
+      "expectedParts": 465,
+      "warnings": [],
+      "at": "2026-04-19T02:32:54.121Z"
+    },
+    "124": {
+      "acNumber": 124,
+      "status": "ok",
+      "slug": "bareilly-bareilly",
+      "boothsUpserted": 456,
+      "expectedParts": 456,
+      "warnings": [],
+      "at": "2026-04-19T02:32:56.546Z"
+    },
+    "125": {
+      "acNumber": 125,
+      "status": "ok",
+      "slug": "bareilly-cantt",
+      "boothsUpserted": 384,
+      "expectedParts": 384,
+      "warnings": [],
+      "at": "2026-04-19T02:32:58.897Z"
+    },
+    "126": {
+      "acNumber": 126,
+      "status": "ok",
+      "slug": "aonla",
+      "boothsUpserted": 379,
+      "expectedParts": 379,
+      "warnings": [],
+      "at": "2026-04-19T02:33:01.140Z"
+    },
+    "127": {
+      "acNumber": 127,
+      "status": "ok",
+      "slug": "pilibhit-pilibhit",
+      "boothsUpserted": 419,
+      "expectedParts": 419,
+      "warnings": [],
+      "at": "2026-04-19T02:33:03.643Z"
+    },
+    "128": {
+      "acNumber": 128,
+      "status": "ok",
+      "slug": "barkhera",
+      "boothsUpserted": 386,
+      "expectedParts": 386,
+      "warnings": [],
+      "at": "2026-04-19T02:33:05.904Z"
+    },
+    "129": {
+      "acNumber": 129,
+      "status": "ok",
+      "slug": "puranpur",
+      "boothsUpserted": 422,
+      "expectedParts": 422,
+      "warnings": [],
+      "at": "2026-04-19T02:33:08.169Z"
+    },
+    "130": {
+      "acNumber": 130,
+      "status": "ok",
+      "slug": "bisalpur",
+      "boothsUpserted": 427,
+      "expectedParts": 427,
+      "warnings": [],
+      "at": "2026-04-19T02:33:11.384Z"
+    },
+    "131": {
+      "acNumber": 131,
+      "status": "ok",
+      "slug": "katra",
+      "boothsUpserted": 446,
+      "expectedParts": 446,
+      "warnings": [],
+      "at": "2026-04-19T02:33:13.947Z"
+    },
+    "132": {
+      "acNumber": 132,
+      "status": "ok",
+      "slug": "jalalabad",
+      "boothsUpserted": 470,
+      "expectedParts": 470,
+      "warnings": [],
+      "at": "2026-04-19T02:33:16.238Z"
+    },
+    "133": {
+      "acNumber": 133,
+      "status": "ok",
+      "slug": "tilhar",
+      "boothsUpserted": 453,
+      "expectedParts": 453,
+      "warnings": [],
+      "at": "2026-04-19T02:33:18.907Z"
+    },
+    "134": {
+      "acNumber": 134,
+      "status": "ok",
+      "slug": "powayan",
+      "boothsUpserted": 488,
+      "expectedParts": 488,
+      "warnings": [],
+      "at": "2026-04-19T02:33:21.489Z"
+    },
+    "135": {
+      "acNumber": 135,
+      "status": "ok",
+      "slug": "shahjahanpur-shahjahanpur",
+      "boothsUpserted": 460,
+      "expectedParts": 460,
+      "warnings": [],
+      "at": "2026-04-19T02:33:23.813Z"
+    },
+    "136": {
+      "acNumber": 136,
+      "status": "ok",
+      "slug": "dadraul",
+      "boothsUpserted": 493,
+      "expectedParts": 493,
+      "warnings": [],
+      "at": "2026-04-19T02:33:26.376Z"
+    },
+    "137": {
+      "acNumber": 137,
+      "status": "ok",
+      "slug": "palia",
+      "boothsUpserted": 435,
+      "expectedParts": 435,
+      "warnings": [],
+      "at": "2026-04-19T02:33:28.942Z"
+    },
+    "138": {
+      "acNumber": 138,
+      "status": "ok",
+      "slug": "nighasan",
+      "boothsUpserted": 387,
+      "expectedParts": 387,
+      "warnings": [],
+      "at": "2026-04-19T02:33:31.762Z"
+    },
+    "139": {
+      "acNumber": 139,
+      "status": "ok",
+      "slug": "gola-gokrannath",
+      "boothsUpserted": 467,
+      "expectedParts": 467,
+      "warnings": [],
+      "at": "2026-04-19T02:33:34.713Z"
+    },
+    "140": {
+      "acNumber": 140,
+      "status": "ok",
+      "slug": "sri-nagar-sc",
+      "boothsUpserted": 367,
+      "expectedParts": 367,
+      "warnings": [],
+      "at": "2026-04-19T02:33:36.993Z"
+    },
+    "141": {
+      "acNumber": 141,
+      "status": "ok",
+      "slug": "dhaurahra",
+      "boothsUpserted": 400,
+      "expectedParts": 400,
+      "warnings": [],
+      "at": "2026-04-19T02:33:39.186Z"
+    },
+    "142": {
+      "acNumber": 142,
+      "status": "ok",
+      "slug": "lakhimpur-kheri",
+      "boothsUpserted": 450,
+      "expectedParts": 450,
+      "warnings": [],
+      "at": "2026-04-19T02:33:41.492Z"
+    },
+    "143": {
+      "acNumber": 143,
+      "status": "ok",
+      "slug": "kasta",
+      "boothsUpserted": 375,
+      "expectedParts": 375,
+      "warnings": [],
+      "at": "2026-04-19T02:33:44.274Z"
+    },
+    "144": {
+      "acNumber": 144,
+      "status": "ok",
+      "slug": "mohammdi",
+      "boothsUpserted": 402,
+      "expectedParts": 402,
+      "warnings": [],
+      "at": "2026-04-19T02:33:47.218Z"
+    },
+    "145": {
+      "acNumber": 145,
+      "status": "ok",
+      "slug": "maholi",
+      "boothsUpserted": 469,
+      "expectedParts": 469,
+      "warnings": [],
+      "at": "2026-04-19T02:33:49.812Z"
+    },
+    "146": {
+      "acNumber": 146,
+      "status": "ok",
+      "slug": "sitapur-sitapur",
+      "boothsUpserted": 469,
+      "expectedParts": 469,
+      "warnings": [],
+      "at": "2026-04-19T02:33:52.558Z"
+    },
+    "147": {
+      "acNumber": 147,
+      "status": "ok",
+      "slug": "hargaon",
+      "boothsUpserted": 407,
+      "expectedParts": 407,
+      "warnings": [],
+      "at": "2026-04-19T02:33:55.153Z"
+    },
+    "148": {
+      "acNumber": 148,
+      "status": "ok",
+      "slug": "laharpur",
+      "boothsUpserted": 425,
+      "expectedParts": 425,
+      "warnings": [],
+      "at": "2026-04-19T02:33:58.536Z"
+    },
+    "149": {
+      "acNumber": 149,
+      "status": "ok",
+      "slug": "biswan",
+      "boothsUpserted": 413,
+      "expectedParts": 413,
+      "warnings": [],
+      "at": "2026-04-19T02:34:01.120Z"
+    },
+    "150": {
+      "acNumber": 150,
+      "status": "ok",
+      "slug": "sevata",
+      "boothsUpserted": 399,
+      "expectedParts": 399,
+      "warnings": [],
+      "at": "2026-04-19T02:34:03.832Z"
+    },
+    "151": {
+      "acNumber": 151,
+      "status": "ok",
+      "slug": "mahmoodabad",
+      "boothsUpserted": 416,
+      "expectedParts": 416,
+      "warnings": [],
+      "at": "2026-04-19T02:34:06.168Z"
+    },
+    "152": {
+      "acNumber": 152,
+      "status": "ok",
+      "slug": "sidhauli",
+      "boothsUpserted": 422,
+      "expectedParts": 422,
+      "warnings": [],
+      "at": "2026-04-19T02:34:08.519Z"
+    },
+    "153": {
+      "acNumber": 153,
+      "status": "ok",
+      "slug": "misrikh",
+      "boothsUpserted": 424,
+      "expectedParts": 424,
+      "warnings": [],
+      "at": "2026-04-19T02:34:11.156Z"
+    },
+    "154": {
+      "acNumber": 154,
+      "status": "ok",
+      "slug": "sawaijpur",
+      "boothsUpserted": 497,
+      "expectedParts": 497,
+      "warnings": [],
+      "at": "2026-04-19T02:34:13.639Z"
+    },
+    "155": {
+      "acNumber": 155,
+      "status": "ok",
+      "slug": "shahabad",
+      "boothsUpserted": 436,
+      "expectedParts": 436,
+      "warnings": [],
+      "at": "2026-04-19T02:34:16.525Z"
+    },
+    "156": {
+      "acNumber": 156,
+      "status": "ok",
+      "slug": "hardoi-hardoi",
+      "boothsUpserted": 452,
+      "expectedParts": 452,
+      "warnings": [],
+      "at": "2026-04-19T02:34:19.132Z"
+    },
+    "157": {
+      "acNumber": 157,
+      "status": "ok",
+      "slug": "gopamau",
+      "boothsUpserted": 427,
+      "expectedParts": 427,
+      "warnings": [],
+      "at": "2026-04-19T02:34:21.778Z"
+    },
+    "158": {
+      "acNumber": 158,
+      "status": "ok",
+      "slug": "sandi",
+      "boothsUpserted": 411,
+      "expectedParts": 411,
+      "warnings": [],
+      "at": "2026-04-19T02:34:24.494Z"
+    },
+    "159": {
+      "acNumber": 159,
+      "status": "ok",
+      "slug": "bilgram-mallanwan",
+      "boothsUpserted": 472,
+      "expectedParts": 472,
+      "warnings": [],
+      "at": "2026-04-19T02:34:26.783Z"
+    },
+    "160": {
+      "acNumber": 160,
+      "status": "ok",
+      "slug": "balamau",
+      "boothsUpserted": 434,
+      "expectedParts": 434,
+      "warnings": [],
+      "at": "2026-04-19T02:34:29.082Z"
+    },
+    "161": {
+      "acNumber": 161,
+      "status": "ok",
+      "slug": "sandila",
+      "boothsUpserted": 419,
+      "expectedParts": 419,
+      "warnings": [],
+      "at": "2026-04-19T02:34:31.712Z"
+    },
+    "162": {
+      "acNumber": 162,
+      "status": "ok",
+      "slug": "bangermau",
+      "boothsUpserted": 427,
+      "expectedParts": 427,
+      "warnings": [],
+      "at": "2026-04-19T02:34:34.027Z"
+    },
+    "163": {
+      "acNumber": 163,
+      "status": "ok",
+      "slug": "safipur",
+      "boothsUpserted": 417,
+      "expectedParts": 417,
+      "warnings": [],
+      "at": "2026-04-19T02:34:36.631Z"
+    },
+    "164": {
+      "acNumber": 164,
+      "status": "ok",
+      "slug": "mohan",
+      "boothsUpserted": 425,
+      "expectedParts": 425,
+      "warnings": [],
+      "at": "2026-04-19T02:34:39.573Z"
+    },
+    "165": {
+      "acNumber": 165,
+      "status": "ok",
+      "slug": "unnao-unnao",
+      "boothsUpserted": 458,
+      "expectedParts": 458,
+      "warnings": [],
+      "at": "2026-04-19T02:34:41.883Z"
+    },
+    "166": {
+      "acNumber": 166,
+      "status": "ok",
+      "slug": "bhagwantnagar",
+      "boothsUpserted": 517,
+      "expectedParts": 517,
+      "warnings": [],
+      "at": "2026-04-19T02:34:44.291Z"
+    },
+    "167": {
+      "acNumber": 167,
+      "status": "ok",
+      "slug": "purwa",
+      "boothsUpserted": 496,
+      "expectedParts": 496,
+      "warnings": [],
+      "at": "2026-04-19T02:34:47.152Z"
+    },
+    "168": {
+      "acNumber": 168,
+      "status": "ok",
+      "slug": "malihabad",
+      "boothsUpserted": 451,
+      "expectedParts": 451,
+      "warnings": [],
+      "at": "2026-04-19T02:34:50.124Z"
+    },
+    "169": {
+      "acNumber": 169,
+      "status": "ok",
+      "slug": "bakshi-kaa-talab",
+      "boothsUpserted": 545,
+      "expectedParts": 545,
+      "warnings": [],
+      "at": "2026-04-19T02:34:52.551Z"
+    },
+    "170": {
+      "acNumber": 170,
+      "status": "ok",
+      "slug": "sarojini-nagar",
+      "boothsUpserted": 652,
+      "expectedParts": 652,
+      "warnings": [],
+      "at": "2026-04-19T02:34:55.452Z"
+    },
+    "171": {
+      "acNumber": 171,
+      "status": "ok",
+      "slug": "lucknow-west",
+      "boothsUpserted": 446,
+      "expectedParts": 446,
+      "warnings": [],
+      "at": "2026-04-19T02:34:58.941Z"
+    },
+    "172": {
+      "acNumber": 172,
+      "status": "ok",
+      "slug": "lucknow-north",
+      "boothsUpserted": 438,
+      "expectedParts": 438,
+      "warnings": [],
+      "at": "2026-04-19T02:35:01.551Z"
+    },
+    "173": {
+      "acNumber": 173,
+      "status": "ok",
+      "slug": "lucknow-east",
+      "boothsUpserted": 444,
+      "expectedParts": 444,
+      "warnings": [],
+      "at": "2026-04-19T02:35:03.905Z"
+    },
+    "174": {
+      "acNumber": 174,
+      "status": "ok",
+      "slug": "lucknow-central",
+      "boothsUpserted": 364,
+      "expectedParts": 364,
+      "warnings": [],
+      "at": "2026-04-19T02:35:07.666Z"
+    },
+    "175": {
+      "acNumber": 175,
+      "status": "ok",
+      "slug": "lucknow-cantt",
+      "boothsUpserted": 354,
+      "expectedParts": 354,
+      "warnings": [],
+      "at": "2026-04-19T02:35:09.943Z"
+    },
+    "176": {
+      "acNumber": 176,
+      "status": "ok",
+      "slug": "mohanlalganj",
+      "boothsUpserted": 438,
+      "expectedParts": 438,
+      "warnings": [],
+      "at": "2026-04-19T02:35:12.180Z"
+    },
+    "177": {
+      "acNumber": 177,
+      "status": "ok",
+      "slug": "bachhrawan",
+      "boothsUpserted": 385,
+      "expectedParts": 385,
+      "warnings": [],
+      "at": "2026-04-19T02:35:14.400Z"
+    },
+    "178": {
+      "acNumber": 178,
+      "status": "ok",
+      "slug": "tiloi",
+      "boothsUpserted": 399,
+      "expectedParts": 399,
+      "warnings": [],
+      "at": "2026-04-19T02:35:17.129Z"
+    },
+    "179": {
+      "acNumber": 179,
+      "status": "ok",
+      "slug": "harchandpur",
+      "boothsUpserted": 392,
+      "expectedParts": 392,
+      "warnings": [],
+      "at": "2026-04-19T02:35:19.424Z"
+    },
+    "180": {
+      "acNumber": 180,
+      "status": "ok",
+      "slug": "rae-bareli",
+      "boothsUpserted": 427,
+      "expectedParts": 427,
+      "warnings": [],
+      "at": "2026-04-19T02:35:22.006Z"
+    },
+    "181": {
+      "acNumber": 181,
+      "status": "ok",
+      "slug": "salon",
+      "boothsUpserted": 402,
+      "expectedParts": 402,
+      "warnings": [],
+      "at": "2026-04-19T02:35:24.346Z"
+    },
+    "182": {
+      "acNumber": 182,
+      "status": "ok",
+      "slug": "sareni",
+      "boothsUpserted": 446,
+      "expectedParts": 446,
+      "warnings": [],
+      "at": "2026-04-19T02:35:27.060Z"
+    },
+    "183": {
+      "acNumber": 183,
+      "status": "ok",
+      "slug": "unchahar",
+      "boothsUpserted": 399,
+      "expectedParts": 399,
+      "warnings": [],
+      "at": "2026-04-19T02:35:29.476Z"
+    },
+    "184": {
+      "acNumber": 184,
+      "status": "ok",
+      "slug": "jagdishpur",
+      "boothsUpserted": 420,
+      "expectedParts": 420,
+      "warnings": [],
+      "at": "2026-04-19T02:35:31.706Z"
+    },
+    "185": {
+      "acNumber": 185,
+      "status": "ok",
+      "slug": "gauriganj",
+      "boothsUpserted": 412,
+      "expectedParts": 412,
+      "warnings": [],
+      "at": "2026-04-19T02:35:33.985Z"
+    },
+    "186": {
+      "acNumber": 186,
+      "status": "ok",
+      "slug": "amethi-amethi",
+      "boothsUpserted": 401,
+      "expectedParts": 401,
+      "warnings": [],
+      "at": "2026-04-19T02:35:36.607Z"
+    },
+    "187": {
+      "acNumber": 187,
+      "status": "ok",
+      "slug": "isauli",
+      "boothsUpserted": 413,
+      "expectedParts": 413,
+      "warnings": [],
+      "at": "2026-04-19T02:35:38.823Z"
+    },
+    "188": {
+      "acNumber": 188,
+      "status": "ok",
+      "slug": "sultanpur-sultanpur",
+      "boothsUpserted": 438,
+      "expectedParts": 438,
+      "warnings": [],
+      "at": "2026-04-19T02:35:41.025Z"
+    },
+    "189": {
+      "acNumber": 189,
+      "status": "ok",
+      "slug": "sadar",
+      "boothsUpserted": 412,
+      "expectedParts": 412,
+      "warnings": [],
+      "at": "2026-04-19T02:35:43.897Z"
+    },
+    "190": {
+      "acNumber": 190,
+      "status": "ok",
+      "slug": "lambhua",
+      "boothsUpserted": 448,
+      "expectedParts": 448,
+      "warnings": [],
+      "at": "2026-04-19T02:35:46.053Z"
+    },
+    "191": {
+      "acNumber": 191,
+      "status": "ok",
+      "slug": "kadipur",
+      "boothsUpserted": 445,
+      "expectedParts": 445,
+      "warnings": [],
+      "at": "2026-04-19T02:35:48.330Z"
+    },
+    "192": {
+      "acNumber": 192,
+      "status": "ok",
+      "slug": "kaimganj",
+      "boothsUpserted": 470,
+      "expectedParts": 470,
+      "warnings": [],
+      "at": "2026-04-19T02:35:50.592Z"
+    },
+    "193": {
+      "acNumber": 193,
+      "status": "ok",
+      "slug": "amritpur",
+      "boothsUpserted": 379,
+      "expectedParts": 379,
+      "warnings": [],
+      "at": "2026-04-19T02:35:52.889Z"
+    },
+    "194": {
+      "acNumber": 194,
+      "status": "ok",
+      "slug": "farrukhabad-farrukhabad",
+      "boothsUpserted": 413,
+      "expectedParts": 413,
+      "warnings": [],
+      "at": "2026-04-19T02:35:55.087Z"
+    },
+    "195": {
+      "acNumber": 195,
+      "status": "ok",
+      "slug": "bhojpur-farrukhabad",
+      "boothsUpserted": 380,
+      "expectedParts": 380,
+      "warnings": [],
+      "at": "2026-04-19T02:35:57.277Z"
+    },
+    "196": {
+      "acNumber": 196,
+      "status": "ok",
+      "slug": "chhibramau",
+      "boothsUpserted": 579,
+      "expectedParts": 579,
+      "warnings": [],
+      "at": "2026-04-19T02:35:59.959Z"
+    },
+    "197": {
+      "acNumber": 197,
+      "status": "ok",
+      "slug": "tirwa",
+      "boothsUpserted": 505,
+      "expectedParts": 505,
+      "warnings": [],
+      "at": "2026-04-19T02:36:02.660Z"
+    },
+    "198": {
+      "acNumber": 198,
+      "status": "ok",
+      "slug": "kannauj-kannauj",
+      "boothsUpserted": 514,
+      "expectedParts": 514,
+      "warnings": [],
+      "at": "2026-04-19T02:36:04.952Z"
+    },
+    "199": {
+      "acNumber": 199,
+      "status": "ok",
+      "slug": "jaswantnagar",
+      "boothsUpserted": 483,
+      "expectedParts": 483,
+      "warnings": [],
+      "at": "2026-04-19T02:36:07.307Z"
+    },
+    "200": {
+      "acNumber": 200,
+      "status": "ok",
+      "slug": "etawah-etawah",
+      "boothsUpserted": 458,
+      "expectedParts": 458,
+      "warnings": [],
+      "at": "2026-04-19T02:36:10.110Z"
+    },
+    "201": {
+      "acNumber": 201,
+      "status": "ok",
+      "slug": "bharthana",
+      "boothsUpserted": 496,
+      "expectedParts": 496,
+      "warnings": [],
+      "at": "2026-04-19T02:36:12.621Z"
+    },
+    "202": {
+      "acNumber": 202,
+      "status": "ok",
+      "slug": "bidhuna",
+      "boothsUpserted": 471,
+      "expectedParts": 471,
+      "warnings": [],
+      "at": "2026-04-19T02:36:15.296Z"
+    },
+    "203": {
+      "acNumber": 203,
+      "status": "ok",
+      "slug": "dibiyapur",
+      "boothsUpserted": 410,
+      "expectedParts": 410,
+      "warnings": [],
+      "at": "2026-04-19T02:36:17.825Z"
+    },
+    "204": {
+      "acNumber": 204,
+      "status": "ok",
+      "slug": "auraiya-auraiya",
+      "boothsUpserted": 419,
+      "expectedParts": 419,
+      "warnings": [],
+      "at": "2026-04-19T02:36:20.060Z"
+    },
+    "205": {
+      "acNumber": 205,
+      "status": "ok",
+      "slug": "rasulabad",
+      "boothsUpserted": 402,
+      "expectedParts": 402,
+      "warnings": [],
+      "at": "2026-04-19T02:36:22.442Z"
+    },
+    "206": {
+      "acNumber": 206,
+      "status": "ok",
+      "slug": "akbarpur-raniya",
+      "boothsUpserted": 409,
+      "expectedParts": 409,
+      "warnings": [],
+      "at": "2026-04-19T02:36:25.490Z"
+    },
+    "207": {
+      "acNumber": 207,
+      "status": "ok",
+      "slug": "sikandra",
+      "boothsUpserted": 426,
+      "expectedParts": 426,
+      "warnings": [],
+      "at": "2026-04-19T02:36:27.690Z"
+    },
+    "208": {
+      "acNumber": 208,
+      "status": "ok",
+      "slug": "bhognipur",
+      "boothsUpserted": 429,
+      "expectedParts": 429,
+      "warnings": [],
+      "at": "2026-04-19T02:36:29.875Z"
+    },
+    "209": {
+      "acNumber": 209,
+      "status": "ok",
+      "slug": "bilhaur",
+      "boothsUpserted": 480,
+      "expectedParts": 480,
+      "warnings": [],
+      "at": "2026-04-19T02:36:32.157Z"
+    },
+    "210": {
+      "acNumber": 210,
+      "status": "ok",
+      "slug": "bithoor",
+      "boothsUpserted": 434,
+      "expectedParts": 434,
+      "warnings": [],
+      "at": "2026-04-19T02:36:36.024Z"
+    },
+    "211": {
+      "acNumber": 211,
+      "status": "ok",
+      "slug": "kalyanpur",
+      "boothsUpserted": 360,
+      "expectedParts": 360,
+      "warnings": [],
+      "at": "2026-04-19T02:36:38.895Z"
+    },
+    "212": {
+      "acNumber": 212,
+      "status": "ok",
+      "slug": "govindnagar",
+      "boothsUpserted": 350,
+      "expectedParts": 350,
+      "warnings": [],
+      "at": "2026-04-19T02:36:41.581Z"
+    },
+    "213": {
+      "acNumber": 213,
+      "status": "ok",
+      "slug": "sishamau",
+      "boothsUpserted": 275,
+      "expectedParts": 275,
+      "warnings": [],
+      "at": "2026-04-19T02:36:45.111Z"
+    },
+    "214": {
+      "acNumber": 214,
+      "status": "ok",
+      "slug": "arya-nagar",
+      "boothsUpserted": 298,
+      "expectedParts": 298,
+      "warnings": [],
+      "at": "2026-04-19T02:36:47.361Z"
+    },
+    "215": {
+      "acNumber": 215,
+      "status": "ok",
+      "slug": "kidwai-nagar",
+      "boothsUpserted": 350,
+      "expectedParts": 350,
+      "warnings": [],
+      "at": "2026-04-19T02:36:49.547Z"
+    },
+    "216": {
+      "acNumber": 216,
+      "status": "ok",
+      "slug": "kanpur-cantt",
+      "boothsUpserted": 352,
+      "expectedParts": 352,
+      "warnings": [],
+      "at": "2026-04-19T02:36:51.940Z"
+    },
+    "217": {
+      "acNumber": 217,
+      "status": "ok",
+      "slug": "maharajpur",
+      "boothsUpserted": 476,
+      "expectedParts": 476,
+      "warnings": [],
+      "at": "2026-04-19T02:36:54.748Z"
+    },
+    "218": {
+      "acNumber": 218,
+      "status": "ok",
+      "slug": "ghatampur",
+      "boothsUpserted": 395,
+      "expectedParts": 395,
+      "warnings": [],
+      "at": "2026-04-19T02:36:57.225Z"
+    },
+    "219": {
+      "acNumber": 219,
+      "status": "ok",
+      "slug": "madhaugarh",
+      "boothsUpserted": 578,
+      "expectedParts": 578,
+      "warnings": [],
+      "at": "2026-04-19T02:36:59.720Z"
+    },
+    "220": {
+      "acNumber": 220,
+      "status": "ok",
+      "slug": "kalpi",
+      "boothsUpserted": 516,
+      "expectedParts": 516,
+      "warnings": [],
+      "at": "2026-04-19T02:37:02.182Z"
+    },
+    "221": {
+      "acNumber": 221,
+      "status": "ok",
+      "slug": "orai",
+      "boothsUpserted": 530,
+      "expectedParts": 530,
+      "warnings": [],
+      "at": "2026-04-19T02:37:05.138Z"
+    },
+    "222": {
+      "acNumber": 222,
+      "status": "ok",
+      "slug": "babina",
+      "boothsUpserted": 399,
+      "expectedParts": 399,
+      "warnings": [],
+      "at": "2026-04-19T02:37:07.561Z"
+    },
+    "223": {
+      "acNumber": 223,
+      "status": "ok",
+      "slug": "jhansi-nagar",
+      "boothsUpserted": 439,
+      "expectedParts": 439,
+      "warnings": [],
+      "at": "2026-04-19T02:37:10.058Z"
+    },
+    "224": {
+      "acNumber": 224,
+      "status": "ok",
+      "slug": "mauranipur",
+      "boothsUpserted": 496,
+      "expectedParts": 496,
+      "warnings": [],
+      "at": "2026-04-19T02:37:12.797Z"
+    },
+    "225": {
+      "acNumber": 225,
+      "status": "ok",
+      "slug": "garautha",
+      "boothsUpserted": 428,
+      "expectedParts": 428,
+      "warnings": [],
+      "at": "2026-04-19T02:37:15.212Z"
+    },
+    "226": {
+      "acNumber": 226,
+      "status": "ok",
+      "slug": "lalitpur-lalitpur",
+      "boothsUpserted": 589,
+      "expectedParts": 589,
+      "warnings": [],
+      "at": "2026-04-19T02:37:17.504Z"
+    },
+    "227": {
+      "acNumber": 227,
+      "status": "ok",
+      "slug": "mehroni",
+      "boothsUpserted": 567,
+      "expectedParts": 567,
+      "warnings": [],
+      "at": "2026-04-19T02:37:20.363Z"
+    },
+    "228": {
+      "acNumber": 228,
+      "status": "skipped",
+      "slug": null,
+      "error": "voterlist.co.in has no 2026 page for this AC; keeping harvard_2019 baseline",
+      "at": "2026-04-19T02:37:23.295Z"
+    },
+    "229": {
+      "acNumber": 229,
+      "status": "skipped",
+      "slug": null,
+      "error": "voterlist.co.in has no 2026 page for this AC; keeping harvard_2019 baseline",
+      "at": "2026-04-19T02:37:23.296Z"
+    },
+    "230": {
+      "acNumber": 230,
+      "status": "ok",
+      "slug": "mahoba-mahoba",
+      "boothsUpserted": 369,
+      "expectedParts": 369,
+      "warnings": [],
+      "at": "2026-04-19T02:37:23.296Z"
+    },
+    "231": {
+      "acNumber": 231,
+      "status": "ok",
+      "slug": "charkhari",
+      "boothsUpserted": 443,
+      "expectedParts": 443,
+      "warnings": [],
+      "at": "2026-04-19T02:37:25.853Z"
+    },
+    "232": {
+      "acNumber": 232,
+      "status": "ok",
+      "slug": "tindwari",
+      "boothsUpserted": 387,
+      "expectedParts": 387,
+      "warnings": [],
+      "at": "2026-04-19T02:37:28.263Z"
+    },
+    "233": {
+      "acNumber": 233,
+      "status": "ok",
+      "slug": "baberu",
+      "boothsUpserted": 391,
+      "expectedParts": 391,
+      "warnings": [],
+      "at": "2026-04-19T02:37:31.182Z"
+    },
+    "234": {
+      "acNumber": 234,
+      "status": "ok",
+      "slug": "naraini",
+      "boothsUpserted": 407,
+      "expectedParts": 407,
+      "warnings": [],
+      "at": "2026-04-19T02:37:33.490Z"
+    },
+    "235": {
+      "acNumber": 235,
+      "status": "ok",
+      "slug": "banda-banda",
+      "boothsUpserted": 333,
+      "expectedParts": 333,
+      "warnings": [],
+      "at": "2026-04-19T02:37:35.782Z"
+    },
+    "236": {
+      "acNumber": 236,
+      "status": "ok",
+      "slug": "chitrakoot-chitrakoot",
+      "boothsUpserted": 469,
+      "expectedParts": 469,
+      "warnings": [],
+      "at": "2026-04-19T02:37:37.984Z"
+    },
+    "237": {
+      "acNumber": 237,
+      "status": "ok",
+      "slug": "manikpur",
+      "boothsUpserted": 436,
+      "expectedParts": 436,
+      "warnings": [],
+      "at": "2026-04-19T02:37:40.606Z"
+    },
+    "238": {
+      "acNumber": 238,
+      "status": "ok",
+      "slug": "jahanabad-fatehpur",
+      "boothsUpserted": 395,
+      "expectedParts": 395,
+      "warnings": [],
+      "at": "2026-04-19T02:37:42.896Z"
+    },
+    "239": {
+      "acNumber": 239,
+      "status": "ok",
+      "slug": "bindki",
+      "boothsUpserted": 383,
+      "expectedParts": 383,
+      "warnings": [],
+      "at": "2026-04-19T02:37:45.497Z"
+    },
+    "240": {
+      "acNumber": 240,
+      "status": "ok",
+      "slug": "fatehpur-fatehpur",
+      "boothsUpserted": 421,
+      "expectedParts": 421,
+      "warnings": [],
+      "at": "2026-04-19T02:37:47.727Z"
+    },
+    "241": {
+      "acNumber": 241,
+      "status": "ok",
+      "slug": "ayah-shah",
+      "boothsUpserted": 327,
+      "expectedParts": 327,
+      "warnings": [],
+      "at": "2026-04-19T02:37:50.281Z"
+    },
+    "242": {
+      "acNumber": 242,
+      "status": "ok",
+      "slug": "husainganj",
+      "boothsUpserted": 400,
+      "expectedParts": 400,
+      "warnings": [],
+      "at": "2026-04-19T02:37:52.438Z"
+    },
+    "243": {
+      "acNumber": 243,
+      "status": "ok",
+      "slug": "khaga",
+      "boothsUpserted": 438,
+      "expectedParts": 438,
+      "warnings": [],
+      "at": "2026-04-19T02:37:55.231Z"
+    },
+    "244": {
+      "acNumber": 244,
+      "status": "ok",
+      "slug": "rampur-khas",
+      "boothsUpserted": 373,
+      "expectedParts": 373,
+      "warnings": [],
+      "at": "2026-04-19T02:37:57.558Z"
+    },
+    "245": {
+      "acNumber": 245,
+      "status": "ok",
+      "slug": "babaganj",
+      "boothsUpserted": 372,
+      "expectedParts": 372,
+      "warnings": [],
+      "at": "2026-04-19T02:37:59.834Z"
+    },
+    "246": {
+      "acNumber": 246,
+      "status": "ok",
+      "slug": "kunda",
+      "boothsUpserted": 419,
+      "expectedParts": 419,
+      "warnings": [],
+      "at": "2026-04-19T02:38:02.868Z"
+    },
+    "247": {
+      "acNumber": 247,
+      "status": "ok",
+      "slug": "vishwanath-ganj",
+      "boothsUpserted": 473,
+      "expectedParts": 473,
+      "warnings": [],
+      "at": "2026-04-19T02:38:05.148Z"
+    },
+    "248": {
+      "acNumber": 248,
+      "status": "ok",
+      "slug": "pratapgarh-up",
+      "boothsUpserted": 413,
+      "expectedParts": 413,
+      "warnings": [],
+      "at": "2026-04-19T02:38:07.670Z"
+    },
+    "249": {
+      "acNumber": 249,
+      "status": "ok",
+      "slug": "patti-pratapgarh",
+      "boothsUpserted": 445,
+      "expectedParts": 445,
+      "warnings": [],
+      "at": "2026-04-19T02:38:10.226Z"
+    },
+    "250": {
+      "acNumber": 250,
+      "status": "ok",
+      "slug": "raniganj-pratapgarh",
+      "boothsUpserted": 398,
+      "expectedParts": 398,
+      "warnings": [],
+      "at": "2026-04-19T02:38:12.757Z"
+    },
+    "251": {
+      "acNumber": 251,
+      "status": "ok",
+      "slug": "sirathu",
+      "boothsUpserted": 439,
+      "expectedParts": 439,
+      "warnings": [],
+      "at": "2026-04-19T02:38:15.327Z"
+    },
+    "252": {
+      "acNumber": 252,
+      "status": "ok",
+      "slug": "manjhanpur",
+      "boothsUpserted": 514,
+      "expectedParts": 514,
+      "warnings": [],
+      "at": "2026-04-19T02:38:17.711Z"
+    },
+    "253": {
+      "acNumber": 253,
+      "status": "ok",
+      "slug": "chail",
+      "boothsUpserted": 459,
+      "expectedParts": 459,
+      "warnings": [],
+      "at": "2026-04-19T02:38:20.222Z"
+    },
+    "254": {
+      "acNumber": 254,
+      "status": "ok",
+      "slug": "phaphamau",
+      "boothsUpserted": 405,
+      "expectedParts": 405,
+      "warnings": [],
+      "at": "2026-04-19T02:38:22.532Z"
+    },
+    "255": {
+      "acNumber": 255,
+      "status": "ok",
+      "slug": "soraon",
+      "boothsUpserted": 460,
+      "expectedParts": 460,
+      "warnings": [],
+      "at": "2026-04-19T02:38:24.826Z"
+    },
+    "256": {
+      "acNumber": 256,
+      "status": "ok",
+      "slug": "phulpur",
+      "boothsUpserted": 457,
+      "expectedParts": 457,
+      "warnings": [],
+      "at": "2026-04-19T02:38:27.588Z"
+    },
+    "257": {
+      "acNumber": 257,
+      "status": "ok",
+      "slug": "pratappur",
+      "boothsUpserted": 458,
+      "expectedParts": 458,
+      "warnings": [],
+      "at": "2026-04-19T02:38:30.854Z"
+    },
+    "258": {
+      "acNumber": 258,
+      "status": "ok",
+      "slug": "handia",
+      "boothsUpserted": 451,
+      "expectedParts": 451,
+      "warnings": [],
+      "at": "2026-04-19T02:38:33.705Z"
+    },
+    "259": {
+      "acNumber": 259,
+      "status": "ok",
+      "slug": "meja",
+      "boothsUpserted": 393,
+      "expectedParts": 393,
+      "warnings": [],
+      "at": "2026-04-19T02:38:36.464Z"
+    },
+    "260": {
+      "acNumber": 260,
+      "status": "ok",
+      "slug": "karachhana",
+      "boothsUpserted": 396,
+      "expectedParts": 396,
+      "warnings": [],
+      "at": "2026-04-19T02:38:38.955Z"
+    },
+    "261": {
+      "acNumber": 261,
+      "status": "ok",
+      "slug": "allahabad-west",
+      "boothsUpserted": 454,
+      "expectedParts": 454,
+      "warnings": [],
+      "at": "2026-04-19T02:38:41.501Z"
+    },
+    "262": {
+      "acNumber": 262,
+      "status": "ok",
+      "slug": "allahabad-north",
+      "boothsUpserted": 425,
+      "expectedParts": 425,
+      "warnings": [],
+      "at": "2026-04-19T02:38:43.894Z"
+    },
+    "263": {
+      "acNumber": 263,
+      "status": "ok",
+      "slug": "allahabad-south",
+      "boothsUpserted": 426,
+      "expectedParts": 426,
+      "warnings": [],
+      "at": "2026-04-19T02:38:46.208Z"
+    },
+    "264": {
+      "acNumber": 264,
+      "status": "ok",
+      "slug": "bara",
+      "boothsUpserted": 405,
+      "expectedParts": 405,
+      "warnings": [],
+      "at": "2026-04-19T02:38:48.757Z"
+    },
+    "265": {
+      "acNumber": 265,
+      "status": "ok",
+      "slug": "koraon",
+      "boothsUpserted": 421,
+      "expectedParts": 421,
+      "warnings": [],
+      "at": "2026-04-19T02:38:50.978Z"
+    },
+    "266": {
+      "acNumber": 266,
+      "status": "ok",
+      "slug": "kursi",
+      "boothsUpserted": 497,
+      "expectedParts": 497,
+      "warnings": [],
+      "at": "2026-04-19T02:38:53.758Z"
+    },
+    "267": {
+      "acNumber": 267,
+      "status": "ok",
+      "slug": "ram-nagar",
+      "boothsUpserted": 450,
+      "expectedParts": 450,
+      "warnings": [],
+      "at": "2026-04-19T02:38:56.699Z"
+    },
+    "268": {
+      "acNumber": 268,
+      "status": "ok",
+      "slug": "barabanki-barabanki",
+      "boothsUpserted": 477,
+      "expectedParts": 477,
+      "warnings": [],
+      "at": "2026-04-19T02:38:59.618Z"
+    },
+    "269": {
+      "acNumber": 269,
+      "status": "ok",
+      "slug": "zaidpur",
+      "boothsUpserted": 480,
+      "expectedParts": 480,
+      "warnings": [],
+      "at": "2026-04-19T02:39:02.379Z"
+    },
+    "270": {
+      "acNumber": 270,
+      "status": "ok",
+      "slug": "dariyabad",
+      "boothsUpserted": 509,
+      "expectedParts": 509,
+      "warnings": [],
+      "at": "2026-04-19T02:39:05.331Z"
+    },
+    "271": {
+      "acNumber": 271,
+      "status": "ok",
+      "slug": "rudauli",
+      "boothsUpserted": 413,
+      "expectedParts": 413,
+      "warnings": [],
+      "at": "2026-04-19T02:39:07.732Z"
+    },
+    "272": {
+      "acNumber": 272,
+      "status": "ok",
+      "slug": "haidergarh",
+      "boothsUpserted": 434,
+      "expectedParts": 434,
+      "warnings": [],
+      "at": "2026-04-19T02:39:10.835Z"
+    },
+    "273": {
+      "acNumber": 273,
+      "status": "ok",
+      "slug": "milkipur",
+      "boothsUpserted": 443,
+      "expectedParts": 443,
+      "warnings": [],
+      "at": "2026-04-19T02:39:13.179Z"
+    },
+    "274": {
+      "acNumber": 274,
+      "status": "ok",
+      "slug": "bikapur",
+      "boothsUpserted": 443,
+      "expectedParts": 443,
+      "warnings": [],
+      "at": "2026-04-19T02:39:15.472Z"
+    },
+    "275": {
+      "acNumber": 275,
+      "status": "ok",
+      "slug": "ayodhya-ayodhya",
+      "boothsUpserted": 419,
+      "expectedParts": 419,
+      "warnings": [],
+      "at": "2026-04-19T02:39:17.778Z"
+    },
+    "276": {
+      "acNumber": 276,
+      "status": "ok",
+      "slug": "goshainganj",
+      "boothsUpserted": 475,
+      "expectedParts": 475,
+      "warnings": [],
+      "at": "2026-04-19T02:39:20.179Z"
+    },
+    "277": {
+      "acNumber": 277,
+      "status": "ok",
+      "slug": "katehari",
+      "boothsUpserted": 486,
+      "expectedParts": 486,
+      "warnings": [],
+      "at": "2026-04-19T02:39:22.900Z"
+    },
+    "278": {
+      "acNumber": 278,
+      "status": "ok",
+      "slug": "tanda",
+      "boothsUpserted": 387,
+      "expectedParts": 387,
+      "warnings": [],
+      "at": "2026-04-19T02:39:25.211Z"
+    },
+    "279": {
+      "acNumber": 279,
+      "status": "ok",
+      "slug": "alapur",
+      "boothsUpserted": 420,
+      "expectedParts": 420,
+      "warnings": [],
+      "at": "2026-04-19T02:39:27.591Z"
+    },
+    "280": {
+      "acNumber": 280,
+      "status": "ok",
+      "slug": "jalalpur",
+      "boothsUpserted": 483,
+      "expectedParts": 483,
+      "warnings": [],
+      "at": "2026-04-19T02:39:30.255Z"
+    },
+    "281": {
+      "acNumber": 281,
+      "status": "ok",
+      "slug": "akbarpur",
+      "boothsUpserted": 395,
+      "expectedParts": 395,
+      "warnings": [],
+      "at": "2026-04-19T02:39:33.026Z"
+    },
+    "282": {
+      "acNumber": 282,
+      "status": "ok",
+      "slug": "balha",
+      "boothsUpserted": 403,
+      "expectedParts": 403,
+      "warnings": [],
+      "at": "2026-04-19T02:39:35.499Z"
+    },
+    "283": {
+      "acNumber": 283,
+      "status": "ok",
+      "slug": "nanpara",
+      "boothsUpserted": 402,
+      "expectedParts": 402,
+      "warnings": [],
+      "at": "2026-04-19T02:39:38.414Z"
+    },
+    "284": {
+      "acNumber": 284,
+      "status": "ok",
+      "slug": "matera",
+      "boothsUpserted": 407,
+      "expectedParts": 407,
+      "warnings": [],
+      "at": "2026-04-19T02:39:40.707Z"
+    },
+    "285": {
+      "acNumber": 285,
+      "status": "ok",
+      "slug": "mahasi",
+      "boothsUpserted": 386,
+      "expectedParts": 386,
+      "warnings": [],
+      "at": "2026-04-19T02:39:43.203Z"
+    },
+    "286": {
+      "acNumber": 286,
+      "status": "ok",
+      "slug": "bahraich-bahraich",
+      "boothsUpserted": 478,
+      "expectedParts": 478,
+      "warnings": [],
+      "at": "2026-04-19T02:39:45.942Z"
+    },
+    "287": {
+      "acNumber": 287,
+      "status": "ok",
+      "slug": "payagpur",
+      "boothsUpserted": 449,
+      "expectedParts": 449,
+      "warnings": [],
+      "at": "2026-04-19T02:39:48.306Z"
+    },
+    "288": {
+      "acNumber": 288,
+      "status": "ok",
+      "slug": "kaiserganj",
+      "boothsUpserted": 456,
+      "expectedParts": 456,
+      "warnings": [],
+      "at": "2026-04-19T02:39:50.580Z"
+    },
+    "289": {
+      "acNumber": 289,
+      "status": "ok",
+      "slug": "bhinga",
+      "boothsUpserted": 447,
+      "expectedParts": 447,
+      "warnings": [],
+      "at": "2026-04-19T02:39:53.124Z"
+    },
+    "290": {
+      "acNumber": 290,
+      "status": "ok",
+      "slug": "shrawasti-shrawasti",
+      "boothsUpserted": 487,
+      "expectedParts": 487,
+      "warnings": [],
+      "at": "2026-04-19T02:39:55.354Z"
+    },
+    "291": {
+      "acNumber": 291,
+      "status": "ok",
+      "slug": "tulsipur",
+      "boothsUpserted": 430,
+      "expectedParts": 430,
+      "warnings": [],
+      "at": "2026-04-19T02:39:57.684Z"
+    },
+    "292": {
+      "acNumber": 292,
+      "status": "ok",
+      "slug": "gainsari",
+      "boothsUpserted": 428,
+      "expectedParts": 428,
+      "warnings": [],
+      "at": "2026-04-19T02:40:00.145Z"
+    },
+    "293": {
+      "acNumber": 293,
+      "status": "ok",
+      "slug": "utraula",
+      "boothsUpserted": 485,
+      "expectedParts": 485,
+      "warnings": [],
+      "at": "2026-04-19T02:40:02.339Z"
+    },
+    "294": {
+      "acNumber": 294,
+      "status": "ok",
+      "slug": "balrampur-up",
+      "boothsUpserted": 462,
+      "expectedParts": 462,
+      "warnings": [],
+      "at": "2026-04-19T02:40:04.650Z"
+    },
+    "295": {
+      "acNumber": 295,
+      "status": "ok",
+      "slug": "mehnaun",
+      "boothsUpserted": 443,
+      "expectedParts": 443,
+      "warnings": [],
+      "at": "2026-04-19T02:40:07.457Z"
+    },
+    "296": {
+      "acNumber": 296,
+      "status": "ok",
+      "slug": "gonda-gonda",
+      "boothsUpserted": 424,
+      "expectedParts": 424,
+      "warnings": [],
+      "at": "2026-04-19T02:40:09.777Z"
+    },
+    "297": {
+      "acNumber": 297,
+      "status": "ok",
+      "slug": "katra-bazar",
+      "boothsUpserted": 500,
+      "expectedParts": 500,
+      "warnings": [],
+      "at": "2026-04-19T02:40:12.297Z"
+    },
+    "298": {
+      "acNumber": 298,
+      "status": "ok",
+      "slug": "colonelganj",
+      "boothsUpserted": 397,
+      "expectedParts": 397,
+      "warnings": [],
+      "at": "2026-04-19T02:40:14.668Z"
+    },
+    "299": {
+      "acNumber": 299,
+      "status": "ok",
+      "slug": "tarabganj",
+      "boothsUpserted": 432,
+      "expectedParts": 432,
+      "warnings": [],
+      "at": "2026-04-19T02:40:17.644Z"
+    },
+    "300": {
+      "acNumber": 300,
+      "status": "ok",
+      "slug": "mankapur",
+      "boothsUpserted": 397,
+      "expectedParts": 397,
+      "warnings": [],
+      "at": "2026-04-19T02:40:20.282Z"
+    },
+    "301": {
+      "acNumber": 301,
+      "status": "ok",
+      "slug": "gaura",
+      "boothsUpserted": 385,
+      "expectedParts": 385,
+      "warnings": [],
+      "at": "2026-04-19T02:40:23.089Z"
+    },
+    "302": {
+      "acNumber": 302,
+      "status": "ok",
+      "slug": "shohratgarh",
+      "boothsUpserted": 452,
+      "expectedParts": 452,
+      "warnings": [],
+      "at": "2026-04-19T02:40:25.339Z"
+    },
+    "303": {
+      "acNumber": 303,
+      "status": "ok",
+      "slug": "kapilvastu",
+      "boothsUpserted": 550,
+      "expectedParts": 550,
+      "warnings": [],
+      "at": "2026-04-19T02:40:28.321Z"
+    },
+    "304": {
+      "acNumber": 304,
+      "status": "ok",
+      "slug": "bansi",
+      "boothsUpserted": 503,
+      "expectedParts": 503,
+      "warnings": [],
+      "at": "2026-04-19T02:40:30.723Z"
+    },
+    "305": {
+      "acNumber": 305,
+      "status": "ok",
+      "slug": "itwa",
+      "boothsUpserted": 441,
+      "expectedParts": 441,
+      "warnings": [],
+      "at": "2026-04-19T02:40:33.027Z"
+    },
+    "306": {
+      "acNumber": 306,
+      "status": "skipped",
+      "slug": null,
+      "error": "voterlist.co.in has no 2026 page for this AC; keeping harvard_2019 baseline",
+      "at": "2026-04-19T02:40:38.300Z"
+    },
+    "307": {
+      "acNumber": 307,
+      "status": "ok",
+      "slug": "harraiya",
+      "boothsUpserted": 459,
+      "expectedParts": 459,
+      "warnings": [],
+      "at": "2026-04-19T02:40:38.301Z"
+    },
+    "308": {
+      "acNumber": 308,
+      "status": "ok",
+      "slug": "kaptanganj",
+      "boothsUpserted": 432,
+      "expectedParts": 432,
+      "warnings": [],
+      "at": "2026-04-19T02:40:41.527Z"
+    },
+    "309": {
+      "acNumber": 309,
+      "status": "ok",
+      "slug": "rudhauli",
+      "boothsUpserted": 517,
+      "expectedParts": 517,
+      "warnings": [],
+      "at": "2026-04-19T02:40:44.859Z"
+    },
+    "310": {
+      "acNumber": 310,
+      "status": "ok",
+      "slug": "basti-sadar",
+      "boothsUpserted": 437,
+      "expectedParts": 437,
+      "warnings": [],
+      "at": "2026-04-19T02:40:48.520Z"
+    },
+    "311": {
+      "acNumber": 311,
+      "status": "ok",
+      "slug": "mahadewa",
+      "boothsUpserted": 467,
+      "expectedParts": 467,
+      "warnings": [],
+      "at": "2026-04-19T02:40:52.668Z"
+    },
+    "312": {
+      "acNumber": 312,
+      "status": "ok",
+      "slug": "menhdawal",
+      "boothsUpserted": 571,
+      "expectedParts": 571,
+      "warnings": [],
+      "at": "2026-04-19T02:40:56.398Z"
+    },
+    "313": {
+      "acNumber": 313,
+      "status": "ok",
+      "slug": "khalilabad",
+      "boothsUpserted": 554,
+      "expectedParts": 554,
+      "warnings": [],
+      "at": "2026-04-19T02:41:00.731Z"
+    },
+    "314": {
+      "acNumber": 314,
+      "status": "ok",
+      "slug": "dhanghata",
+      "boothsUpserted": 493,
+      "expectedParts": 493,
+      "warnings": [],
+      "at": "2026-04-19T02:41:04.675Z"
+    },
+    "315": {
+      "acNumber": 315,
+      "status": "ok",
+      "slug": "pharenda",
+      "boothsUpserted": 394,
+      "expectedParts": 394,
+      "warnings": [],
+      "at": "2026-04-19T02:41:08.824Z"
+    },
+    "316": {
+      "acNumber": 316,
+      "status": "ok",
+      "slug": "nautanwa",
+      "boothsUpserted": 436,
+      "expectedParts": 436,
+      "warnings": [],
+      "at": "2026-04-19T02:41:11.305Z"
+    },
+    "317": {
+      "acNumber": 317,
+      "status": "ok",
+      "slug": "siswa",
+      "boothsUpserted": 455,
+      "expectedParts": 455,
+      "warnings": [],
+      "at": "2026-04-19T02:41:14.758Z"
+    },
+    "318": {
+      "acNumber": 318,
+      "status": "ok",
+      "slug": "maharajganj-maharajganj",
+      "boothsUpserted": 475,
+      "expectedParts": 475,
+      "warnings": [],
+      "at": "2026-04-19T02:41:17.355Z"
+    },
+    "319": {
+      "acNumber": 319,
+      "status": "ok",
+      "slug": "paniyra",
+      "boothsUpserted": 481,
+      "expectedParts": 481,
+      "warnings": [],
+      "at": "2026-04-19T02:41:20.592Z"
+    },
+    "320": {
+      "acNumber": 320,
+      "status": "ok",
+      "slug": "caimpiyarganj",
+      "boothsUpserted": 438,
+      "expectedParts": 438,
+      "warnings": [],
+      "at": "2026-04-19T02:41:23.755Z"
+    },
+    "321": {
+      "acNumber": 321,
+      "status": "ok",
+      "slug": "pipraich",
+      "boothsUpserted": 449,
+      "expectedParts": 449,
+      "warnings": [],
+      "at": "2026-04-19T02:41:26.593Z"
+    },
+    "322": {
+      "acNumber": 322,
+      "status": "ok",
+      "slug": "gorakhpur-urban",
+      "boothsUpserted": 457,
+      "expectedParts": 457,
+      "warnings": [],
+      "at": "2026-04-19T02:41:29.682Z"
+    },
+    "323": {
+      "acNumber": 323,
+      "status": "ok",
+      "slug": "gorakhpur-rural",
+      "boothsUpserted": 435,
+      "expectedParts": 435,
+      "warnings": [],
+      "at": "2026-04-19T02:41:32.696Z"
+    },
+    "324": {
+      "acNumber": 324,
+      "status": "ok",
+      "slug": "sahajanwa",
+      "boothsUpserted": 451,
+      "expectedParts": 451,
+      "warnings": [],
+      "at": "2026-04-19T02:41:35.712Z"
+    },
+    "325": {
+      "acNumber": 325,
+      "status": "ok",
+      "slug": "khajani",
+      "boothsUpserted": 455,
+      "expectedParts": 455,
+      "warnings": [],
+      "at": "2026-04-19T02:41:38.695Z"
+    },
+    "326": {
+      "acNumber": 326,
+      "status": "ok",
+      "slug": "chauri-chaura",
+      "boothsUpserted": 403,
+      "expectedParts": 403,
+      "warnings": [],
+      "at": "2026-04-19T02:41:42.263Z"
+    },
+    "327": {
+      "acNumber": 327,
+      "status": "ok",
+      "slug": "bansgaon",
+      "boothsUpserted": 444,
+      "expectedParts": 444,
+      "warnings": [],
+      "at": "2026-04-19T02:41:47.048Z"
+    },
+    "328": {
+      "acNumber": 328,
+      "status": "ok",
+      "slug": "chillupar",
+      "boothsUpserted": 515,
+      "expectedParts": 515,
+      "warnings": [],
+      "at": "2026-04-19T02:41:49.737Z"
+    },
+    "329": {
+      "acNumber": 329,
+      "status": "ok",
+      "slug": "khadda",
+      "boothsUpserted": 388,
+      "expectedParts": 388,
+      "warnings": [],
+      "at": "2026-04-19T02:41:52.202Z"
+    },
+    "330": {
+      "acNumber": 330,
+      "status": "ok",
+      "slug": "padrauna",
+      "boothsUpserted": 434,
+      "expectedParts": 434,
+      "warnings": [],
+      "at": "2026-04-19T02:41:54.497Z"
+    },
+    "331": {
+      "acNumber": 331,
+      "status": "ok",
+      "slug": "tamkuhi-raj",
+      "boothsUpserted": 455,
+      "expectedParts": 455,
+      "warnings": [],
+      "at": "2026-04-19T02:41:57.008Z"
+    },
+    "332": {
+      "acNumber": 332,
+      "status": "ok",
+      "slug": "fazilnagar",
+      "boothsUpserted": 472,
+      "expectedParts": 472,
+      "warnings": [],
+      "at": "2026-04-19T02:41:59.502Z"
+    },
+    "333": {
+      "acNumber": 333,
+      "status": "ok",
+      "slug": "kushinagar-kushinagar",
+      "boothsUpserted": 445,
+      "expectedParts": 445,
+      "warnings": [],
+      "at": "2026-04-19T02:42:02.199Z"
+    },
+    "334": {
+      "acNumber": 334,
+      "status": "ok",
+      "slug": "hata",
+      "boothsUpserted": 420,
+      "expectedParts": 420,
+      "warnings": [],
+      "at": "2026-04-19T02:42:04.879Z"
+    },
+    "335": {
+      "acNumber": 335,
+      "status": "ok",
+      "slug": "ramkola",
+      "boothsUpserted": 399,
+      "expectedParts": 399,
+      "warnings": [],
+      "at": "2026-04-19T02:42:07.393Z"
+    },
+    "336": {
+      "acNumber": 336,
+      "status": "ok",
+      "slug": "rudrapur-deoria",
+      "boothsUpserted": 392,
+      "expectedParts": 392,
+      "warnings": [],
+      "at": "2026-04-19T02:42:10.418Z"
+    },
+    "337": {
+      "acNumber": 337,
+      "status": "ok",
+      "slug": "deoria-deoria",
+      "boothsUpserted": 392,
+      "expectedParts": 392,
+      "warnings": [],
+      "at": "2026-04-19T02:42:12.797Z"
+    },
+    "338": {
+      "acNumber": 338,
+      "status": "ok",
+      "slug": "pathardeva",
+      "boothsUpserted": 404,
+      "expectedParts": 404,
+      "warnings": [],
+      "at": "2026-04-19T02:42:15.055Z"
+    },
+    "339": {
+      "acNumber": 339,
+      "status": "ok",
+      "slug": "rampur-karkhana",
+      "boothsUpserted": 425,
+      "expectedParts": 425,
+      "warnings": [],
+      "at": "2026-04-19T02:42:17.661Z"
+    },
+    "340": {
+      "acNumber": 340,
+      "status": "ok",
+      "slug": "bhatpar-rani",
+      "boothsUpserted": 406,
+      "expectedParts": 406,
+      "warnings": [],
+      "at": "2026-04-19T02:42:19.941Z"
+    },
+    "341": {
+      "acNumber": 341,
+      "status": "ok",
+      "slug": "salempur",
+      "boothsUpserted": 387,
+      "expectedParts": 387,
+      "warnings": [],
+      "at": "2026-04-19T02:42:22.324Z"
+    },
+    "342": {
+      "acNumber": 342,
+      "status": "ok",
+      "slug": "barhaj",
+      "boothsUpserted": 375,
+      "expectedParts": 375,
+      "warnings": [],
+      "at": "2026-04-19T02:42:24.521Z"
+    },
+    "343": {
+      "acNumber": 343,
+      "status": "ok",
+      "slug": "atrauliya",
+      "boothsUpserted": 455,
+      "expectedParts": 455,
+      "warnings": [],
+      "at": "2026-04-19T02:42:27.079Z"
+    },
+    "344": {
+      "acNumber": 344,
+      "status": "ok",
+      "slug": "gopalpur",
+      "boothsUpserted": 428,
+      "expectedParts": 428,
+      "warnings": [],
+      "at": "2026-04-19T02:42:29.375Z"
+    },
+    "345": {
+      "acNumber": 345,
+      "status": "ok",
+      "slug": "sagri",
+      "boothsUpserted": 423,
+      "expectedParts": 423,
+      "warnings": [],
+      "at": "2026-04-19T02:42:32.153Z"
+    },
+    "346": {
+      "acNumber": 346,
+      "status": "ok",
+      "slug": "mubarakpur",
+      "boothsUpserted": 402,
+      "expectedParts": 402,
+      "warnings": [],
+      "at": "2026-04-19T02:42:34.786Z"
+    },
+    "347": {
+      "acNumber": 347,
+      "status": "ok",
+      "slug": "azamgarh-azamgarh",
+      "boothsUpserted": 451,
+      "expectedParts": 451,
+      "warnings": [],
+      "at": "2026-04-19T02:42:37.284Z"
+    },
+    "348": {
+      "acNumber": 348,
+      "status": "ok",
+      "slug": "nizamabad-azamgarh",
+      "boothsUpserted": 412,
+      "expectedParts": 412,
+      "warnings": [],
+      "at": "2026-04-19T02:42:39.672Z"
+    },
+    "349": {
+      "acNumber": 349,
+      "status": "ok",
+      "slug": "phoolpur-pawai",
+      "boothsUpserted": 402,
+      "expectedParts": 402,
+      "warnings": [],
+      "at": "2026-04-19T02:42:42.223Z"
+    },
+    "350": {
+      "acNumber": 350,
+      "status": "ok",
+      "slug": "didarganj",
+      "boothsUpserted": 461,
+      "expectedParts": 461,
+      "warnings": [],
+      "at": "2026-04-19T02:42:44.507Z"
+    },
+    "351": {
+      "acNumber": 351,
+      "status": "ok",
+      "slug": "lalganj",
+      "boothsUpserted": 474,
+      "expectedParts": 474,
+      "warnings": [],
+      "at": "2026-04-19T02:42:46.966Z"
+    },
+    "352": {
+      "acNumber": 352,
+      "status": "ok",
+      "slug": "mehnagar",
+      "boothsUpserted": 479,
+      "expectedParts": 479,
+      "warnings": [],
+      "at": "2026-04-19T02:42:49.278Z"
+    },
+    "353": {
+      "acNumber": 353,
+      "status": "ok",
+      "slug": "madhuban",
+      "boothsUpserted": 472,
+      "expectedParts": 472,
+      "warnings": [],
+      "at": "2026-04-19T02:42:51.665Z"
+    },
+    "354": {
+      "acNumber": 354,
+      "status": "ok",
+      "slug": "ghosi",
+      "boothsUpserted": 512,
+      "expectedParts": 512,
+      "warnings": [],
+      "at": "2026-04-19T02:42:54.178Z"
+    },
+    "355": {
+      "acNumber": 355,
+      "status": "ok",
+      "slug": "muhammadabad-gohna-sc",
+      "boothsUpserted": 435,
+      "expectedParts": 435,
+      "warnings": [],
+      "at": "2026-04-19T02:42:58.233Z"
+    },
+    "356": {
+      "acNumber": 356,
+      "status": "ok",
+      "slug": "mau-mau",
+      "boothsUpserted": 517,
+      "expectedParts": 517,
+      "warnings": [],
+      "at": "2026-04-19T02:43:01.296Z"
+    },
+    "357": {
+      "acNumber": 357,
+      "status": "ok",
+      "slug": "belthara-road",
+      "boothsUpserted": 446,
+      "expectedParts": 446,
+      "warnings": [],
+      "at": "2026-04-19T02:43:04.849Z"
+    },
+    "358": {
+      "acNumber": 358,
+      "status": "ok",
+      "slug": "rasara",
+      "boothsUpserted": 420,
+      "expectedParts": 420,
+      "warnings": [],
+      "at": "2026-04-19T02:43:07.048Z"
+    },
+    "359": {
+      "acNumber": 359,
+      "status": "ok",
+      "slug": "sikanderpur",
+      "boothsUpserted": 359,
+      "expectedParts": 359,
+      "warnings": [],
+      "at": "2026-04-19T02:43:09.250Z"
+    },
+    "360": {
+      "acNumber": 360,
+      "status": "ok",
+      "slug": "phephana",
+      "boothsUpserted": 383,
+      "expectedParts": 383,
+      "warnings": [],
+      "at": "2026-04-19T02:43:11.978Z"
+    },
+    "361": {
+      "acNumber": 361,
+      "status": "ok",
+      "slug": "ballia-nagar",
+      "boothsUpserted": 395,
+      "expectedParts": 395,
+      "warnings": [],
+      "at": "2026-04-19T02:43:14.176Z"
+    },
+    "362": {
+      "acNumber": 362,
+      "status": "ok",
+      "slug": "bansdih",
+      "boothsUpserted": 453,
+      "expectedParts": 453,
+      "warnings": [],
+      "at": "2026-04-19T02:43:16.510Z"
+    },
+    "363": {
+      "acNumber": 363,
+      "status": "ok",
+      "slug": "bairia",
+      "boothsUpserted": 406,
+      "expectedParts": 406,
+      "warnings": [],
+      "at": "2026-04-19T02:43:19.054Z"
+    },
+    "364": {
+      "acNumber": 364,
+      "status": "ok",
+      "slug": "badlapur",
+      "boothsUpserted": 421,
+      "expectedParts": 421,
+      "warnings": [],
+      "at": "2026-04-19T02:43:21.580Z"
+    },
+    "365": {
+      "acNumber": 365,
+      "status": "ok",
+      "slug": "shahganj",
+      "boothsUpserted": 457,
+      "expectedParts": 457,
+      "warnings": [],
+      "at": "2026-04-19T02:43:23.817Z"
+    },
+    "366": {
+      "acNumber": 366,
+      "status": "ok",
+      "slug": "jaunpur-jaunpur",
+      "boothsUpserted": 520,
+      "expectedParts": 520,
+      "warnings": [],
+      "at": "2026-04-19T02:43:26.085Z"
+    },
+    "367": {
+      "acNumber": 367,
+      "status": "ok",
+      "slug": "malhani",
+      "boothsUpserted": 447,
+      "expectedParts": 447,
+      "warnings": [],
+      "at": "2026-04-19T02:43:29.359Z"
+    },
+    "368": {
+      "acNumber": 368,
+      "status": "ok",
+      "slug": "mungra-badshahpur",
+      "boothsUpserted": 457,
+      "expectedParts": 457,
+      "warnings": [],
+      "at": "2026-04-19T02:43:31.889Z"
+    },
+    "369": {
+      "acNumber": 369,
+      "status": "ok",
+      "slug": "machhlishahr",
+      "boothsUpserted": 497,
+      "expectedParts": 497,
+      "warnings": [],
+      "at": "2026-04-19T02:43:34.649Z"
+    },
+    "370": {
+      "acNumber": 370,
+      "status": "ok",
+      "slug": "mariyahu",
+      "boothsUpserted": 416,
+      "expectedParts": 416,
+      "warnings": [],
+      "at": "2026-04-19T02:43:37.681Z"
+    },
+    "371": {
+      "acNumber": 371,
+      "status": "ok",
+      "slug": "zafrabad",
+      "boothsUpserted": 443,
+      "expectedParts": 443,
+      "warnings": [],
+      "at": "2026-04-19T02:43:40.307Z"
+    },
+    "372": {
+      "acNumber": 372,
+      "status": "ok",
+      "slug": "kerakat",
+      "boothsUpserted": 514,
+      "expectedParts": 514,
+      "warnings": [],
+      "at": "2026-04-19T02:43:42.773Z"
+    },
+    "373": {
+      "acNumber": 373,
+      "status": "ok",
+      "slug": "jakhanian",
+      "boothsUpserted": 536,
+      "expectedParts": 536,
+      "warnings": [],
+      "at": "2026-04-19T02:43:45.405Z"
+    },
+    "374": {
+      "acNumber": 374,
+      "status": "ok",
+      "slug": "saidpur",
+      "boothsUpserted": 482,
+      "expectedParts": 482,
+      "warnings": [],
+      "at": "2026-04-19T02:43:47.900Z"
+    },
+    "375": {
+      "acNumber": 375,
+      "status": "ok",
+      "slug": "ghazipur-ghazipur",
+      "boothsUpserted": 423,
+      "expectedParts": 423,
+      "warnings": [],
+      "at": "2026-04-19T02:43:50.438Z"
+    },
+    "376": {
+      "acNumber": 376,
+      "status": "ok",
+      "slug": "jangipur-ghazipur",
+      "boothsUpserted": 446,
+      "expectedParts": 446,
+      "warnings": [],
+      "at": "2026-04-19T02:43:53.146Z"
+    },
+    "377": {
+      "acNumber": 377,
+      "status": "ok",
+      "slug": "zahoorabad",
+      "boothsUpserted": 495,
+      "expectedParts": 495,
+      "warnings": [],
+      "at": "2026-04-19T02:43:55.858Z"
+    },
+    "378": {
+      "acNumber": 378,
+      "status": "ok",
+      "slug": "mohammadabad",
+      "boothsUpserted": 519,
+      "expectedParts": 519,
+      "warnings": [],
+      "at": "2026-04-19T02:43:58.633Z"
+    },
+    "379": {
+      "acNumber": 379,
+      "status": "ok",
+      "slug": "zamania",
+      "boothsUpserted": 477,
+      "expectedParts": 477,
+      "warnings": [],
+      "at": "2026-04-19T02:44:00.992Z"
+    },
+    "380": {
+      "acNumber": 380,
+      "status": "ok",
+      "slug": "mughalsarai",
+      "boothsUpserted": 448,
+      "expectedParts": 448,
+      "warnings": [],
+      "at": "2026-04-19T02:44:03.753Z"
+    },
+    "381": {
+      "acNumber": 381,
+      "status": "ok",
+      "slug": "sakaldiha",
+      "boothsUpserted": 393,
+      "expectedParts": 393,
+      "warnings": [],
+      "at": "2026-04-19T02:44:06.342Z"
+    },
+    "382": {
+      "acNumber": 382,
+      "status": "ok",
+      "slug": "saiyadraja",
+      "boothsUpserted": 393,
+      "expectedParts": 393,
+      "warnings": [],
+      "at": "2026-04-19T02:44:08.630Z"
+    },
+    "383": {
+      "acNumber": 383,
+      "status": "ok",
+      "slug": "chakia",
+      "boothsUpserted": 457,
+      "expectedParts": 457,
+      "warnings": [],
+      "at": "2026-04-19T02:44:10.864Z"
+    },
+    "384": {
+      "acNumber": 384,
+      "status": "ok",
+      "slug": "pindra",
+      "boothsUpserted": 421,
+      "expectedParts": 421,
+      "warnings": [],
+      "at": "2026-04-19T02:44:13.172Z"
+    },
+    "385": {
+      "acNumber": 385,
+      "status": "ok",
+      "slug": "ajagara",
+      "boothsUpserted": 413,
+      "expectedParts": 413,
+      "warnings": [],
+      "at": "2026-04-19T02:44:15.402Z"
+    },
+    "386": {
+      "acNumber": 386,
+      "status": "ok",
+      "slug": "shivpur",
+      "boothsUpserted": 419,
+      "expectedParts": 419,
+      "warnings": [],
+      "at": "2026-04-19T02:44:18.292Z"
+    },
+    "387": {
+      "acNumber": 387,
+      "status": "ok",
+      "slug": "rohaniya",
+      "boothsUpserted": 448,
+      "expectedParts": 448,
+      "warnings": [],
+      "at": "2026-04-19T02:44:20.534Z"
+    },
+    "388": {
+      "acNumber": 388,
+      "status": "ok",
+      "slug": "varanasi-north",
+      "boothsUpserted": 451,
+      "expectedParts": 451,
+      "warnings": [],
+      "at": "2026-04-19T02:44:24.183Z"
+    },
+    "389": {
+      "acNumber": 389,
+      "status": "ok",
+      "slug": "varanasi-south",
+      "boothsUpserted": 353,
+      "expectedParts": 353,
+      "warnings": [],
+      "at": "2026-04-19T02:44:26.850Z"
+    },
+    "390": {
+      "acNumber": 390,
+      "status": "ok",
+      "slug": "varanasi-cantt",
+      "boothsUpserted": 460,
+      "expectedParts": 460,
+      "warnings": [],
+      "at": "2026-04-19T02:44:29.327Z"
+    },
+    "391": {
+      "acNumber": 391,
+      "status": "ok",
+      "slug": "sevapuri",
+      "boothsUpserted": 395,
+      "expectedParts": 395,
+      "warnings": [],
+      "at": "2026-04-19T02:44:31.683Z"
+    },
+    "392": {
+      "acNumber": 392,
+      "status": "ok",
+      "slug": "bhadohi-bhadohi",
+      "boothsUpserted": 504,
+      "expectedParts": 504,
+      "warnings": [],
+      "at": "2026-04-19T02:44:33.900Z"
+    },
+    "393": {
+      "acNumber": 393,
+      "status": "ok",
+      "slug": "gyanpur",
+      "boothsUpserted": 458,
+      "expectedParts": 458,
+      "warnings": [],
+      "at": "2026-04-19T02:44:36.219Z"
+    },
+    "394": {
+      "acNumber": 394,
+      "status": "ok",
+      "slug": "aurai",
+      "boothsUpserted": 442,
+      "expectedParts": 442,
+      "warnings": [],
+      "at": "2026-04-19T02:44:38.757Z"
+    },
+    "395": {
+      "acNumber": 395,
+      "status": "ok",
+      "slug": "chhanbey",
+      "boothsUpserted": 462,
+      "expectedParts": 462,
+      "warnings": [],
+      "at": "2026-04-19T02:44:41.005Z"
+    },
+    "396": {
+      "acNumber": 396,
+      "status": "ok",
+      "slug": "mirzapur-mirzapur",
+      "boothsUpserted": 451,
+      "expectedParts": 451,
+      "warnings": [],
+      "at": "2026-04-19T02:44:43.263Z"
+    },
+    "397": {
+      "acNumber": 397,
+      "status": "ok",
+      "slug": "majhawan",
+      "boothsUpserted": 474,
+      "expectedParts": 474,
+      "warnings": [],
+      "at": "2026-04-19T02:44:45.473Z"
+    },
+    "398": {
+      "acNumber": 398,
+      "status": "ok",
+      "slug": "chunar",
+      "boothsUpserted": 426,
+      "expectedParts": 426,
+      "warnings": [],
+      "at": "2026-04-19T02:44:47.821Z"
+    },
+    "399": {
+      "acNumber": 399,
+      "status": "ok",
+      "slug": "marihan",
+      "boothsUpserted": 445,
+      "expectedParts": 445,
+      "warnings": [],
+      "at": "2026-04-19T02:44:50.088Z"
+    },
+    "400": {
+      "acNumber": 400,
+      "status": "ok",
+      "slug": "ghorawal",
+      "boothsUpserted": 472,
+      "expectedParts": 472,
+      "warnings": [],
+      "at": "2026-04-19T02:44:52.283Z"
+    },
+    "401": {
+      "acNumber": 401,
+      "status": "ok",
+      "slug": "robertsganj",
+      "boothsUpserted": 439,
+      "expectedParts": 439,
+      "warnings": [],
+      "at": "2026-04-19T02:44:55.076Z"
+    },
+    "402": {
+      "acNumber": 402,
+      "status": "ok",
+      "slug": "obra",
+      "boothsUpserted": 351,
+      "expectedParts": 351,
+      "warnings": [],
+      "at": "2026-04-19T02:44:57.814Z"
+    },
+    "403": {
+      "acNumber": 403,
+      "status": "ok",
+      "slug": "duddhi",
+      "boothsUpserted": 400,
+      "expectedParts": 400,
+      "warnings": [],
+      "at": "2026-04-19T02:45:00.547Z"
+    }
+  }
+}
