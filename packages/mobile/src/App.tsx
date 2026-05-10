@@ -35,7 +35,7 @@ const App: React.FC = () => {
       <SafeAreaProvider>
         <StatusBar
           barStyle="dark-content"
-          backgroundColor={COLORS.white}
+          backgroundColor={COLORS.cream}
           translucent={false}
         />
         <I18nProvider>

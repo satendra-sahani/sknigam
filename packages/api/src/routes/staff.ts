@@ -19,6 +19,7 @@ router.get('/', authenticate, requireRole('super_admin'), paginationQuery, async
 
     const filter: any = { role: 'staff' };
     if (req.query.assemblyConstituency) filter.assemblyConstituency = req.query.assemblyConstituency;
+    if (req.query.district) filter.district = req.query.district;
     if (req.query.isActive !== undefined) filter.isActive = req.query.isActive === 'true';
     if (req.query.search) {
       filter.$or = [

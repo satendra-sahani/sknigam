@@ -17,13 +17,13 @@ import { useI18n } from '../i18n';
 import api from '../services/api';
 import { subscribe } from '../services/visitQueue';
 import { COLORS } from '../utils/constants';
+import { FONTS, RADIUS } from '../utils/theme';
+import Avatar from '../components/Avatar';
+import Btn from '../components/Btn';
+import Card from '../components/Card';
+import Chip from '../components/Chip';
+import Progress from '../components/Progress';
 import type { MainTabParamList, RootStackParamList, QueuedVisit } from '../types';
-
-const roleKeyMap: Record<string, string> = {
-  super_admin: 'home_role_super',
-  staff: 'home_role_staff',
-  politician: 'home_role_politician',
-};
 
 type Nav = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
@@ -36,13 +36,12 @@ interface Props {
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const { user, logout } = useAuth();
-  const { lang, toggle, t } = useI18n();
+  const { t } = useI18n();
   const [assignmentsTotal, setAssignmentsTotal] = useState(0);
   const [completed, setCompleted] = useState(0);
   const [target, setTarget] = useState(0);
   const [queueCount, setQueueCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -50,12 +49,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const res = await api.get('/voter-assignments', { params: { limit: 100 } });
       const assignments = res.data.data.assignments || [];
       setAssignmentsTotal(assignments.length);
-      setCompleted(assignments.reduce((s: number, a: any) => s + (a.completedCount || 0), 0));
-      setTarget(assignments.reduce((s: number, a: any) => s + (a.totalVoters || 0), 0));
+      setCompleted(
+        assignments.reduce((s: number, a: any) => s + (a.completedCount || 0), 0),
+      );
+      setTarget(
+        assignments.reduce((s: number, a: any) => s + (a.totalVoters || 0), 0),
+      );
       setLoadError(null);
     } catch (err: any) {
-      // Surface a compact hint instead of silently showing "0 booths" —
-      // that's what made past debugging so painful on field devices.
       const status = err?.response?.status;
       const msg = err?.response?.data?.error;
       if (status) setLoadError(`${status}: ${msg || 'Server error'}`);
@@ -81,335 +82,373 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     setRefreshing(false);
   }
 
-  const pct = target > 0 ? Math.round((completed / target) * 100) : 0;
+  const pct = target > 0 ? Math.round((completed / target) * 1000) / 10 : 0;
   const pending = Math.max(0, target - completed);
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.hero} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.ink} />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}>
-        <View style={styles.hero}>
-          <View style={styles.heroTop}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.greeting}>{t('home_greeting')}</Text>
-              <Text style={styles.userName} numberOfLines={1}>
-                {user?.name || t('home_user_fallback')}
-              </Text>
-              {user?.role && (
-                <View style={styles.rolePill}>
-                  <Icon name="shield-check" size={12} color={COLORS.primary} />
-                  <Text style={styles.rolePillText}>
-                    {roleKeyMap[user.role] ? t(roleKeyMap[user.role]) : user.role}
-                  </Text>
-                </View>
-              )}
-            </View>
-            <View style={styles.heroActions}>
-              <TouchableOpacity
-                onPress={toggle}
-                accessibilityLabel={t('lang_switch_tooltip')}
-                style={styles.langBtn}>
-                <Text style={styles.langBtnText}>
-                  {lang === 'en' ? 'EN' : 'हि'}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.indigo} />
+        }
+        contentContainerStyle={{ paddingBottom: 32 }}>
+        {/* Civic banner */}
+        <View style={styles.banner}>
+          <View style={styles.bannerTop}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Avatar name={user?.name} tone="brass" size={40} />
+              <View style={{ marginLeft: 10 }}>
+                <Text style={styles.bannerGreeting}>Good morning · सुप्रभात</Text>
+                <Text style={styles.bannerName} numberOfLines={1}>
+                  {user?.name || t('home_user_fallback')}
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
-                <Icon name="logout" size={20} color={COLORS.grey300} />
+              </View>
+            </View>
+            <View style={styles.bannerActions}>
+              <Chip tone="indigo">FIELD STAFF</Chip>
+              <TouchableOpacity onPress={logout} style={styles.logoutBtn} activeOpacity={0.7}>
+                <Icon name="logout" size={16} color="rgba(255,255,255,0.7)" />
               </TouchableOpacity>
             </View>
           </View>
 
-          {user?.assemblyConstituency && (
-            <View style={styles.heroConstituency}>
-              <Icon name="map-marker" size={14} color={COLORS.primary} />
-              <Text style={styles.constituencyText} numberOfLines={1}>
-                {user.assemblyConstituency}
-                {user.district ? ` · ${user.district}` : ''}
-              </Text>
-            </View>
-          )}
-
-          <View style={styles.heroStatsRow}>
-            <HeroStat label={t('home_stat_booths')} value={String(assignmentsTotal)} icon="map-marker-multiple" />
-            <View style={styles.heroDivider} />
-            <HeroStat label={t('home_stat_done')} value={String(completed)} icon="check-circle" />
-            <View style={styles.heroDivider} />
-            <HeroStat label={t('home_stat_pending')} value={String(pending)} icon="clock-outline" />
-          </View>
-
-          {loadError && (
-            <View style={styles.errorBanner}>
-              <Icon name="alert-circle" size={14} color={COLORS.warning} />
-              <Text style={styles.errorBannerText} numberOfLines={2}>
-                {loadError}
-              </Text>
+          {(user?.assemblyConstituency || user?.district) && (
+            <View style={styles.locationPill}>
+              <Icon name="map-marker" size={14} color={COLORS.brass} />
+              <View style={{ flex: 1, marginLeft: 8 }}>
+                <Text style={styles.locationName} numberOfLines={1}>
+                  {user?.assemblyConstituency || '—'}
+                  {user?.district ? ` · ${user.district}` : ''}
+                </Text>
+              </View>
+              {user?.assemblyConstituency ? (
+                <Text style={styles.locationCode} numberOfLines={1}>
+                  UP-AC
+                </Text>
+              ) : null}
             </View>
           )}
         </View>
 
         <View style={styles.content}>
-          {target > 0 && (
-            <View style={styles.progressCard}>
-              <View style={styles.progressHeader}>
-                <View>
-                  <Text style={styles.progressLabel}>{t('home_overall_progress')}</Text>
-                  <Text style={styles.progressValue}>{pct}%</Text>
-                </View>
-                <View style={styles.progressCount}>
-                  <Text style={styles.progressCountValue}>{completed.toLocaleString('en-IN')}</Text>
-                  <Text style={styles.progressCountDiv}>/</Text>
-                  <Text style={styles.progressCountTotal}>{target.toLocaleString('en-IN')}</Text>
-                </View>
-              </View>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${pct}%` }]} />
-              </View>
-              <Text style={styles.progressFootnote}>
-                {assignmentsTotal === 1
-                  ? t('home_across_one')
-                  : t('home_across_many', { n: assignmentsTotal })}
-              </Text>
-            </View>
-          )}
-
+          {/* Sync alert */}
           {queueCount > 0 && (
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => navigation.navigate('Queue')}
-              style={styles.queueCta}>
-              <View style={styles.queueIconWrap}>
-                <Icon name="cloud-upload" size={20} color={COLORS.warning} />
+            <View style={styles.syncAlert}>
+              <View style={styles.syncIconBox}>
+                <Icon name="cloud-upload" size={18} color={COLORS.warning} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.queueTitle}>
-                  {queueCount === 1
-                    ? t('home_queue_waiting_one')
-                    : t('home_queue_waiting_many', { n: queueCount })}
-                </Text>
-                <Text style={styles.queueSub}>{t('home_queue_sub')}</Text>
+                <Text style={styles.syncTitle}>{queueCount} visits queued offline</Text>
+                <Text style={styles.syncSub}>{queueCount} विज़िट ऑफलाइन क्यू में</Text>
               </View>
-              <Icon name="chevron-right" size={22} color={COLORS.grey400} />
-            </TouchableOpacity>
+              <Btn size="sm" onPress={() => navigation.navigate('Queue')}>
+                Sync
+              </Btn>
+            </View>
           )}
 
-          <Text style={styles.sectionTitle}>{t('home_quick_actions')}</Text>
-
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={styles.primaryCta}
-            onPress={() => navigation.navigate('Assignments')}>
-            <View style={styles.ctaIconLight}>
-              <Icon name="map-marker-multiple" size={22} color={COLORS.white} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.primaryCtaText}>{t('home_open_booths')}</Text>
-              <Text style={styles.primaryCtaSub}>{t('home_open_booths_sub')}</Text>
-            </View>
-            <Icon name="chevron-right" size={22} color={COLORS.white} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={styles.secondaryCta}
-            onPress={() => navigation.navigate('Queue')}>
-            <View style={styles.secondaryIcon}>
-              <Icon name="cloud-sync" size={22} color={COLORS.accent} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.secondaryCtaText}>{t('home_sync_queue')}</Text>
-              <Text style={styles.secondaryCtaSub}>
-                {queueCount === 0
-                  ? t('home_sync_queue_all_clear')
-                  : queueCount === 1
-                    ? t('home_sync_queue_pending_one')
-                    : t('home_sync_queue_pending_many', { n: queueCount })}
+          {/* Error */}
+          {loadError ? (
+            <View style={styles.errorBanner}>
+              <Icon name="alert-circle" size={14} color={COLORS.danger} />
+              <Text style={styles.errorText} numberOfLines={2}>
+                {loadError}
               </Text>
             </View>
-            <Icon name="chevron-right" size={22} color={COLORS.grey400} />
-          </TouchableOpacity>
+          ) : null}
+
+          {/* Stats */}
+          <View style={styles.statsRow}>
+            <StatTile
+              n={String(assignmentsTotal)}
+              en="Booths"
+              hi="बूथ"
+              color={COLORS.indigo}
+            />
+            <StatTile n={String(completed)} en="Done" hi="पूर्ण" color={COLORS.success} />
+            <StatTile n={String(pending)} en="Pending" hi="बाकी" color={COLORS.brass} />
+          </View>
+
+          {/* Progress card */}
+          {target > 0 && (
+            <Card padding={16}>
+              <View style={styles.progressHeader}>
+                <View>
+                  <Text style={styles.progressTitle}>Overall progress</Text>
+                  <Text style={styles.progressTitleHi}>कुल प्रगति</Text>
+                </View>
+                <Text style={styles.progressPct}>{pct}%</Text>
+              </View>
+              <Progress value={pct} tone="brass" height={6} />
+              <View style={styles.progressFootRow}>
+                <Text style={styles.progressFoot}>{completed.toLocaleString('en-IN')} done</Text>
+                <Text style={styles.progressFoot}>{target.toLocaleString('en-IN')} total</Text>
+              </View>
+            </Card>
+          )}
+
+          {/* Quick actions */}
+          <View style={styles.actionsRow}>
+            <ActionTile
+              en="My booths"
+              hi="मेरे बूथ"
+              kicker={`${assignmentsTotal} assigned`}
+              tone="indigo"
+              icon="map-marker-multiple"
+              onPress={() => navigation.navigate('Assignments')}
+            />
+            <ActionTile
+              en="Queue"
+              hi="क्यू"
+              kicker={queueCount === 0 ? 'All synced' : `${queueCount} to sync`}
+              tone="warning"
+              icon="cloud-upload"
+              onPress={() => navigation.navigate('Queue')}
+            />
+          </View>
         </View>
       </ScrollView>
     </View>
   );
 };
 
-function HeroStat({ label, value, icon }: { label: string; value: string; icon: string }) {
-  return (
-    <View style={styles.heroStat}>
-      <Icon name={icon} size={14} color={COLORS.grey400} />
-      <Text style={styles.heroStatValue}>{value}</Text>
-      <Text style={styles.heroStatLabel}>{label}</Text>
-    </View>
-  );
+interface StatTileProps {
+  n: string;
+  en: string;
+  hi: string;
+  color: string;
 }
 
+const StatTile: React.FC<StatTileProps> = ({ n, en, hi, color }) => (
+  <Card padding={12} style={{ flex: 1 }}>
+    <Text style={[styles.statValue, { color }]}>{n}</Text>
+    <Text style={styles.statLabel}>{en}</Text>
+    <Text style={styles.statLabelHi}>{hi}</Text>
+  </Card>
+);
+
+interface ActionTileProps {
+  en: string;
+  hi: string;
+  kicker: string;
+  tone: 'indigo' | 'warning';
+  icon: string;
+  onPress: () => void;
+}
+
+const ActionTile: React.FC<ActionTileProps> = ({ en, hi, kicker, tone, icon, onPress }) => {
+  const c = tone === 'indigo' ? COLORS.indigo : COLORS.warning;
+  const bg = tone === 'indigo' ? COLORS.indigoSoft : COLORS.warningSoft;
+  return (
+    <TouchableOpacity activeOpacity={0.85} onPress={onPress} style={styles.actionTile}>
+      <View style={[styles.actionIcon, { backgroundColor: bg }]}>
+        <Icon name={icon} size={22} color={c} />
+      </View>
+      <View>
+        <Text style={styles.actionEn}>{en}</Text>
+        <Text style={styles.actionHi}>{hi}</Text>
+        <Text style={[styles.actionKicker, { color: c }]}>{kicker}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  hero: {
-    backgroundColor: COLORS.hero,
-    paddingTop: 24,
-    paddingBottom: 24,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+  container: { flex: 1, backgroundColor: COLORS.cream },
+  banner: {
+    paddingTop: 14,
+    paddingHorizontal: 18,
+    paddingBottom: 18,
+    backgroundColor: COLORS.ink,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
   },
-  heroTop: { flexDirection: 'row', alignItems: 'flex-start' },
-  greeting: { fontSize: 13, color: COLORS.grey400, fontWeight: '500' },
-  userName: { fontSize: 26, fontWeight: '800', color: COLORS.white, marginTop: 2 },
-  rolePill: {
-    alignSelf: 'flex-start',
+  bannerTop: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: COLORS.primaryLight,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    marginTop: 8,
   },
-  rolePillText: { fontSize: 11, color: COLORS.primary, fontWeight: '700' },
-  heroActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  langBtn: {
-    paddingHorizontal: 12,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.heroAccent,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 44,
+  bannerGreeting: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.62)',
+    fontFamily: FONTS.uiMedium,
   },
-  langBtnText: { color: COLORS.white, fontSize: 13, fontWeight: '800', letterSpacing: 0.5 },
+  bannerName: {
+    fontSize: 16,
+    color: COLORS.white,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
+    marginTop: 1,
+  },
+  bannerActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   logoutBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.heroAccent,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
-  heroConstituency: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+  locationPill: {
     marginTop: 14,
-    backgroundColor: COLORS.heroAccent,
-    alignSelf: 'flex-start',
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    maxWidth: '100%',
-  },
-  constituencyText: { fontSize: 13, color: COLORS.white, fontWeight: '600' },
-  heroStatsRow: {
+    paddingVertical: 10,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: RADIUS.md,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.heroAccent,
-    borderRadius: 14,
-    padding: 14,
-    marginTop: 20,
   },
-  heroStat: { flex: 1, alignItems: 'center', gap: 4 },
-  heroDivider: { width: 1, height: 30, backgroundColor: COLORS.grey700 },
-  heroStatValue: { fontSize: 20, color: COLORS.white, fontWeight: '800' },
-  heroStatLabel: { fontSize: 10, color: COLORS.grey400, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  locationName: {
+    fontSize: 12,
+    color: COLORS.white,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+  },
+  locationCode: {
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.55)',
+    fontFamily: FONTS.mono,
+  },
+  content: { paddingHorizontal: 14, paddingTop: 16, gap: 14 },
+  syncAlert: {
+    padding: 12,
+    backgroundColor: COLORS.warningSoft,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: '#F1DEAA',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  syncIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  syncTitle: {
+    fontSize: 13,
+    color: '#7A5008',
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
+  },
+  syncSub: {
+    fontSize: 11,
+    color: '#7A5008',
+    fontFamily: FONTS.hi,
+    opacity: 0.85,
+    marginTop: 1,
+  },
   errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 14,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: COLORS.warningLight,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.dangerSoft,
   },
-  errorBannerText: { flex: 1, fontSize: 12, color: COLORS.warning, fontWeight: '600' },
-  content: { padding: 16, paddingTop: 20, paddingBottom: 32, gap: 12 },
-  progressCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: COLORS.grey200,
+  errorText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#7A2014',
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
   },
-  progressHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 },
-  progressLabel: { fontSize: 11, color: COLORS.grey500, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  progressValue: { fontSize: 32, color: COLORS.grey800, fontWeight: '800', marginTop: 4 },
-  progressCount: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-  progressCountValue: { fontSize: 16, color: COLORS.primary, fontWeight: '800' },
-  progressCountDiv: { fontSize: 14, color: COLORS.grey300 },
-  progressCountTotal: { fontSize: 14, color: COLORS.grey500, fontWeight: '600' },
-  progressBar: { height: 8, backgroundColor: COLORS.grey200, borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 4 },
-  progressFootnote: { fontSize: 11, color: COLORS.grey500, marginTop: 10 },
-  queueCta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: COLORS.warningLight,
-    borderWidth: 1,
-    borderColor: '#fde68a',
-    borderRadius: 14,
-    padding: 14,
-  },
-  queueIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  queueTitle: { fontSize: 14, fontWeight: '700', color: COLORS.grey800 },
-  queueSub: { fontSize: 12, color: COLORS.grey600, marginTop: 2 },
-  sectionTitle: {
-    fontSize: 11,
+  statsRow: { flexDirection: 'row', gap: 8 },
+  statValue: {
+    fontFamily: FONTS.monoBold,
+    fontSize: 26,
     fontWeight: '700',
-    color: COLORS.grey500,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    lineHeight: 28,
+  },
+  statLabel: {
     marginTop: 6,
-    marginBottom: 2,
+    fontSize: 11,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
   },
-  primaryCta: {
+  statLabelHi: {
+    fontSize: 10,
+    color: COLORS.muted,
+    fontFamily: FONTS.hi,
+    marginTop: 1,
+  },
+  progressHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 12,
-    backgroundColor: COLORS.primary,
-    borderRadius: 16,
-    padding: 16,
+    marginBottom: 12,
   },
-  ctaIconLight: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: COLORS.primaryDark,
-    justifyContent: 'center',
-    alignItems: 'center',
+  progressTitle: {
+    fontSize: 13,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
   },
-  primaryCtaText: { color: COLORS.white, fontSize: 16, fontWeight: '800' },
-  primaryCtaSub: { color: COLORS.primaryLight, fontSize: 12, marginTop: 2 },
-  secondaryCta: {
+  progressTitleHi: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.hi,
+  },
+  progressPct: {
+    fontSize: 22,
+    color: COLORS.brass,
+    fontFamily: FONTS.monoBold,
+    fontWeight: '700',
+    letterSpacing: -0.4,
+  },
+  progressFootRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 16,
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  progressFoot: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.mono,
+  },
+  actionsRow: { flexDirection: 'row', gap: 10 },
+  actionTile: {
+    flex: 1,
+    backgroundColor: COLORS.paper,
+    borderRadius: RADIUS.xl,
     borderWidth: 1,
-    borderColor: COLORS.grey200,
+    borderColor: COLORS.hairlineSoft,
+    padding: 14,
+    minHeight: 116,
+    justifyContent: 'space-between',
   },
-  secondaryIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: COLORS.accentLight,
-    justifyContent: 'center',
+  actionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  secondaryCtaText: { color: COLORS.grey800, fontSize: 16, fontWeight: '800' },
-  secondaryCtaSub: { color: COLORS.grey500, fontSize: 12, marginTop: 2 },
+  actionEn: {
+    fontSize: 14,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
+  },
+  actionHi: {
+    fontSize: 11,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    marginTop: 1,
+  },
+  actionKicker: {
+    fontSize: 11,
+    fontFamily: FONTS.monoBold,
+    fontWeight: '700',
+    marginTop: 6,
+  },
 });
 
 export default HomeScreen;

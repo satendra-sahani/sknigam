@@ -41,14 +41,60 @@ function buildVoterFilter(req: AuthRequest): any {
   const q = req.query;
 
   if (q.assemblyConstituency) filter.assemblyConstituency = q.assemblyConstituency;
+  if (q.district) filter.district = q.district;
   if (q.boothId && mongoose.isValidObjectId(q.boothId as string)) filter.boothId = q.boothId;
   if (q.partNumber) filter.partNumber = parseInt(q.partNumber as string, 10);
   if (q.caste) filter.caste = q.caste;
+  if (q.subCaste) filter.subCaste = q.subCaste;
   if (q.religion) filter.religion = q.religion;
   if (q.gender) filter.gender = q.gender;
   if (q.votingIntention) filter.votingIntention = q.votingIntention;
+  if (q.partySupport) filter.partySupport = q.partySupport;
+  if (q.influenceLevel) filter.influenceLevel = q.influenceLevel;
+  if (q.educationLevel) filter.educationLevel = q.educationLevel;
   if (q.verificationStatus !== undefined) filter.verificationStatus = q.verificationStatus === 'true';
   if (q.favouriteCandidate) filter.favouriteCandidate = q.favouriteCandidate;
+
+  // Age range — both ends optional, both ends inclusive.
+  const ageMin = q.ageMin !== undefined ? parseInt(q.ageMin as string, 10) : NaN;
+  const ageMax = q.ageMax !== undefined ? parseInt(q.ageMax as string, 10) : NaN;
+  if (Number.isFinite(ageMin) || Number.isFinite(ageMax)) {
+    filter.age = {};
+    if (Number.isFinite(ageMin)) filter.age.$gte = ageMin;
+    if (Number.isFinite(ageMax)) filter.age.$lte = ageMax;
+  }
+
+  // Visit-date range — `visitDateFrom` / `visitDateTo` accept ISO strings.
+  // `visitDateTo` is treated as end-of-day to make "give me everything up to
+  // 2026-05-09" feel right.
+  const fromRaw = q.visitDateFrom ? new Date(q.visitDateFrom as string) : null;
+  const toRaw = q.visitDateTo ? new Date(q.visitDateTo as string) : null;
+  const from = fromRaw && !isNaN(fromRaw.getTime()) ? fromRaw : null;
+  const to = toRaw && !isNaN(toRaw.getTime()) ? toRaw : null;
+  if (from || to) {
+    filter.visitDate = {};
+    if (from) filter.visitDate.$gte = from;
+    if (to) {
+      // Bump `to` to end-of-day if it landed on midnight.
+      if (
+        to.getHours() === 0 &&
+        to.getMinutes() === 0 &&
+        to.getSeconds() === 0
+      ) {
+        to.setHours(23, 59, 59, 999);
+      }
+      filter.visitDate.$lte = to;
+    }
+  }
+
+  // Grievance multi-select — accept either repeated `grievances=Roads&grievances=Water`
+  // or a single comma-separated `grievances=Roads,Water`. Match documents
+  // whose grievances array contains ALL selected values.
+  const grRaw = q.grievances;
+  let grievances: string[] = [];
+  if (Array.isArray(grRaw)) grievances = grRaw.map(String);
+  else if (typeof grRaw === 'string' && grRaw.length) grievances = grRaw.split(',').map((s) => s.trim()).filter(Boolean);
+  if (grievances.length) filter.grievances = { $all: grievances };
 
   if (q.search) {
     const s = String(q.search);
@@ -817,6 +863,128 @@ router.get(
           male,
           female,
           verificationRate: total > 0 ? Math.round((verified / total) * 100) : 0,
+        },
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  },
+);
+
+// GET /api/voters/stats/breakdown — chart-mode aggregations over the same
+// filter set the table uses. One round trip, one filter, several
+// $group buckets so the web can paint multiple charts without N requests.
+router.get(
+  '/stats/breakdown',
+  authenticate,
+  requireRole('super_admin', 'politician'),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const baseFilter = buildVoterFilter(req);
+
+      const groupBy = (field: string): mongoose.PipelineStage[] => [
+        { $match: baseFilter },
+        { $group: { _id: `$${field}`, count: { $sum: 1 } } },
+        { $project: { _id: 0, key: { $ifNull: ['$_id', 'Unknown'] }, count: 1 } },
+        { $sort: { count: -1 as const } },
+      ];
+
+      // Age buckets: 18-25 / 26-35 / 36-50 / 51-65 / 65+ / Unknown.
+      const agePipeline: mongoose.PipelineStage[] = [
+        { $match: baseFilter },
+        {
+          $bucket: {
+            groupBy: '$age',
+            boundaries: [0, 26, 36, 51, 66, 200],
+            default: 'unknown',
+            output: { count: { $sum: 1 } },
+          },
+        },
+      ];
+
+      // Grievances are an array, so $unwind first.
+      const grievancesPipeline: mongoose.PipelineStage[] = [
+        { $match: baseFilter },
+        { $unwind: { path: '$grievances', preserveNullAndEmptyArrays: false } },
+        { $group: { _id: '$grievances', count: { $sum: 1 } } },
+        { $project: { _id: 0, key: '$_id', count: 1 } },
+        { $sort: { count: -1 as const } },
+      ];
+
+      const [
+        total,
+        verifiedCount,
+        gender,
+        religion,
+        caste,
+        subCaste,
+        votingIntention,
+        partySupport,
+        ageBuckets,
+        grievances,
+        recentVisitsRaw,
+      ] = await Promise.all([
+        Voter.countDocuments(baseFilter),
+        Voter.countDocuments({ ...baseFilter, verificationStatus: true }),
+        Voter.aggregate(groupBy('gender')),
+        Voter.aggregate(groupBy('religion')),
+        Voter.aggregate(groupBy('caste')),
+        Voter.aggregate(groupBy('subCaste')),
+        Voter.aggregate(groupBy('votingIntention')),
+        Voter.aggregate(groupBy('partySupport')),
+        Voter.aggregate(agePipeline),
+        Voter.aggregate(grievancesPipeline),
+        Voter.aggregate([
+          {
+            $match: {
+              ...baseFilter,
+              visitDate: { $type: 'date' },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                $dateToString: { format: '%Y-%m-%d', date: '$visitDate' },
+              },
+              count: { $sum: 1 },
+            },
+          },
+          { $project: { _id: 0, key: '$_id', count: 1 } },
+          { $sort: { key: 1 } },
+          { $limit: 60 },
+        ]),
+      ]);
+
+      // Normalise age buckets to readable labels.
+      const ageLabel = (b: number | string): string => {
+        if (b === 0) return '18-25';
+        if (b === 26) return '26-35';
+        if (b === 36) return '36-50';
+        if (b === 51) return '51-65';
+        if (b === 66) return '65+';
+        return 'Unknown';
+      };
+      const age = (ageBuckets as Array<{ _id: number | string; count: number }>).map((b) => ({
+        key: ageLabel(b._id),
+        count: b.count,
+      }));
+
+      res.json({
+        success: true,
+        data: {
+          total,
+          verified: verifiedCount,
+          unverified: total - verifiedCount,
+          verificationRate: total > 0 ? Math.round((verifiedCount / total) * 100) : 0,
+          gender,
+          religion,
+          caste,
+          subCaste,
+          votingIntention,
+          partySupport,
+          age,
+          grievances,
+          visitsByDay: recentVisitsRaw,
         },
       });
     } catch (error: any) {

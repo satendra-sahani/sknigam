@@ -17,12 +17,20 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../services/api';
 import { useI18n } from '../../i18n';
 import { COLORS } from '../../utils/constants';
+import { FONTS, RADIUS } from '../../utils/theme';
+import AppBar from '../../components/AppBar';
 import type { HierarchyDistrictRow, RootStackParamList } from '../../types';
 
 interface Props {
   route: RouteProp<RootStackParamList, 'Districts'>;
   navigation: StackNavigationProp<RootStackParamList, 'Districts'>;
 }
+
+const toneOf = (pct: number) => {
+  if (pct >= 70) return COLORS.success;
+  if (pct >= 20) return COLORS.brass;
+  return COLORS.danger;
+};
 
 const DistrictsScreen: React.FC<Props> = ({ route, navigation }) => {
   const { state } = route.params;
@@ -32,19 +40,22 @@ const DistrictsScreen: React.FC<Props> = ({ route, navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
 
-  const load = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
-    try {
-      const res = await api.get('/analytics/hierarchy/districts', { params: { state } });
-      setRows(res.data.data);
-    } catch (err: any) {
-      Alert.alert(t('error'), err.response?.data?.error || t('districts_load_failed'));
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [state, t]);
+  const load = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+      try {
+        const res = await api.get('/analytics/hierarchy/districts', { params: { state } });
+        setRows(res.data.data);
+      } catch (err: any) {
+        Alert.alert(t('error'), err.response?.data?.error || t('districts_load_failed'));
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [state, t],
+  );
 
   useEffect(() => {
     load();
@@ -56,68 +67,26 @@ const DistrictsScreen: React.FC<Props> = ({ route, navigation }) => {
     r.district.toLowerCase().includes(search.trim().toLowerCase()),
   );
 
-  const totals = rows.reduce(
-    (acc, r) => ({
-      voters: acc.voters + r.totalVoters,
-      verified: acc.verified + r.verified,
-    }),
-    { voters: 0, verified: 0 },
-  );
-  const overallPct = totals.voters > 0 ? Math.round((totals.verified / totals.voters) * 100) : 0;
-
   function renderItem({ item }: { item: HierarchyDistrictRow }) {
     const pct = item.totalVoters > 0 ? Math.round((item.verified / item.totalVoters) * 100) : 0;
-    const isDone = pct === 100 && item.totalVoters > 0;
-    const tone = isDone ? COLORS.success : pct >= 50 ? COLORS.primary : COLORS.warning;
+    const tone = toneOf(pct);
     return (
       <TouchableOpacity
-        activeOpacity={0.8}
+        activeOpacity={0.85}
         onPress={() => navigation.navigate('Constituencies', { district: item.district })}
-        style={styles.card}>
-        <View style={styles.cardTop}>
-          <View style={[styles.iconBox, { backgroundColor: `${tone}1A` }]}>
-            <Icon name="city-variant-outline" size={22} color={tone} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.name} numberOfLines={1}>{item.district}</Text>
-            <View style={styles.metaRow}>
-              <Icon name="map-marker-multiple" size={11} color={COLORS.grey400} />
-              <Text style={styles.meta}>
-                {item.booths === 1
-                  ? t('districts_booths_one')
-                  : t('districts_booths_many', { n: item.booths })}
-                {' · '}
-                {t('districts_voters_count', { n: item.totalVoters })}
-              </Text>
-            </View>
-          </View>
-          {isDone ? (
-            <View style={styles.doneBadge}>
-              <Icon name="check" size={14} color={COLORS.white} />
-            </View>
-          ) : (
-            <View style={[styles.pctPill, { backgroundColor: `${tone}1A` }]}>
-              <Text style={[styles.pctText, { color: tone }]}>{pct}%</Text>
-            </View>
-          )}
-        </View>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${pct}%`, backgroundColor: tone }]} />
-        </View>
-        <View style={styles.cardBottom}>
-          <Text style={styles.progressText}>
-            {t('explore_voters_completed', { done: item.verified, total: item.totalVoters })}
+        style={styles.row}>
+        <View style={[styles.toneBar, { backgroundColor: tone }]} />
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={styles.rowName} numberOfLines={1}>
+            {item.district}
           </Text>
-          <View style={styles.actionChip}>
-            <Icon
-              name={isDone ? 'check-circle-outline' : 'arrow-right-circle-outline'}
-              size={13}
-              color={isDone ? COLORS.success : COLORS.primary}
-            />
-            <Text style={[styles.actionText, { color: isDone ? COLORS.success : COLORS.primary }]}>
-              {isDone ? t('districts_reached') : t('districts_continue')}
-            </Text>
-          </View>
+          <Text style={styles.rowMeta}>
+            {item.booths.toLocaleString('en-IN')} booths ·{' '}
+            {item.totalVoters.toLocaleString('en-IN')} voters
+          </Text>
+        </View>
+        <View style={{ alignItems: 'flex-end', minWidth: 64 }}>
+          <Text style={[styles.rowPct, { color: tone }]}>{pct}%</Text>
         </View>
       </TouchableOpacity>
     );
@@ -125,34 +94,27 @@ const DistrictsScreen: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Icon name="arrow-left" size={22} color={COLORS.grey800} />
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title}>{t('districts_title')}</Text>
-          <Text style={styles.subtitle}>
-            {rows.length === 1
-              ? t('districts_subtitle_one', { state, pct: overallPct })
-              : t('districts_subtitle_many', { state, n: rows.length, pct: overallPct })}
-          </Text>
-        </View>
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.cream} />
+      <AppBar
+        title="Districts"
+        hi={`ज़िले · ${rows.length}`}
+        back
+        onBack={() => navigation.goBack()}
+      />
 
       <View style={styles.searchWrap}>
         <View style={styles.searchBox}>
-          <Icon name="magnify" size={18} color={COLORS.grey400} />
+          <Icon name="magnify" size={16} color={COLORS.muted} />
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder={t('districts_search')}
-            placeholderTextColor={COLORS.grey400}
+            placeholder="Search · खोजें"
+            placeholderTextColor={COLORS.muted}
             style={styles.searchInput}
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => setSearch('')}>
-              <Icon name="close-circle" size={16} color={COLORS.grey400} />
+              <Icon name="close-circle" size={16} color={COLORS.muted} />
             </TouchableOpacity>
           )}
         </View>
@@ -160,7 +122,7 @@ const DistrictsScreen: React.FC<Props> = ({ route, navigation }) => {
 
       {loading && rows.length === 0 ? (
         <View style={styles.center}>
-          <ActivityIndicator color={COLORS.primary} size="large" />
+          <ActivityIndicator color={COLORS.indigo} size="large" />
         </View>
       ) : (
         <FlatList
@@ -168,18 +130,16 @@ const DistrictsScreen: React.FC<Props> = ({ route, navigation }) => {
           keyExtractor={(item) => item.district}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={COLORS.primary} />
+            <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={COLORS.indigo} />
           }
           ListEmptyComponent={
             <View style={styles.empty}>
               <View style={styles.emptyIcon}>
-                <Icon name="map-search-outline" size={38} color={COLORS.grey400} />
+                <Icon name="map-search-outline" size={38} color={COLORS.indigoDeep} />
               </View>
-              <Text style={styles.emptyText}>{t('districts_empty')}</Text>
-              <Text style={styles.emptySub}>
-                {rows.length === 0 ? t('districts_empty_data') : t('districts_empty_search')}
-              </Text>
+              <Text style={styles.emptyText}>No districts found</Text>
             </View>
           }
         />
@@ -189,112 +149,73 @@ const DistrictsScreen: React.FC<Props> = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.grey200,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.grey100,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: { fontSize: 20, fontWeight: '800', color: COLORS.grey800 },
-  subtitle: { fontSize: 12, color: COLORS.grey500, marginTop: 2, fontWeight: '600' },
-  searchWrap: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 12,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.grey200,
-  },
+  container: { flex: 1, backgroundColor: COLORS.cream },
+  searchWrap: { paddingHorizontal: 14, paddingVertical: 10 },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: COLORS.grey100,
-    borderRadius: 12,
+    height: 44,
     paddingHorizontal: 14,
-    paddingVertical: 11,
-  },
-  searchInput: { flex: 1, fontSize: 14, color: COLORS.grey800, padding: 0 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  listContent: { padding: 16, paddingBottom: 24 },
-  card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: COLORS.paper,
+    borderRadius: RADIUS.pill,
     borderWidth: 1,
-    borderColor: COLORS.grey200,
+    borderColor: COLORS.hairline,
   },
-  cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  iconBox: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+  searchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
+    padding: 0,
+    marginLeft: 10,
   },
-  name: { fontSize: 16, fontWeight: '800', color: COLORS.grey800 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-  meta: { fontSize: 12, color: COLORS.grey500 },
-  doneBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: COLORS.success,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pctPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-  },
-  pctText: { fontSize: 12, fontWeight: '800' },
-  progressBar: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: COLORS.grey200,
-    overflow: 'hidden',
-    marginTop: 14,
-  },
-  progressFill: { height: '100%', borderRadius: 3 },
-  cardBottom: {
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  listContent: { paddingHorizontal: 14, paddingTop: 4, paddingBottom: 24 },
+  row: {
+    backgroundColor: COLORS.paper,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.hairlineSoft,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 10,
   },
-  progressText: { fontSize: 12, color: COLORS.grey600, fontWeight: '600' },
-  actionChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+  toneBar: { width: 4, height: 32, borderRadius: 2, marginRight: 12 },
+  rowName: {
+    fontSize: 14,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
   },
-  actionText: { fontSize: 12, fontWeight: '700' },
-  empty: { alignItems: 'center', paddingTop: 80, gap: 10, paddingHorizontal: 32 },
+  rowMeta: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.mono,
+    marginTop: 2,
+  },
+  rowPct: {
+    fontSize: 16,
+    fontFamily: FONTS.monoBold,
+    fontWeight: '700',
+  },
+  empty: { alignItems: 'center', paddingTop: 80 },
   emptyIcon: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.grey100,
-    justifyContent: 'center',
+    backgroundColor: COLORS.indigoSoft,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
-  emptyText: { fontSize: 15, color: COLORS.grey700, fontWeight: '700' },
-  emptySub: { fontSize: 12, color: COLORS.grey500, textAlign: 'center', lineHeight: 18 },
+  emptyText: {
+    fontSize: 15,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
+  },
 });
 
 export default DistrictsScreen;

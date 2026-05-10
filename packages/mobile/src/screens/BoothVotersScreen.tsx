@@ -18,6 +18,10 @@ import api from '../services/api';
 import { useI18n } from '../i18n';
 import { boothDisplay } from '../utils/hindify';
 import { COLORS } from '../utils/constants';
+import { FONTS, RADIUS } from '../utils/theme';
+import AppBar from '../components/AppBar';
+import Avatar from '../components/Avatar';
+import Chip from '../components/Chip';
 import type { RootStackParamList } from '../types';
 
 interface VoterRow {
@@ -40,10 +44,10 @@ interface Props {
 }
 
 const filters = [
-  { key: 'all', labelKey: 'boothVoters_filter_all', icon: 'account-group' },
-  { key: 'pending', labelKey: 'boothVoters_filter_pending', icon: 'clock-outline' },
-  { key: 'verified', labelKey: 'boothVoters_filter_done', icon: 'check-circle' },
-] as const;
+  { key: 'all' as const, en: 'All', hi: 'सभी' },
+  { key: 'pending' as const, en: 'Pending', hi: 'बाकी' },
+  { key: 'verified' as const, en: 'Done', hi: 'पूर्ण' },
+];
 
 type FilterKey = (typeof filters)[number]['key'];
 
@@ -57,6 +61,7 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterKey>('pending');
+  const [counts, setCounts] = useState({ all: 0, pending: 0, done: 0 });
 
   const load = useCallback(
     async (opts: { reset?: boolean } = {}) => {
@@ -77,6 +82,12 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
         setVoters((prev) => (reset ? fetched : [...prev, ...fetched]));
         setHasMore(pagination.page < pagination.pages);
         setPage((reset ? 1 : page) + 1);
+
+        if (reset) {
+          if (filter === 'all') setCounts((c) => ({ ...c, all: pagination.total }));
+          if (filter === 'pending') setCounts((c) => ({ ...c, pending: pagination.total }));
+          if (filter === 'verified') setCounts((c) => ({ ...c, done: pagination.total }));
+        }
       } catch (err: any) {
         Alert.alert(t('error'), err.response?.data?.error || t('boothVoters_load_failed'));
       } finally {
@@ -84,7 +95,7 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
         setRefreshing(false);
       }
     },
-    [boothId, page, search, filter, loading],
+    [boothId, page, search, filter, loading, t],
   );
 
   useEffect(() => {
@@ -115,103 +126,106 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
   }
 
   function renderItem({ item }: { item: VoterRow }) {
-    const genderTone = item.gender === 'F' ? '#db2777' : item.gender === 'M' ? COLORS.accent : COLORS.grey500;
-    const genderLabel =
-      item.gender === 'M'
-        ? t('visit_gender_male')
-        : item.gender === 'F'
-          ? t('visit_gender_female')
-          : t('visit_gender_other');
     const displayName = lang === 'hi' ? item.fullNameHi || item.fullName : item.fullName;
     const displayFather =
       lang === 'hi' ? item.fatherOrHusbandNameHi || item.fatherOrHusbandName : item.fatherOrHusbandName;
+    const isDone = item.verificationStatus;
+    const initials = displayName
+      .split(' ')
+      .map((w) => w[0]?.toUpperCase())
+      .slice(0, 2)
+      .join('');
+
     return (
       <TouchableOpacity
-        activeOpacity={0.7}
+        activeOpacity={0.85}
         onPress={() => navigation.navigate('VoterVisit', { voterId: item._id })}
         style={styles.row}>
-        <View style={[styles.serialBox, item.verificationStatus && styles.serialBoxDone]}>
-          <Text style={[styles.serialText, item.verificationStatus && { color: COLORS.white }]}>
-            {item.voterSerialNumber}
-          </Text>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.voterName} numberOfLines={1}>
-            {displayName}
-          </Text>
-          <View style={styles.voterMetaRow}>
-            <View style={[styles.genderPill, { backgroundColor: `${genderTone}15` }]}>
-              <Text style={[styles.genderText, { color: genderTone }]}>
-                {genderLabel} · {item.age}{lang === 'hi' ? '' : 'y'}
-              </Text>
+        <Text style={styles.serial}>
+          {String(item.voterSerialNumber).padStart(3, '0')}
+        </Text>
+        <Avatar
+          name={initials}
+          tone={isDone ? 'success' : 'indigo'}
+          size={36}
+          style={{ marginRight: 10 }}
+        />
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.name} numberOfLines={1}>
+              {displayName}
+            </Text>
+            <View style={{ marginLeft: 6 }}>
+              <Chip tone="neutral">
+                {item.gender} · {item.age}
+              </Chip>
             </View>
           </View>
-          <Text style={styles.voterSub} numberOfLines={1}>
-            {t('boothVoters_father')} {displayFather}
+          <Text style={styles.nameHi} numberOfLines={1}>
+            {displayFather}
           </Text>
-          <Text style={styles.epicText}>{item.epicNumber}</Text>
+          <Text style={styles.epic} numberOfLines={1}>
+            {item.epicNumber}
+          </Text>
         </View>
-        {item.verificationStatus ? (
-          <View style={styles.statusDone}>
-            <Icon name="check-circle" size={20} color={COLORS.success} />
-          </View>
-        ) : (
-          <View style={styles.statusPending}>
-            <Icon name="chevron-right" size={18} color={COLORS.grey400} />
-          </View>
-        )}
+        <View style={{ marginLeft: 8 }}>
+          <Chip tone={isDone ? 'success' : 'neutral'}>{isDone ? 'Done' : 'Pending'}</Chip>
+        </View>
       </TouchableOpacity>
     );
   }
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Icon name="arrow-left" size={22} color={COLORS.grey800} />
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title} numberOfLines={1}>
-            {boothDisplay(boothName, lang)}
-          </Text>
-          <View style={styles.subtitleRow}>
-            <Icon name="map-marker" size={11} color={COLORS.grey500} />
-            <Text style={styles.subtitle}>{t('assignments_part')} {partNumber}</Text>
-          </View>
-        </View>
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.cream} />
+      <AppBar
+        title={`${boothDisplay(boothName, lang)}`}
+        hi={`बूथ ${partNumber} · मतदाता`}
+        back
+        onBack={() => navigation.goBack()}
+      />
 
       <View style={styles.searchWrap}>
         <View style={styles.searchBox}>
-          <Icon name="magnify" size={18} color={COLORS.grey400} />
+          <Icon name="magnify" size={16} color={COLORS.muted} />
           <TextInput
             value={search}
             onChangeText={setSearch}
             onSubmitEditing={onSearchSubmit}
-            placeholder={t('boothVoters_search')}
-            placeholderTextColor={COLORS.grey400}
+            placeholder="Search name, EPIC, serial · नाम / ईपीआईसी"
+            placeholderTextColor={COLORS.muted}
             style={styles.searchInput}
             returnKeyType="search"
           />
           {search.length > 0 && (
-            <TouchableOpacity onPress={() => { setSearch(''); onSearchSubmit(); }}>
-              <Icon name="close-circle" size={16} color={COLORS.grey400} />
+            <TouchableOpacity
+              onPress={() => {
+                setSearch('');
+                onSearchSubmit();
+              }}>
+              <Icon name="close-circle" size={16} color={COLORS.muted} />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
       <View style={styles.tabsRow}>
-        {filters.map((f) => (
-          <TouchableOpacity
-            key={f.key}
-            onPress={() => setFilter(f.key)}
-            style={[styles.tab, filter === f.key && styles.tabActive]}>
-            <Icon name={f.icon} size={14} color={filter === f.key ? COLORS.white : COLORS.grey500} />
-            <Text style={[styles.tabText, filter === f.key && styles.tabTextActive]}>{t(f.labelKey)}</Text>
-          </TouchableOpacity>
-        ))}
+        {filters.map((f) => {
+          const active = filter === f.key;
+          const count = f.key === 'all' ? counts.all : f.key === 'pending' ? counts.pending : counts.done;
+          return (
+            <TouchableOpacity
+              key={f.key}
+              activeOpacity={0.85}
+              onPress={() => setFilter(f.key)}
+              style={[styles.tab, active && styles.tabActive]}>
+              <Text style={[styles.tabText, active && styles.tabTextActive]}>{f.en}</Text>
+              {count > 0 ? (
+                <Text style={[styles.tabCount, active && styles.tabCountActive]}> {count}</Text>
+              ) : null}
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       <FlatList
@@ -219,20 +233,25 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
+        ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.indigo} />
+        }
         onEndReached={() => hasMore && !loading && load()}
         onEndReachedThreshold={0.4}
         ListFooterComponent={
-          loading && voters.length > 0 ? <ActivityIndicator style={{ margin: 20 }} color={COLORS.primary} /> : null
+          loading && voters.length > 0 ? (
+            <ActivityIndicator style={{ margin: 20 }} color={COLORS.indigo} />
+          ) : null
         }
         ListEmptyComponent={
           !loading ? (
             <View style={styles.empty}>
               <View style={styles.emptyIcon}>
-                <Icon name="account-search-outline" size={38} color={COLORS.grey400} />
+                <Icon name="account-search-outline" size={38} color={COLORS.indigoDeep} />
               </View>
-              <Text style={styles.emptyText}>{t('boothVoters_empty')}</Text>
-              <Text style={styles.emptySub}>{t('boothVoters_empty_sub')}</Text>
+              <Text style={styles.emptyText}>No voters found</Text>
+              <Text style={styles.emptySub}>Try changing the filter or search.</Text>
             </View>
           ) : null
         }
@@ -242,117 +261,117 @@ const BoothVotersScreen: React.FC<Props> = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.grey200,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.grey100,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: { fontSize: 17, fontWeight: '800', color: COLORS.grey800 },
-  subtitleRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 },
-  subtitle: { fontSize: 12, color: COLORS.grey500 },
-  searchWrap: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-    backgroundColor: COLORS.white,
-  },
+  container: { flex: 1, backgroundColor: COLORS.cream },
+  searchWrap: { paddingHorizontal: 14, paddingVertical: 10 },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: COLORS.grey100,
-    borderRadius: 12,
+    height: 44,
     paddingHorizontal: 14,
-    paddingVertical: 11,
+    backgroundColor: COLORS.paper,
+    borderRadius: RADIUS.pill,
+    borderWidth: 1,
+    borderColor: COLORS.hairline,
   },
-  searchInput: { flex: 1, fontSize: 14, color: COLORS.grey800, padding: 0 },
+  searchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
+    padding: 0,
+    marginLeft: 10,
+  },
   tabsRow: {
     flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.grey200,
+    paddingHorizontal: 14,
+    paddingBottom: 8,
+    gap: 6,
   },
   tab: {
+    flex: 1,
+    height: 36,
+    borderRadius: RADIUS.pill,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    backgroundColor: COLORS.grey100,
-  },
-  tabActive: { backgroundColor: COLORS.primary },
-  tabText: { fontSize: 12, color: COLORS.grey600, fontWeight: '700' },
-  tabTextActive: { color: COLORS.white },
-  listContent: { padding: 12, paddingBottom: 24 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: COLORS.white,
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 12,
+    justifyContent: 'center',
+    backgroundColor: COLORS.paper,
     borderWidth: 1,
-    borderColor: COLORS.grey200,
+    borderColor: COLORS.hairline,
   },
-  serialBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: COLORS.primaryLight,
+  tabActive: { backgroundColor: COLORS.ink, borderColor: COLORS.ink },
+  tabText: {
+    fontSize: 12,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+  },
+  tabTextActive: { color: COLORS.white },
+  tabCount: {
+    fontSize: 12,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.monoMedium,
+    opacity: 0.8,
+  },
+  tabCountActive: { color: COLORS.white, opacity: 0.8 },
+  listContent: { paddingHorizontal: 14, paddingBottom: 24 },
+  row: {
+    backgroundColor: COLORS.paper,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.hairlineSoft,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  serialBoxDone: { backgroundColor: COLORS.success },
-  serialText: { fontSize: 14, fontWeight: '800', color: COLORS.primary },
-  voterName: { fontSize: 15, fontWeight: '700', color: COLORS.grey800 },
-  voterMetaRow: { flexDirection: 'row', marginTop: 4 },
-  genderPill: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
+  serial: {
+    width: 32,
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.monoSemiBold,
+    fontWeight: '600',
   },
-  genderText: { fontSize: 10, fontWeight: '700' },
-  voterSub: { fontSize: 11, color: COLORS.grey500, marginTop: 3 },
-  epicText: { fontSize: 10, color: COLORS.grey400, marginTop: 2, fontFamily: 'monospace' },
-  statusDone: { justifyContent: 'center', alignItems: 'center' },
-  statusPending: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: COLORS.grey100,
-    justifyContent: 'center',
-    alignItems: 'center',
+  name: {
+    fontSize: 13,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+    flexShrink: 1,
+  },
+  nameHi: {
+    fontSize: 11,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    marginTop: 1,
+  },
+  epic: {
+    fontSize: 10,
+    color: COLORS.muted,
+    fontFamily: FONTS.mono,
+    marginTop: 3,
   },
   empty: { alignItems: 'center', paddingTop: 80, gap: 10 },
   emptyIcon: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.grey100,
-    justifyContent: 'center',
+    backgroundColor: COLORS.indigoSoft,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  emptyText: { fontSize: 15, color: COLORS.grey700, fontWeight: '700' },
-  emptySub: { fontSize: 12, color: COLORS.grey500 },
+  emptyText: {
+    fontSize: 15,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
+  },
+  emptySub: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
+  },
 });
 
 export default BoothVotersScreen;

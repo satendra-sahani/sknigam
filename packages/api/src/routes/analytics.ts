@@ -24,6 +24,52 @@ async function buildScope(req: AuthRequest): Promise<any> {
   if (q.boothId && mongoose.isValidObjectId(q.boothId as string)) scope.boothId = new mongoose.Types.ObjectId(q.boothId as string);
   if (q.partNumber) scope.partNumber = parseInt(q.partNumber as string, 10);
 
+  // Survey-time voter attribute filters — applied directly to the Voter
+  // collection match.  These are no-ops when the voter doc doesn't carry
+  // the field (e.g. voters without `religion` simply fall outside the
+  // match), which is the desired behaviour for "show me voters with X".
+  if (q.caste) scope.caste = q.caste;
+  if (q.subCaste) scope.subCaste = q.subCaste;
+  if (q.religion) scope.religion = q.religion;
+  if (q.gender) scope.gender = q.gender;
+  if (q.votingIntention) scope.votingIntention = q.votingIntention;
+  if (q.partySupport) scope.partySupport = q.partySupport;
+  if (q.influenceLevel) scope.influenceLevel = q.influenceLevel;
+  if (q.educationLevel) scope.educationLevel = q.educationLevel;
+  if (q.verificationStatus !== undefined) {
+    scope.verificationStatus = q.verificationStatus === 'true';
+  }
+
+  // Free-text search across name / EPIC / mobile / father-or-husband-name.
+  // Mirrors the /voters list endpoint's behaviour so the same Filters modal
+  // works identically on analytics dashboards.
+  if (q.search) {
+    const s = String(q.search);
+    scope.$or = [
+      { fullName: { $regex: s, $options: 'i' } },
+      { epicNumber: { $regex: s, $options: 'i' } },
+      { fatherOrHusbandName: { $regex: s, $options: 'i' } },
+      { mobileNumber: { $regex: s } },
+    ];
+  }
+
+  // Age range — both ends optional + inclusive.
+  const ageMin = q.ageMin !== undefined ? parseInt(q.ageMin as string, 10) : NaN;
+  const ageMax = q.ageMax !== undefined ? parseInt(q.ageMax as string, 10) : NaN;
+  if (Number.isFinite(ageMin) || Number.isFinite(ageMax)) {
+    scope.age = {};
+    if (Number.isFinite(ageMin)) scope.age.$gte = ageMin;
+    if (Number.isFinite(ageMax)) scope.age.$lte = ageMax;
+  }
+
+  // Grievances — accept comma-list or repeated query params.
+  const grRaw = q.grievances;
+  let grievances: string[] = [];
+  if (Array.isArray(grRaw)) grievances = grRaw.map(String);
+  else if (typeof grRaw === 'string' && grRaw.length)
+    grievances = grRaw.split(',').map((s) => s.trim()).filter(Boolean);
+  if (grievances.length) scope.grievances = { $all: grievances };
+
   // District filter — Voter docs don't carry `district`, so we translate
   // it via the Booth collection into a boothId $in list.  Used by the
   // /explore page's Charts view at the district level.  If the district
@@ -39,17 +85,21 @@ async function buildScope(req: AuthRequest): Promise<any> {
   // Optional date-range filter applied to visitDate (canvassing date).
   // Lets booth/analytics views show "what did we learn this week / this
   // month".  Dates missing on a voter simply exclude them from the match,
-  // which is desirable for date-scoped dashboards.
-  if (q.dateFrom || q.dateTo) {
+  // which is desirable for date-scoped dashboards.  Accepts either
+  // `dateFrom`/`dateTo` (legacy alias) or `visitDateFrom`/`visitDateTo`
+  // so the same Filters modal payload works on every endpoint.
+  const fromRaw = (q.visitDateFrom as string) || (q.dateFrom as string);
+  const toRaw = (q.visitDateTo as string) || (q.dateTo as string);
+  if (fromRaw || toRaw) {
     const range: any = {};
-    if (q.dateFrom) {
-      const d = new Date(q.dateFrom as string);
+    if (fromRaw) {
+      const d = new Date(fromRaw);
       if (!Number.isNaN(d.getTime())) range.$gte = d;
     }
-    if (q.dateTo) {
-      const d = new Date(q.dateTo as string);
+    if (toRaw) {
+      const d = new Date(toRaw);
       if (!Number.isNaN(d.getTime())) {
-        // Make `dateTo` inclusive of the whole day the user picked.
+        // Make the end date inclusive of the whole day the user picked.
         d.setHours(23, 59, 59, 999);
         range.$lte = d;
       }

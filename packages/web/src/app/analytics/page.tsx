@@ -13,6 +13,19 @@ import {
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import api from '@/lib/api';
+import {
+  FiltersButton,
+  ActiveChips,
+  SharedVoterFiltersModal,
+} from '@/components/filters';
+import {
+  buildVoterQuery,
+  describeVoterFilters,
+  clearVoterChip,
+  emptyVoterFilters,
+  type VoterFilterState,
+  type VoterChip,
+} from '@/lib/voterFilters';
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -43,8 +56,8 @@ interface BoothProgress {
 const PALETTE = ['#dc2626', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#64748b', '#0ea5e9'];
 
 export default function AnalyticsPage() {
-  const [constituency, setConstituency] = useState('');
-  const [applied, setApplied] = useState('');
+  const [applied, setApplied] = useState<VoterFilterState>(emptyVoterFilters);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [overview, setOverview] = useState<Overview | null>(null);
@@ -59,7 +72,7 @@ export default function AnalyticsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const params = applied ? { assemblyConstituency: applied } : {};
+      const params = buildVoterQuery(applied);
       const [ov, c, r, a, cd, vi, g, bp] = await Promise.all([
         api.get('/analytics/overview', { params }),
         api.get('/analytics/caste', { params }),
@@ -110,41 +123,30 @@ export default function AnalyticsPage() {
     };
   }, [booths]);
 
+  const activeChips = useMemo(() => describeVoterFilters(applied), [applied]);
+
+  function clearChip(chip: VoterChip) {
+    setApplied((s) => clearVoterChip(s, chip));
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-slate-900">Analytics</h1>
-          <p className="text-sm text-slate-500">Caste, age, candidate share and grievance insights</p>
+          <p className="text-sm text-slate-500">
+            Caste, age, candidate share and grievance insights
+            {activeChips.length > 0 && ` · ${activeChips.length} filter${activeChips.length === 1 ? '' : 's'} applied`}
+          </p>
         </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setApplied(constituency.trim());
-          }}
-          className="flex items-center gap-2">
-          <input
-            value={constituency}
-            onChange={(e) => setConstituency(e.target.value)}
-            placeholder="Filter by constituency"
-            className="px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
-          />
-          <button type="submit" className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition">
-            Apply
-          </button>
-          {applied && (
-            <button
-              type="button"
-              onClick={() => {
-                setConstituency('');
-                setApplied('');
-              }}
-              className="px-3 py-2 text-sm text-slate-600 hover:text-slate-900">
-              Clear
-            </button>
-          )}
-        </form>
+        <FiltersButton onClick={() => setFiltersOpen(true)} count={activeChips.length} />
       </div>
+
+      <ActiveChips
+        chips={activeChips}
+        onRemove={clearChip}
+        onClearAll={() => setApplied(emptyVoterFilters)}
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {overview ? (
@@ -246,6 +248,18 @@ export default function AnalyticsPage() {
           </div>
         )}
       </div>
+
+      <SharedVoterFiltersModal
+        open={filtersOpen}
+        title="Filter analytics"
+        subtitle="Scope every chart to a location, voter attribute, or visit window"
+        initial={applied}
+        onClose={() => setFiltersOpen(false)}
+        onApply={(next) => {
+          setApplied(next);
+          setFiltersOpen(false);
+        }}
+      />
     </div>
   );
 }

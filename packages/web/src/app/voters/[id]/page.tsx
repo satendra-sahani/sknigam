@@ -39,6 +39,7 @@ interface VoterDetail {
   grievances?: string[];
   problemDescription?: string;
   influenceLevel?: string;
+  voterPhoto?: string;
   boothId?: { _id: string; name: string; partNumber: number; assemblyConstituency: string; district: string } | string;
   visitedBy?: { _id: string; name: string; phone: string } | string;
 }
@@ -142,22 +143,46 @@ export default function VoterDetailPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <button onClick={() => router.back()} className="text-xs text-slate-500 hover:text-slate-700 mb-1">
-            &larr; Back
-          </button>
-          <h1 className="text-xl font-semibold text-slate-900">{voter.fullName}</h1>
-          <p className="text-sm text-slate-500">
-            EPIC <span className="font-mono">{voter.epicNumber}</span> · Part {voter.partNumber} · {voter.assemblyConstituency}
-          </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-4 min-w-0">
+          {voter.voterPhoto ? (
+            <a
+              href={voter.voterPhoto}
+              target="_blank"
+              rel="noreferrer"
+              className="shrink-0"
+              title="Open full-size photo">
+              <img
+                src={voter.voterPhoto}
+                alt={voter.fullName}
+                className="w-20 h-20 rounded-xl object-cover border border-slate-200 bg-slate-100"
+              />
+            </a>
+          ) : (
+            <div
+              className="shrink-0 w-20 h-20 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 text-center px-1"
+              title="No photo captured yet">
+              No photo
+              <br />
+              yet
+            </div>
+          )}
+          <div className="min-w-0">
+            <button onClick={() => router.back()} className="text-xs text-slate-500 hover:text-slate-700 mb-1">
+              &larr; Back
+            </button>
+            <h1 className="text-xl font-semibold text-slate-900 truncate">{voter.fullName}</h1>
+            <p className="text-sm text-slate-500 truncate">
+              EPIC <span className="font-mono">{voter.epicNumber}</span> · Part {voter.partNumber} · {voter.assemblyConstituency}
+            </p>
+          </div>
         </div>
         {voter.verificationStatus ? (
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
             Verified
           </span>
         ) : (
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
             Pending Visit
           </span>
         )}

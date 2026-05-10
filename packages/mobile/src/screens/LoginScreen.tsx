@@ -8,13 +8,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAuth } from '../hooks/useAuth';
 import { useI18n } from '../i18n';
 import { COLORS } from '../utils/constants';
+import { FONTS, RADIUS } from '../utils/theme';
+import Btn from '../components/Btn';
+import Mark from '../components/Mark';
 
 interface LoginScreenProps {
   navigation: any;
@@ -34,10 +36,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const handleLogin = async () => {
     if (!isValid) return;
     setIsLoading(true);
-
     try {
       const result = await login(email.trim().toLowerCase(), password);
-
       if (result.success && result.otpRequired) {
         navigation.navigate('OtpVerification', {
           email: email.trim().toLowerCase(),
@@ -46,7 +46,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       } else if (!result.success) {
         Alert.alert(t('login_failed'), result.message || t('login_invalid'));
       }
-      // If success without OTP, navigation is handled by auth state change
     } catch (error: any) {
       Alert.alert(t('error'), t('login_generic_error'));
     } finally {
@@ -61,88 +60,104 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">
-        <TouchableOpacity onPress={toggle} style={styles.langToggle} activeOpacity={0.7}>
-          <Icon name="translate" size={14} color={COLORS.grey600} />
-          <Text style={styles.langToggleText}>{lang === 'en' ? 'हिंदी' : 'English'}</Text>
-        </TouchableOpacity>
-        <View style={styles.header}>
-          <View style={styles.logoCircle}>
-            <Icon name="vote" size={48} color={COLORS.primary} />
-          </View>
-          <Text style={styles.title}>{t('login_brand')}</Text>
-          <Text style={styles.subtitle}>{t('login_tagline')}</Text>
-        </View>
-
-        <View style={styles.form}>
-          <Text style={styles.formTitle}>{t('login_title')}</Text>
-
-          <View style={styles.inputContainer}>
-            <Icon
-              name="email-outline"
-              size={20}
-              color={COLORS.grey400}
-              style={styles.inputIcon}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder={t('login_email_placeholder')}
-              placeholderTextColor={COLORS.grey400}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              onSubmitEditing={() => passwordRef.current?.focus()}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Icon
-              name="lock-outline"
-              size={20}
-              color={COLORS.grey400}
-              style={styles.inputIcon}
-            />
-            <TextInput
-              ref={passwordRef}
-              style={[styles.input, { flex: 1 }]}
-              placeholder={t('login_password_placeholder')}
-              placeholderTextColor={COLORS.grey400}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              returnKeyType="go"
-              onSubmitEditing={handleLogin}
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeButton}>
-              <Icon
-                name={showPassword ? 'eye-off' : 'eye'}
-                size={22}
-                color={COLORS.grey400}
-              />
-            </TouchableOpacity>
-          </View>
-
+        <View style={styles.langPill}>
           <TouchableOpacity
-            style={[
-              styles.loginButton,
-              !isValid && styles.loginButtonDisabled,
-            ]}
-            onPress={handleLogin}
-            disabled={!isValid || isLoading}
-            activeOpacity={0.8}>
-            {isLoading ? (
-              <ActivityIndicator color={COLORS.white} size="small" />
-            ) : (
-              <Text style={styles.loginButtonText}>{t('login_button')}</Text>
-            )}
+            onPress={() => lang !== 'en' && toggle()}
+            activeOpacity={0.85}
+            style={[styles.langChip, lang === 'en' && styles.langChipActive]}>
+            <Text
+              style={[
+                styles.langChipText,
+                lang === 'en' && styles.langChipTextActive,
+              ]}>
+              EN
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => lang !== 'hi' && toggle()}
+            activeOpacity={0.85}
+            style={[styles.langChip, lang === 'hi' && styles.langChipActive]}>
+            <Text
+              style={[
+                styles.langChipTextHi,
+                lang === 'hi' && styles.langChipTextActive,
+              ]}>
+              हिं
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.footerText}>{t('login_footer')}</Text>
+        <View style={styles.headerRow}>
+          <Mark size={56} />
+          <View style={{ marginLeft: 14 }}>
+            <Text style={styles.brand}>POLLSTICS</Text>
+            <Text style={styles.tagline}>फ़ील्ड स्टाफ़ ऐप</Text>
+          </View>
+        </View>
+
+        <Text style={styles.intro}>Sign in with your assigned credentials.</Text>
+        <Text style={styles.introHi}>दिए गए ईमेल और पासवर्ड से साइन इन करें।</Text>
+
+        <View style={styles.form}>
+          <View style={styles.fieldGroup}>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>Email</Text>
+              <Text style={styles.labelHi}> · ईमेल</Text>
+            </View>
+            <View style={styles.inputBox}>
+              <TextInput
+                style={styles.input}
+                placeholder="you@pollstics.in"
+                placeholderTextColor={COLORS.muted}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+              />
+            </View>
+          </View>
+
+          <View style={styles.fieldGroup}>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>Password</Text>
+              <Text style={styles.labelHi}> · पासवर्ड</Text>
+            </View>
+            <View style={styles.inputBox}>
+              <TextInput
+                ref={passwordRef}
+                style={[styles.input, { flex: 1 }]}
+                placeholder="••••••••"
+                placeholderTextColor={COLORS.muted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                returnKeyType="go"
+                onSubmitEditing={handleLogin}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.showBtn}
+                activeOpacity={0.7}>
+                <Text style={styles.showText}>{showPassword ? 'HIDE' : 'SHOW'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.footer}>
+          <Btn
+            full
+            size="lg"
+            loading={isLoading}
+            disabled={!isValid}
+            onPress={handleLogin}>
+            Sign in · साइन इन
+          </Btn>
+          <Text style={styles.versionText}>v1.0 · POLLSTICS · 360×800</Text>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -163,17 +178,12 @@ const OtpVerificationScreen: React.FC<{ navigation: any; route: any }> = ({
     if (value.length > 1) {
       value = value.charAt(value.length - 1);
     }
-
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-
-    // Auto-focus next input
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
-
-    // Auto-submit when all 6 digits entered
     if (index === 5 && value) {
       const code = newOtp.join('');
       if (code.length === 6) {
@@ -194,7 +204,6 @@ const OtpVerificationScreen: React.FC<{ navigation: any; route: any }> = ({
   const handleVerify = async (code?: string) => {
     const otpCode = code || otp.join('');
     if (otpCode.length !== 6) return;
-
     setIsLoading(true);
     try {
       const success = await verifyOtp(tempToken, otpCode);
@@ -217,35 +226,32 @@ const OtpVerificationScreen: React.FC<{ navigation: any; route: any }> = ({
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={24} color={COLORS.grey700} />
-        </TouchableOpacity>
-
-        <View style={styles.otpHeader}>
-          <View style={styles.otpIconCircle}>
-            <Icon name="shield-check" size={40} color={COLORS.primary} />
+        <View style={styles.appBar}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backBtn}
+            activeOpacity={0.7}>
+            <Icon name="chevron-left" size={22} color={COLORS.ink} />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.appBarTitle}>Verify phone</Text>
+            <Text style={styles.appBarSub}>फ़ोन सत्यापित करें</Text>
           </View>
-          <Text style={styles.otpTitle}>{t('otp_screen_title')}</Text>
-          <Text style={styles.otpSubtitle}>
-            {t('otp_screen_subtitle', { email: '' }).replace('\n', '')}
-            {'\n'}
-            <Text style={styles.otpEmail}>{email}</Text>
-          </Text>
         </View>
 
-        <View style={styles.otpContainer}>
+        <Text style={styles.otpIntro}>
+          We sent a 6-digit code to <Text style={styles.otpEmailMono}>{email}</Text>.
+        </Text>
+        <Text style={styles.otpIntroHi}>हमने 6-अंकीय कोड भेजा है।</Text>
+
+        <View style={styles.otpRow}>
           {otp.map((digit, index) => (
             <TextInput
               key={index}
               ref={(ref) => {
                 inputRefs.current[index] = ref;
               }}
-              style={[
-                styles.otpInput,
-                digit ? styles.otpInputFilled : {},
-              ]}
+              style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
               value={digit}
               onChangeText={(value) => handleOtpChange(value, index)}
               onKeyPress={(e) => handleKeyPress(e, index)}
@@ -257,193 +263,217 @@ const OtpVerificationScreen: React.FC<{ navigation: any; route: any }> = ({
           ))}
         </View>
 
-        <TouchableOpacity
-          style={[
-            styles.loginButton,
-            otp.join('').length !== 6 && styles.loginButtonDisabled,
-          ]}
-          onPress={() => handleVerify()}
-          disabled={otp.join('').length !== 6 || isLoading}
-          activeOpacity={0.8}>
-          {isLoading ? (
-            <ActivityIndicator color={COLORS.white} size="small" />
-          ) : (
-            <Text style={styles.loginButtonText}>{t('login_verify')}</Text>
-          )}
-        </TouchableOpacity>
+        <View style={styles.resendRow}>
+          <Text style={styles.resendMono}>Resend in 0:32</Text>
+          <Text style={styles.resendHi}>0:32 में पुनः</Text>
+        </View>
+
+        <View style={styles.footer}>
+          <Btn
+            full
+            size="lg"
+            loading={isLoading}
+            disabled={otp.join('').length !== 6}
+            onPress={() => handleVerify()}>
+            Verify · सत्यापित करें
+          </Btn>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
+  root: { flex: 1, backgroundColor: COLORS.cream },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 24,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 40,
+  langPill: {
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    backgroundColor: COLORS.paper,
+    borderRadius: RADIUS.pill,
+    borderWidth: 1,
+    borderColor: COLORS.hairline,
+    padding: 4,
   },
-  logoCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: COLORS.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
+  langChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: RADIUS.pill,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: COLORS.grey800,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: COLORS.grey500,
-    marginTop: 4,
-  },
-  form: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  formTitle: {
-    fontSize: 20,
+  langChipActive: { backgroundColor: COLORS.indigo },
+  langChipText: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.uiBold,
     fontWeight: '700',
-    color: COLORS.grey800,
-    marginBottom: 24,
-    textAlign: 'center',
+    letterSpacing: 0.4,
   },
-  inputContainer: {
+  langChipTextHi: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.hiSemiBold,
+    fontWeight: '600',
+  },
+  langChipTextActive: { color: COLORS.white },
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.grey100,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: COLORS.grey200,
-    marginBottom: 14,
-    paddingHorizontal: 14,
+    marginTop: 28,
   },
-  inputIcon: {
-    marginRight: 10,
+  brand: {
+    fontSize: 24,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
+    letterSpacing: -0.6,
+  },
+  tagline: {
+    fontSize: 13,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    marginTop: 2,
+  },
+  intro: {
+    marginTop: 18,
+    fontSize: 13,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.uiMedium,
+    lineHeight: 20,
+  },
+  introHi: {
+    fontSize: 13,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    opacity: 0.85,
+    lineHeight: 20,
+  },
+  form: { marginTop: 28, gap: 14 },
+  fieldGroup: { gap: 6 },
+  labelRow: { flexDirection: 'row', alignItems: 'baseline' },
+  label: {
+    fontSize: 12,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+  },
+  labelHi: {
+    fontSize: 12,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    opacity: 0.65,
+  },
+  inputBox: {
+    height: 48,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.hairline,
+    backgroundColor: COLORS.paper,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   input: {
     flex: 1,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: COLORS.grey800,
+    paddingVertical: 0,
+    fontSize: 14,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
   },
-  eyeButton: {
-    padding: 4,
-  },
-  loginButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-    minHeight: 52,
-  },
-  loginButtonDisabled: {
-    backgroundColor: COLORS.grey300,
-  },
-  loginButtonText: {
-    color: COLORS.white,
-    fontSize: 17,
+  showBtn: { paddingHorizontal: 4, paddingVertical: 4 },
+  showText: {
+    fontSize: 11,
+    color: COLORS.indigo,
+    fontFamily: FONTS.uiBold,
     fontWeight: '700',
+    letterSpacing: 0.6,
   },
-  footerText: {
+  footer: { marginTop: 'auto', paddingTop: 24, gap: 12 },
+  versionText: {
     textAlign: 'center',
-    color: COLORS.grey400,
-    fontSize: 12,
-    marginTop: 32,
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.mono,
   },
-  langToggle: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
+
+  // OTP screen
+  appBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 14,
-    backgroundColor: COLORS.grey100,
-    borderWidth: 1,
-    borderColor: COLORS.grey200,
-    zIndex: 10,
-  },
-  langToggleText: { fontSize: 12, color: COLORS.grey700, fontWeight: '700' },
-  backButton: {
-    position: 'absolute',
-    top: 16,
-    left: 0,
-    padding: 8,
-    zIndex: 10,
-  },
-  otpHeader: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  otpIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  otpTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: COLORS.grey800,
+    height: 48,
     marginBottom: 8,
+    marginLeft: -8,
   },
-  otpSubtitle: {
-    fontSize: 15,
-    color: COLORS.grey500,
-    textAlign: 'center',
-    lineHeight: 22,
+  backBtn: { padding: 8, marginRight: 4 },
+  appBarTitle: {
+    fontSize: 16,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
   },
-  otpEmail: {
-    fontWeight: '700',
-    color: COLORS.grey700,
+  appBarSub: {
+    fontSize: 12,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    opacity: 0.7,
   },
-  otpContainer: {
+  otpIntro: {
+    marginTop: 16,
+    fontSize: 13,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.uiMedium,
+    lineHeight: 20,
+  },
+  otpEmailMono: { fontFamily: FONTS.monoMedium, color: COLORS.ink },
+  otpIntroHi: {
+    fontSize: 13,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    opacity: 0.85,
+    marginTop: 4,
+  },
+  otpRow: {
+    marginTop: 28,
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 10,
-    marginBottom: 32,
+    justifyContent: 'space-between',
   },
-  otpInput: {
-    width: 48,
+  otpBox: {
+    width: 44,
     height: 56,
-    borderWidth: 2,
-    borderColor: COLORS.grey300,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
+    borderWidth: 1.5,
+    borderColor: COLORS.hairline,
+    backgroundColor: COLORS.paper,
+    color: COLORS.ink,
     textAlign: 'center',
     fontSize: 22,
+    fontFamily: FONTS.monoBold,
     fontWeight: '700',
-    color: COLORS.grey800,
-    backgroundColor: COLORS.white,
   },
-  otpInputFilled: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primaryLight,
+  otpBoxFilled: {
+    borderColor: COLORS.indigo,
+    backgroundColor: COLORS.indigoSoft,
+  },
+  resendRow: {
+    marginTop: 18,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  resendMono: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.mono,
+  },
+  resendHi: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.hi,
   },
 });
 

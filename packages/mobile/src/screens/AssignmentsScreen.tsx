@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  ActivityIndicator,
   Alert,
   StatusBar,
 } from 'react-native';
@@ -18,6 +17,11 @@ import api from '../services/api';
 import { useI18n } from '../i18n';
 import { boothDisplay } from '../utils/hindify';
 import { COLORS } from '../utils/constants';
+import { FONTS, RADIUS } from '../utils/theme';
+import AppBar from '../components/AppBar';
+import Chip from '../components/Chip';
+import Progress from '../components/Progress';
+import Skeleton from '../components/Skeleton';
 import type { MainTabParamList, RootStackParamList } from '../types';
 
 interface PopulatedBooth {
@@ -53,26 +57,29 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
-    try {
-      const res = await api.get('/voter-assignments', { params: { limit: 100 } });
-      setAssignments(res.data.data.assignments);
-    } catch (err: any) {
-      const status = err?.response?.status;
-      const serverMsg = err?.response?.data?.error;
-      const detail = status
-        ? `HTTP ${status}: ${serverMsg || 'Server error'}`
-        : err?.code === 'ECONNABORTED'
-          ? 'Request timed out. Check Wi-Fi / server.'
-          : `Cannot reach API (${err?.message || 'network error'}).\n\nAPI URL: ${api.defaults.baseURL}`;
-      Alert.alert(t('assignments_failed'), detail);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+  const load = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+      try {
+        const res = await api.get('/voter-assignments', { params: { limit: 100 } });
+        setAssignments(res.data.data.assignments);
+      } catch (err: any) {
+        const status = err?.response?.status;
+        const serverMsg = err?.response?.data?.error;
+        const detail = status
+          ? `HTTP ${status}: ${serverMsg || 'Server error'}`
+          : err?.code === 'ECONNABORTED'
+            ? 'Request timed out. Check Wi-Fi / server.'
+            : `Cannot reach API (${err?.message || 'network error'}).\n\nAPI URL: ${api.defaults.baseURL}`;
+        Alert.alert(t('assignments_failed'), detail);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [t],
+  );
 
   useEffect(() => {
     load();
@@ -90,10 +97,12 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
     const booth = typeof item.boothId === 'object' ? item.boothId : null;
     const pct = item.totalVoters > 0 ? Math.round((item.completedCount / item.totalVoters) * 100) : 0;
     const isDone = pct === 100;
-    const tone = isDone ? COLORS.success : pct >= 50 ? COLORS.primary : COLORS.warning;
+    const isNew = pct === 0;
+    const tone = isDone ? 'success' : 'brass';
+
     return (
       <TouchableOpacity
-        activeOpacity={0.8}
+        activeOpacity={0.85}
         onPress={() => {
           if (!booth) return;
           navigation.navigate('BoothVoters', {
@@ -105,46 +114,49 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
         }}
         style={styles.card}>
         <View style={styles.cardTop}>
-          <View style={[styles.partBadge, { backgroundColor: `${tone}1A` }]}>
-            <Text style={[styles.partLabel, { color: tone }]}>{t('assignments_part')}</Text>
-            <Text style={[styles.partNum, { color: tone }]}>{booth?.partNumber ?? '—'}</Text>
+          <View
+            style={[
+              styles.partBadge,
+              {
+                backgroundColor: isDone ? COLORS.successSoft : COLORS.indigoSoft,
+              },
+            ]}>
+            <Text
+              style={[
+                styles.partNum,
+                {
+                  color: isDone ? '#0F4A2D' : COLORS.indigoDeep,
+                },
+              ]}>
+              {booth?.partNumber ?? '—'}
+            </Text>
           </View>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={styles.boothName} numberOfLines={1}>
               {booth?.name ? boothDisplay(booth.name, lang) : t('assignments_unknown_booth')}
             </Text>
-            <View style={styles.metaRow}>
-              <Icon name="map-marker" size={12} color={COLORS.grey400} />
-              <Text style={styles.boothMeta} numberOfLines={1}>
-                {booth?.assemblyConstituency}
-                {booth?.village ? ` · ${boothDisplay(booth.village, lang)}` : ''}
-              </Text>
-            </View>
-          </View>
-          {isDone ? (
-            <View style={styles.doneBadge}>
-              <Icon name="check" size={12} color={COLORS.white} />
-            </View>
-          ) : (
-            <Icon name="chevron-right" size={22} color={COLORS.grey400} />
-          )}
-        </View>
-
-        <View style={styles.progressSection}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${pct}%`, backgroundColor: tone }]} />
-          </View>
-          <View style={styles.progressRow}>
-            <Text style={[styles.progressPct, { color: tone }]}>{pct}%</Text>
-            <Text style={styles.progressText}>
-              {t('assignments_of_voters', { done: item.completedCount, total: item.totalVoters })}
+            <Text style={styles.boothMeta} numberOfLines={1}>
+              {booth?.assemblyConstituency}
+              {booth?.village ? ` · ${boothDisplay(booth.village, lang)}` : ''}
             </Text>
           </View>
+          {isDone ? <Chip tone="success">Done</Chip> : null}
+          {isNew ? <Chip tone="neutral">New</Chip> : null}
+        </View>
+
+        <View style={{ marginTop: 12 }}>
+          <View style={styles.progressLabelRow}>
+            <Text style={styles.progressLabel}>Progress</Text>
+            <Text style={[styles.progressMono, { color: isDone ? COLORS.success : COLORS.brass }]}>
+              {pct}% · {item.completedCount}/{item.totalVoters}
+            </Text>
+          </View>
+          <Progress value={pct} tone={tone as any} height={6} />
         </View>
 
         {(item.voterSerialFrom || item.voterSerialTo) && (
           <View style={styles.rangeChip}>
-            <Icon name="tag-outline" size={11} color={COLORS.grey500} />
+            <Icon name="tag-outline" size={11} color={COLORS.muted} />
             <Text style={styles.rangeText}>
               {t('assignments_serial', {
                 from: item.voterSerialFrom ?? '1',
@@ -159,32 +171,46 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-      <View style={styles.header}>
-        <Text style={styles.title}>{t('assignments_title')}</Text>
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryPill}>
-            <Icon name="map-marker-multiple" size={12} color={COLORS.primary} />
-            <Text style={styles.summaryText}>
-              {assignments.length === 1
-                ? t('assignments_count_one')
-                : t('assignments_count_many', { n: assignments.length })}
-            </Text>
-          </View>
-          {totals.target > 0 && (
-            <View style={[styles.summaryPill, { backgroundColor: COLORS.accentLight }]}>
-              <Icon name="chart-line" size={12} color={COLORS.accent} />
-              <Text style={[styles.summaryText, { color: COLORS.accent }]}>
-                {t('assignments_overall', { n: overallPct })}
-              </Text>
-            </View>
-          )}
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.cream} />
+      <AppBar
+        title="My Booths"
+        hi="मेरे बूथ"
+        right={
+          <TouchableOpacity activeOpacity={0.7} style={styles.searchBtn}>
+            <Icon name="magnify" size={20} color={COLORS.muted} />
+          </TouchableOpacity>
+        }
+      />
+
+      <View style={styles.summary}>
+        <View>
+          <Text style={styles.summaryEn}>
+            {assignments.length} booths · {overallPct}% complete
+          </Text>
+          <Text style={styles.summaryHi}>
+            {assignments.length} बूथ · {overallPct}% पूर्ण
+          </Text>
+        </View>
+        <View style={{ width: 110 }}>
+          <Progress value={overallPct} tone="brass" height={6} />
         </View>
       </View>
+
       {loading && assignments.length === 0 ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={COLORS.primary} size="large" />
-          <Text style={styles.loadingText}>{t('assignments_loading')}</Text>
+        <View style={styles.listContent}>
+          {[0, 1, 2, 3].map((i) => (
+            <View key={i} style={[styles.card, { marginBottom: 10 }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Skeleton width={40} height={40} radius={10} />
+                <View style={{ flex: 1, marginLeft: 10, gap: 6 }}>
+                  <Skeleton width="80%" height={10} />
+                  <Skeleton width="50%" height={8} />
+                  <Skeleton width="30%" height={8} />
+                </View>
+              </View>
+              <Skeleton height={6} radius={3} style={{ marginTop: 12 }} />
+            </View>
+          ))}
         </View>
       ) : (
         <FlatList
@@ -194,15 +220,20 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={COLORS.primary} />
+            <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={COLORS.indigo} />
           }
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
           ListEmptyComponent={
             <View style={styles.empty}>
               <View style={styles.emptyIcon}>
-                <Icon name="clipboard-text-off-outline" size={40} color={COLORS.grey400} />
+                <Icon name="clipboard-text-off-outline" size={40} color={COLORS.indigoDeep} />
               </View>
-              <Text style={styles.emptyText}>{t('assignments_empty')}</Text>
-              <Text style={styles.emptySub}>{t('assignments_empty_sub')}</Text>
+              <Text style={styles.emptyText}>No booths assigned yet</Text>
+              <Text style={styles.emptyTextHi}>अभी कोई बूथ निर्धारित नहीं</Text>
+              <Text style={styles.emptySub}>
+                Pull down to refresh. Your supervisor assigns booths from the back office.
+              </Text>
+              <Text style={styles.emptySubHi}>ताज़ा करने के लिए नीचे खींचें।</Text>
             </View>
           }
         />
@@ -212,93 +243,143 @@ const AssignmentsScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 14,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.grey200,
+  container: { flex: 1, backgroundColor: COLORS.cream },
+  searchBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
   },
-  title: { fontSize: 24, fontWeight: '800', color: COLORS.grey800 },
-  summaryRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
-  summaryPill: {
+  summary: {
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingBottom: 8,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: COLORS.primaryLight,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
   },
-  summaryText: { fontSize: 11, color: COLORS.primary, fontWeight: '700' },
-  listContent: { padding: 16, paddingBottom: 24 },
+  summaryEn: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+  },
+  summaryHi: {
+    fontSize: 10,
+    color: COLORS.muted,
+    fontFamily: FONTS.hi,
+  },
+  listContent: { paddingHorizontal: 14, paddingTop: 4, paddingBottom: 24 },
   card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: COLORS.paper,
+    borderRadius: RADIUS.xl,
     borderWidth: 1,
-    borderColor: COLORS.grey200,
+    borderColor: COLORS.hairlineSoft,
+    padding: 14,
   },
-  cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   partBadge: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  partLabel: { fontSize: 8, fontWeight: '800', letterSpacing: 0.8 },
-  partNum: { fontSize: 17, fontWeight: '800', lineHeight: 20 },
-  boothName: { fontSize: 16, fontWeight: '700', color: COLORS.grey800 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 3 },
-  boothMeta: { fontSize: 12, color: COLORS.grey500, flex: 1 },
-  doneBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: COLORS.success,
-    justifyContent: 'center',
+  partNum: {
+    fontSize: 14,
+    fontFamily: FONTS.monoBold,
+    fontWeight: '700',
+  },
+  boothName: {
+    fontSize: 13,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+  },
+  boothMeta: {
+    fontSize: 10,
+    color: COLORS.muted,
+    fontFamily: FONTS.ui,
+    marginTop: 4,
+  },
+  progressLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 5,
   },
-  progressSection: { marginTop: 14 },
-  progressBar: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: COLORS.grey200,
-    overflow: 'hidden',
+  progressLabel: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
   },
-  progressFill: { height: '100%', borderRadius: 3 },
-  progressRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
-  progressPct: { fontSize: 15, fontWeight: '800' },
-  progressText: { fontSize: 12, color: COLORS.grey600, fontWeight: '600' },
+  progressMono: {
+    fontSize: 11,
+    fontFamily: FONTS.monoBold,
+    fontWeight: '700',
+  },
   rangeChip: {
     alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     marginTop: 10,
-    backgroundColor: COLORS.grey100,
+    backgroundColor: COLORS.cream,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
   },
-  rangeText: { fontSize: 11, color: COLORS.grey600, fontWeight: '600' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  loadingText: { fontSize: 13, color: COLORS.grey500 },
-  empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
-  emptyIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.grey100,
-    justifyContent: 'center',
+  rangeText: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+  },
+  empty: {
     alignItems: 'center',
+    paddingTop: 80,
+    gap: 8,
   },
-  emptyText: { fontSize: 16, color: COLORS.grey700, fontWeight: '700' },
-  emptySub: { fontSize: 13, color: COLORS.grey500, textAlign: 'center', paddingHorizontal: 40, lineHeight: 18 },
+  emptyIcon: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: COLORS.indigoSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 17,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
+  },
+  emptyTextHi: {
+    fontSize: 13,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    marginTop: -4,
+  },
+  emptySub: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
+    textAlign: 'center',
+    paddingHorizontal: 40,
+    lineHeight: 18,
+    marginTop: 6,
+  },
+  emptySubHi: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontFamily: FONTS.hi,
+    textAlign: 'center',
+    paddingHorizontal: 40,
+  },
 });
 
 export default AssignmentsScreen;

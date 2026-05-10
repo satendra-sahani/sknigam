@@ -20,14 +20,28 @@ import api from '../services/api';
 import { trySubmitNow } from '../services/visitQueue';
 import { useI18n } from '../i18n';
 import { COLORS } from '../utils/constants';
+import { FONTS, RADIUS } from '../utils/theme';
 import {
   PARTIES,
   CASTES,
+  RELIGIONS,
   partyLabel,
   casteLabel,
   subCasteLabel,
+  religionLabel,
+  castesForReligion,
 } from '../utils/voterOptions';
 import { dualLanguage } from '../utils/hindify';
+import { ensureCameraPermission, ensureGalleryPermission } from '../utils/permissions';
+import AppBar from '../components/AppBar';
+import Avatar from '../components/Avatar';
+import Btn from '../components/Btn';
+import Card from '../components/Card';
+import Chip from '../components/Chip';
+import Field from '../components/Field';
+import GrievanceChip from '../components/GrievanceChip';
+import IntentCard from '../components/IntentCard';
+import SectionLabel from '../components/SectionLabel';
 import type { RootStackParamList, VoterData } from '../types';
 
 interface Props {
@@ -35,25 +49,31 @@ interface Props {
   navigation: StackNavigationProp<RootStackParamList, 'VoterVisit'>;
 }
 
-const INTENTIONS = [
-  { key: 'Will Vote', labelKey: 'visit_intention_will', icon: 'thumb-up', tone: COLORS.success },
-  { key: 'May Vote', labelKey: 'visit_intention_may', icon: 'help-circle-outline', tone: COLORS.warning },
-  { key: "Won't Vote", labelKey: 'visit_intention_wont', icon: 'thumb-down', tone: COLORS.danger },
-  { key: 'First-Time Voter', labelKey: 'visit_intention_first', icon: 'star-outline', tone: COLORS.accent },
-] as const;
+const INTENTIONS: Array<{
+  key: string;
+  en: string;
+  hi: string;
+  tone: 'success' | 'brass' | 'danger' | 'info';
+  icon: string;
+}> = [
+  { key: 'Will Vote', en: 'Will Vote', hi: 'वोट देंगे', tone: 'success', icon: 'thumb-up' },
+  { key: 'May Vote', en: 'May Vote', hi: 'शायद वोट दें', tone: 'brass', icon: 'help-circle-outline' },
+  { key: "Won't Vote", en: "Won't Vote", hi: 'नहीं देंगे', tone: 'danger', icon: 'thumb-down' },
+  { key: 'First-Time Voter', en: 'First-time', hi: 'पहली बार', tone: 'info', icon: 'star-outline' },
+];
 
-const GRIEVANCES = [
-  'Roads',
-  'Water',
-  'Electricity',
-  'Employment',
-  'Education',
-  'Health',
-  'Pension',
-  'Corruption',
-  'LawAndOrder',
-  'Other',
-] as const;
+const GRIEVANCE_LIST: Array<{ code: string; en: string; hi: string }> = [
+  { code: 'Roads', en: 'Roads', hi: 'सड़क' },
+  { code: 'Water', en: 'Water', hi: 'पानी' },
+  { code: 'Electricity', en: 'Electricity', hi: 'बिजली' },
+  { code: 'Employment', en: 'Employment', hi: 'रोज़गार' },
+  { code: 'Education', en: 'Education', hi: 'शिक्षा' },
+  { code: 'Health', en: 'Health', hi: 'स्वास्थ्य' },
+  { code: 'Pension', en: 'Pension', hi: 'पेंशन' },
+  { code: 'Corruption', en: 'Corruption', hi: 'भ्रष्टाचार' },
+  { code: 'LawAndOrder', en: 'Law & Order', hi: 'कानून' },
+  { code: 'Other', en: 'Other', hi: 'अन्य' },
+];
 
 interface VoterDataWithHi extends VoterData {
   fullNameHi?: string;
@@ -68,6 +88,7 @@ type PickerState =
   | { kind: 'party' }
   | { kind: 'caste' }
   | { kind: 'subCaste' }
+  | { kind: 'religion' }
   | null;
 
 const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
@@ -86,6 +107,7 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [caste, setCaste] = useState('');
   const [subCaste, setSubCaste] = useState('');
+  const [religion, setReligion] = useState('');
   const [problemDescription, setProblemDescription] = useState('');
   const [grievances, setGrievances] = useState<string[]>([]);
   const [photoUri, setPhotoUri] = useState<string | undefined>();
@@ -111,6 +133,7 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
         setAadhaarNumber(v.aadhaarNumber || '');
         setCaste(v.caste || '');
         setSubCaste(v.subCaste || '');
+        setReligion(v.religion || '');
         setProblemDescription(
           (lang === 'hi' ? v.problemDescriptionHi || v.problemDescription : v.problemDescription) || '',
         );
@@ -122,26 +145,51 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
         setLoading(false);
       }
     })();
-  }, [voterId, navigation, lang]);
+  }, [voterId, navigation, lang, t]);
 
   function toggleGrievance(g: string) {
     setGrievances((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]));
   }
 
-  function pickPhoto(source: 'camera' | 'library') {
+  async function pickPhoto(source: 'camera' | 'library') {
     const cb = (res: any) => {
+      // Image-picker reports `didCancel` when the user backs out of the
+      // OS picker — that's not an error, just a no-op. `errorCode` shows
+      // up if a runtime permission was still missing somehow; surface it.
+      if (res?.didCancel) return;
+      if (res?.errorCode) {
+        Alert.alert(t('error'), res.errorMessage || res.errorCode);
+        return;
+      }
       if (res?.assets?.[0]?.uri) setPhotoUri(res.assets[0].uri);
     };
+
     if (source === 'camera') {
+      const granted = await ensureCameraPermission();
+      if (!granted) return;
       launchCamera({ mediaType: 'photo', quality: 0.7, saveToPhotos: false }, cb);
     } else {
+      const granted = await ensureGalleryPermission();
+      if (!granted) return;
       launchImageLibrary({ mediaType: 'photo', quality: 0.7 }, cb);
     }
   }
 
+  const availableCastes = useMemo(() => castesForReligion(religion), [religion]);
   const activeCasteEntry = useMemo(() => CASTES.find((c) => c.code === caste), [caste]);
 
-  function openPicker(kind: 'party' | 'caste' | 'subCaste') {
+  // When religion changes, drop the previously-picked caste/sub-caste if
+  // they no longer apply to the new religion. Without this, switching from
+  // Hindu→Muslim would leave "Yadav" hanging in the saved payload.
+  useEffect(() => {
+    if (!religion) return;
+    if (caste && !availableCastes.some((c) => c.code === caste)) {
+      setCaste('');
+      setSubCaste('');
+    }
+  }, [religion, caste, availableCastes]);
+
+  function openPicker(kind: 'party' | 'caste' | 'subCaste' | 'religion') {
     if (kind === 'subCaste' && !activeCasteEntry) return;
     setPickerSearch('');
     setPicker({ kind });
@@ -159,6 +207,7 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
       setCaste(code);
       setSubCaste('');
     } else if (picker.kind === 'subCaste') setSubCaste(code);
+    else if (picker.kind === 'religion') setReligion(code);
     closePicker();
   }
 
@@ -204,6 +253,7 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
         aadhaarNumber: aadhaarNumber.trim() || undefined,
         caste: caste || undefined,
         subCaste: subCaste || undefined,
+        religion: religion || undefined,
         problemDescription: problemPair.en,
         problemDescriptionHi: problemPair.hi,
         grievances,
@@ -232,7 +282,7 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
   if (loading || !voter) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color={COLORS.primary} size="large" />
+        <ActivityIndicator color={COLORS.indigo} size="large" />
         <Text style={styles.loadingText}>{t('visit_loading')}</Text>
       </View>
     );
@@ -241,270 +291,255 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
   const displayName = lang === 'hi' ? voter.fullNameHi || voter.fullName : voter.fullName;
   const displayFather =
     lang === 'hi' ? voter.fatherOrHusbandNameHi || voter.fatherOrHusbandName : voter.fatherOrHusbandName;
-  const displayAddress = lang === 'hi' ? voter.addressHi || voter.address : voter.address;
-  const genderLabel =
-    voter.gender === 'M'
-      ? t('visit_gender_male')
-      : voter.gender === 'F'
-        ? t('visit_gender_female')
-        : t('visit_gender_other');
-
   const partyText = partyLabel(partySupport, lang);
   const casteText = casteLabel(caste, lang);
   const subCasteText = subCasteLabel(caste, subCaste, lang);
+  const religionText = religionLabel(religion, lang);
+  const initials = displayName.split(' ').map((s) => s[0]?.toUpperCase()).slice(0, 2).join('');
 
-  // In preview, free-text values are shown in the currently-selected
-  // language: if the user is viewing in Hindi but typed in Latin, we
-  // surface the transliterated Hindi so the review screen stays in one
-  // script. Both variants are still persisted by confirmSave().
   const previewCandidate = favouriteCandidate
-    ? (lang === 'hi' ? (dualLanguage(favouriteCandidate).hi ?? favouriteCandidate) : (dualLanguage(favouriteCandidate).en ?? favouriteCandidate))
+    ? lang === 'hi'
+      ? dualLanguage(favouriteCandidate).hi ?? favouriteCandidate
+      : dualLanguage(favouriteCandidate).en ?? favouriteCandidate
     : '';
   const previewProblem = problemDescription
-    ? (lang === 'hi' ? (dualLanguage(problemDescription).hi ?? problemDescription) : (dualLanguage(problemDescription).en ?? problemDescription))
+    ? lang === 'hi'
+      ? dualLanguage(problemDescription).hi ?? problemDescription
+      : dualLanguage(problemDescription).en ?? problemDescription
     : '';
   const previewRemarks = staffRemarks
-    ? (lang === 'hi' ? (dualLanguage(staffRemarks).hi ?? staffRemarks) : (dualLanguage(staffRemarks).en ?? staffRemarks))
+    ? lang === 'hi'
+      ? dualLanguage(staffRemarks).hi ?? staffRemarks
+      : dualLanguage(staffRemarks).en ?? staffRemarks
     : '';
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Icon name="arrow-left" size={22} color={COLORS.grey800} />
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title} numberOfLines={1}>
-            {displayName}
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.cream} />
+      <AppBar
+        title="Voter visit"
+        hi="मतदाता विज़िट"
+        back
+        onBack={() => navigation.goBack()}
+        right={
+          <Text style={styles.serialChip}>
+            {String(voter.voterSerialNumber).padStart(3, '0')}
           </Text>
-          <Text style={styles.subtitle}>
-            #{voter.voterSerialNumber} · {voter.epicNumber}
-          </Text>
-        </View>
-        {voter.verificationStatus && (
-          <View style={styles.doneBadge}>
-            <Icon name="check" size={12} color={COLORS.white} />
-            <Text style={styles.doneBadgeText}>{t('visit_done_badge')}</Text>
-          </View>
-        )}
-      </View>
+        }
+      />
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.voterCard}>
-          <View style={styles.voterHero}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Hero */}
+        <Card padding={14}>
+          <View style={styles.heroRow}>
             {voter.voterPhoto ? (
-              <Image source={{ uri: voter.voterPhoto }} style={styles.voterPhoto} />
+              <Image source={{ uri: voter.voterPhoto }} style={styles.heroPhoto} />
             ) : (
-              <View style={styles.voterAvatar}>
-                <Text style={styles.voterInitial}>{voter.fullName.charAt(0).toUpperCase()}</Text>
-              </View>
+              <Avatar name={initials || 'AK'} tone="indigo" size={56} />
             )}
-            <View style={{ flex: 1 }}>
-              <Text style={styles.voterHeroName}>{displayName}</Text>
-              <Text style={styles.voterHeroMeta}>
-                {genderLabel} · {voter.age} {t('visit_years')}
+            <View style={{ flex: 1, marginLeft: 12, minWidth: 0 }}>
+              <Text style={styles.heroName} numberOfLines={1}>
+                {displayName}
               </Text>
+              <Text style={styles.heroNameHi} numberOfLines={1}>
+                {voter.fullNameHi || displayName}
+              </Text>
+              <View style={styles.heroChips}>
+                <Chip tone="neutral">
+                  {voter.gender} · {voter.age}
+                </Chip>
+                <View style={{ width: 6 }} />
+                <Chip tone="neutral">Serial {voter.voterSerialNumber}</Chip>
+              </View>
             </View>
           </View>
-          <View style={styles.voterGrid}>
-            <InfoCell label={t('visit_label_voter_id')} value={voter.epicNumber} />
-            <InfoCell label={t('visit_label_father')} value={displayFather} />
-            {voter.religion && <InfoCell label={t('visit_label_religion')} value={voter.religion} />}
-            <InfoCell label={t('visit_label_address')} value={displayAddress} full />
+          <View style={styles.heroEpicRow}>
+            <Text style={styles.heroEpic}>EPIC · {voter.epicNumber}</Text>
+            <Text style={styles.heroEpic}>S/o {displayFather}</Text>
           </View>
+        </Card>
+
+        {/* Voting intention */}
+        <SectionLabel num="1" en="Voting intention" hi="मतदान का इरादा" />
+        <View style={styles.intentionGrid}>
+          {INTENTIONS.map((i) => (
+            <View key={i.key} style={{ width: '48%' }}>
+              <IntentCard
+                tone={i.tone}
+                en={i.en}
+                hi={i.hi}
+                icon={i.icon}
+                selected={votingIntention === i.key}
+                onPress={() => setVotingIntention(i.key)}
+              />
+            </View>
+          ))}
         </View>
 
-        {lang === 'hi' && (
-          <View style={styles.hintBanner}>
-            <Icon name="keyboard-outline" size={18} color={COLORS.primary} />
-            <Text style={styles.hintBannerText}>{t('visit_hindi_keyboard_hint')}</Text>
-          </View>
-        )}
+        {/* Party & candidate */}
+        <SectionLabel num="2" en="Party & candidate" hi="पार्टी और उम्मीदवार" />
+        <Field
+          label="Party support"
+          hi="समर्थित पार्टी"
+          readOnlyValue={partyText}
+          placeholder="Select a party · पार्टी चुनें"
+          onPress={() => openPicker('party')}
+          suffix={<Icon name="chevron-down" size={16} color={COLORS.muted} />}
+        />
+        <Field
+          label="Favourite candidate"
+          hi="पसंदीदा उम्मीदवार"
+          value={favouriteCandidate}
+          onChangeText={setFavouriteCandidate}
+          placeholder="Type or transliterate · टाइप करें"
+        />
 
-        <Section title={t('visit_section_intention')} required>
-          <View style={styles.intentionGrid}>
-            {INTENTIONS.map((i) => {
-              const active = votingIntention === i.key;
-              return (
-                <TouchableOpacity
-                  key={i.key}
-                  activeOpacity={0.8}
-                  onPress={() => setVotingIntention(i.key)}
-                  style={[
-                    styles.intentionCard,
-                    active && { backgroundColor: i.tone, borderColor: i.tone },
-                  ]}>
-                  <Icon name={i.icon} size={22} color={active ? COLORS.white : i.tone} />
-                  <Text style={[styles.intentionText, active && { color: COLORS.white }]}>{t(i.labelKey)}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </Section>
-
-        <Section title={t('visit_section_party')}>
-          <TouchableOpacity style={styles.selectBox} onPress={() => openPicker('party')} activeOpacity={0.85}>
-            <Text style={[styles.selectText, !partyText && styles.selectPlaceholder]}>
-              {partyText || t('visit_placeholder_party')}
-            </Text>
-            <Icon name="chevron-down" size={20} color={COLORS.grey500} />
-          </TouchableOpacity>
-        </Section>
-
-        <Section title={t('visit_section_candidate')} helper={t('visit_dual_lang_note')}>
-          <TextInput
-            value={favouriteCandidate}
-            onChangeText={setFavouriteCandidate}
-            placeholder={t('visit_placeholder_candidate')}
-            placeholderTextColor={COLORS.grey400}
-            style={styles.input}
+        {/* Identity & reach */}
+        <SectionLabel num="3" en="Identity & reach" hi="पहचान" />
+        <Field
+          label="Religion"
+          hi="धर्म"
+          readOnlyValue={religionText}
+          placeholder="Select religion · धर्म चुनें"
+          onPress={() => openPicker('religion')}
+          suffix={<Icon name="chevron-down" size={16} color={COLORS.muted} />}
+        />
+        <Field
+          label="Caste"
+          hi="जाति"
+          readOnlyValue={casteText}
+          placeholder="Select caste · जाति चुनें"
+          onPress={() => openPicker('caste')}
+          suffix={<Icon name="chevron-down" size={16} color={COLORS.muted} />}
+        />
+        {activeCasteEntry ? (
+          <Field
+            label="Sub-caste"
+            hi="उप-जाति"
+            readOnlyValue={subCasteText}
+            placeholder="Select sub-caste · उप-जाति चुनें"
+            onPress={() => openPicker('subCaste')}
+            suffix={<Icon name="chevron-down" size={16} color={COLORS.muted} />}
           />
-        </Section>
+        ) : null}
+        <Field
+          label="Mobile"
+          hi="मोबाइल"
+          mono
+          value={mobileNumber}
+          onChangeText={setMobileNumber}
+          keyboardType="phone-pad"
+          maxLength={10}
+          placeholder="10-digit number"
+        />
+        <Field
+          label="Email"
+          hi="ईमेल"
+          hint="optional"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          placeholder="name@example.com"
+        />
+        <Field
+          label="Aadhaar"
+          hi="आधार"
+          hint="optional"
+          mono
+          value={aadhaarNumber}
+          onChangeText={(v) => setAadhaarNumber(v.replace(/[^0-9]/g, ''))}
+          keyboardType="number-pad"
+          maxLength={12}
+          placeholder="12 digits"
+        />
 
-        <Section title={t('visit_section_caste')}>
-          <TouchableOpacity style={styles.selectBox} onPress={() => openPicker('caste')} activeOpacity={0.85}>
-            <Text style={[styles.selectText, !casteText && styles.selectPlaceholder]}>
-              {casteText || t('visit_placeholder_caste')}
-            </Text>
-            <Icon name="chevron-down" size={20} color={COLORS.grey500} />
-          </TouchableOpacity>
-          {activeCasteEntry && (
-            <TouchableOpacity
-              style={[styles.selectBox, { marginTop: 10 }]}
-              onPress={() => openPicker('subCaste')}
-              activeOpacity={0.85}>
-              <Text style={[styles.selectText, !subCasteText && styles.selectPlaceholder]}>
-                {subCasteText || t('visit_placeholder_subCaste')}
-              </Text>
-              <Icon name="chevron-down" size={20} color={COLORS.grey500} />
-            </TouchableOpacity>
-          )}
-        </Section>
-
-        <Section title={t('visit_section_mobile')}>
-          <View style={styles.inputWithIcon}>
-            <Icon name="phone-outline" size={18} color={COLORS.grey400} />
-            <TextInput
-              value={mobileNumber}
-              onChangeText={setMobileNumber}
-              placeholder={t('visit_placeholder_mobile')}
-              placeholderTextColor={COLORS.grey400}
-              keyboardType="phone-pad"
-              maxLength={10}
-              style={styles.inputInner}
+        {/* Grievances */}
+        <SectionLabel num="4" en="Grievances" hi="शिकायतें" />
+        <View style={styles.chipRow}>
+          {GRIEVANCE_LIST.map((g) => (
+            <GrievanceChip
+              key={g.code}
+              en={g.en}
+              hi={g.hi}
+              selected={grievances.includes(g.code)}
+              onPress={() => toggleGrievance(g.code)}
             />
-          </View>
-        </Section>
+          ))}
+        </View>
 
-        <Section title={t('visit_section_email')} helper={t('optional')}>
-          <View style={styles.inputWithIcon}>
-            <Icon name="email-outline" size={18} color={COLORS.grey400} />
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder={t('visit_placeholder_email')}
-              placeholderTextColor={COLORS.grey400}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              style={styles.inputInner}
-            />
-          </View>
-        </Section>
-
-        <Section title={t('visit_section_aadhaar')} helper={t('optional')}>
-          <View style={styles.inputWithIcon}>
-            <Icon name="card-account-details-outline" size={18} color={COLORS.grey400} />
-            <TextInput
-              value={aadhaarNumber}
-              onChangeText={(v) => setAadhaarNumber(v.replace(/[^0-9]/g, ''))}
-              placeholder={t('visit_placeholder_aadhaar')}
-              placeholderTextColor={COLORS.grey400}
-              keyboardType="number-pad"
-              maxLength={12}
-              style={styles.inputInner}
-            />
-          </View>
-        </Section>
-
-        <Section
-          title={t('visit_section_grievances')}
-          helper={grievances.length > 0 ? t('visit_selected_count', { n: grievances.length }) : undefined}>
-          <View style={styles.chipRow}>
-            {GRIEVANCES.map((g) => {
-              const active = grievances.includes(g);
-              return (
-                <TouchableOpacity
-                  key={g}
-                  activeOpacity={0.8}
-                  onPress={() => toggleGrievance(g)}
-                  style={[styles.chip, active && styles.chipActive]}>
-                  {active && <Icon name="check" size={12} color={COLORS.white} />}
-                  <Text style={[styles.chipText, active && styles.chipTextActive]}>{t(`grievance_${g}`)}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </Section>
-
-        <Section title={t('visit_section_problem')} helper={t('visit_dual_lang_note')}>
+        {/* Notes */}
+        <SectionLabel num="5" en="Notes" hi="टिप्पणियाँ" />
+        <View style={styles.textareaBox}>
           <TextInput
             value={problemDescription}
             onChangeText={setProblemDescription}
-            placeholder={t('visit_placeholder_problem')}
-            placeholderTextColor={COLORS.grey400}
+            placeholder="Problem description · समस्या का विवरण"
+            placeholderTextColor={COLORS.muted}
             multiline
-            style={[styles.input, styles.textarea]}
+            style={styles.textarea}
           />
-        </Section>
-
-        <Section title={t('visit_section_remarks')} helper={t('visit_dual_lang_note')}>
+        </View>
+        <View style={styles.textareaBox}>
           <TextInput
             value={staffRemarks}
             onChangeText={setStaffRemarks}
-            placeholder={t('visit_placeholder_remarks')}
-            placeholderTextColor={COLORS.grey400}
+            placeholder="Staff remarks · कर्मचारी की टिप्पणी"
+            placeholderTextColor={COLORS.muted}
             multiline
-            style={[styles.input, styles.textarea]}
+            style={styles.textarea}
           />
-        </Section>
+        </View>
 
-        <Section title={t('visit_section_photo')}>
-          {photoUri ? (
-            <View style={styles.photoBox}>
-              <Image source={{ uri: photoUri }} style={styles.photo} />
-              <TouchableOpacity onPress={() => setPhotoUri(undefined)} style={styles.photoRemove}>
-                <Icon name="close" size={18} color={COLORS.white} />
-              </TouchableOpacity>
-            </View>
-          ) : null}
-          <View style={styles.photoBtnRow}>
-            <TouchableOpacity style={styles.secondaryBtn} onPress={() => pickPhoto('camera')}>
-              <Icon name="camera-outline" size={18} color={COLORS.primary} />
-              <Text style={styles.secondaryBtnText}>{t('visit_camera')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryBtn} onPress={() => pickPhoto('library')}>
-              <Icon name="image-outline" size={18} color={COLORS.primary} />
-              <Text style={styles.secondaryBtnText}>{t('visit_gallery')}</Text>
-            </TouchableOpacity>
+        {/* Photo */}
+        <SectionLabel num="6" en="Photo" hi="फ़ोटो" />
+        <View style={styles.photoBlock}>
+          <View style={styles.photoBox}>
+            {photoUri ? (
+              <Image source={{ uri: photoUri }} style={styles.photoImg} />
+            ) : (
+              <Text style={styles.photoPlaceholder}>voter{'\n'}photo{'\n'}110×130</Text>
+            )}
+            {photoUri ? (
+              <View style={styles.photoOk}>
+                <Text style={styles.photoOkText}>OK</Text>
+              </View>
+            ) : null}
           </View>
-        </Section>
+          <View style={{ flex: 1, marginLeft: 12, justifyContent: 'space-between' }}>
+            <Text style={styles.photoNote}>
+              {photoUri
+                ? 'Captured. Faces are stored only on this device until sync.'
+                : 'Capture or pick a photo. Stored only on this device until sync.'}
+              {'\n'}
+              <Text style={styles.photoNoteHi}>सिंक तक डिवाइस में।</Text>
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Btn size="sm" kind="secondary" onPress={() => pickPhoto('camera')}>
+                {photoUri ? 'Replace' : 'Camera'}
+              </Btn>
+              <Btn size="sm" kind="ghost" onPress={() => pickPhoto('library')}>
+                Gallery
+              </Btn>
+            </View>
+            {photoUri ? (
+              <TouchableOpacity onPress={() => setPhotoUri(undefined)} style={styles.photoRemove}>
+                <Icon name="close" size={12} color={COLORS.danger} />
+                <Text style={styles.photoRemoveText}>Remove</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        </View>
       </ScrollView>
 
+      {/* Sticky save */}
       <View style={styles.footer}>
-        <TouchableOpacity
-          onPress={validateAndPreview}
-          disabled={saving}
-          style={[styles.saveBtn, saving && { opacity: 0.6 }]}>
-          {saving ? (
-            <ActivityIndicator color={COLORS.white} />
-          ) : (
-            <>
-              <Icon name="eye-outline" size={20} color={COLORS.white} />
-              <Text style={styles.saveBtnText}>{t('visit_preview_btn')}</Text>
-            </>
-          )}
-        </TouchableOpacity>
+        <Btn full size="lg" loading={saving} onPress={validateAndPreview} icon={<Icon name="eye-outline" size={18} color={COLORS.white} />}>
+          Preview & save · पूर्वावलोकन
+        </Btn>
       </View>
 
       <PickerModal
@@ -512,14 +547,16 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
         onClose={closePicker}
         title={
           picker?.kind === 'party'
-            ? t('visit_picker_party_title')
+            ? 'Choose party · पार्टी चुनें'
             : picker?.kind === 'caste'
-              ? t('visit_picker_caste_title')
-              : t('visit_picker_subCaste_title')
+              ? 'Choose caste · जाति चुनें'
+              : picker?.kind === 'religion'
+                ? 'Choose religion · धर्म चुनें'
+                : 'Choose sub-caste · उप-जाति'
         }
         search={pickerSearch}
         onSearch={setPickerSearch}
-        searchPlaceholder={t('visit_picker_search')}
+        searchPlaceholder="Search · खोजें"
         items={
           picker?.kind === 'party'
             ? PARTIES.map((p) => ({
@@ -528,97 +565,67 @@ const VoterVisitScreen: React.FC<Props> = ({ route, navigation }) => {
                 selected: partySupport === p.code,
               }))
             : picker?.kind === 'caste'
-              ? CASTES.map((c) => ({
+              ? availableCastes.map((c) => ({
                   code: c.code,
                   label: lang === 'hi' ? c.labelHi : c.labelEn,
                   selected: caste === c.code,
                 }))
-              : (activeCasteEntry?.subCastes || []).map((s) => ({
-                  code: s.code,
-                  label: lang === 'hi' ? s.labelHi : s.labelEn,
-                  selected: subCaste === s.code,
-                }))
+              : picker?.kind === 'religion'
+                ? RELIGIONS.map((r) => ({
+                    code: r.code,
+                    label: lang === 'hi' ? r.labelHi : r.labelEn,
+                    selected: religion === r.code,
+                  }))
+                : (activeCasteEntry?.subCastes || []).map((s) => ({
+                    code: s.code,
+                    label: lang === 'hi' ? s.labelHi : s.labelEn,
+                    selected: subCaste === s.code,
+                  }))
         }
         onSelect={selectPicker}
-        emptyText={t('visit_picker_empty')}
+        emptyText="No matches"
       />
 
       <PreviewModal
         visible={showPreview}
         onClose={() => setShowPreview(false)}
         onConfirm={confirmSave}
+        voterName={displayName}
+        voterNameHi={voter.fullNameHi || displayName}
+        gender={voter.gender}
+        age={voter.age}
+        epic={voter.epicNumber}
+        serial={voter.voterSerialNumber}
         rows={[
-          { label: t('visit_label_voter_id'), value: voter.epicNumber },
-          { label: t('visit_section_intention'), value: t(intentionLabelKey(votingIntention)) },
-          { label: t('visit_section_party'), value: partyText || '—' },
-          { label: t('visit_section_candidate'), value: previewCandidate || '—' },
-          { label: t('visit_section_caste'), value: casteText || '—' },
-          { label: t('visit_section_subCaste'), value: subCasteText || '—' },
-          { label: t('visit_section_mobile'), value: mobileNumber || '—' },
-          { label: t('visit_section_email'), value: email || '—' },
-          { label: t('visit_section_aadhaar'), value: aadhaarNumber || '—' },
           {
-            label: t('visit_section_grievances'),
-            value: grievances.length ? grievances.map((g) => t(`grievance_${g}`)).join(', ') : '—',
+            label: 'Voting intention',
+            hi: 'मतदान का इरादा',
+            value: INTENTIONS.find((i) => i.key === votingIntention)?.en || '—',
+            tone: 'success',
           },
-          { label: t('visit_section_problem'), value: previewProblem || '—' },
-          { label: t('visit_section_remarks'), value: previewRemarks || '—' },
+          { label: 'Party support', hi: 'समर्थित पार्टी', value: partyText || '—' },
+          { label: 'Favourite candidate', hi: 'पसंदीदा उम्मीदवार', value: previewCandidate || '—', muted: !previewCandidate },
+          { label: 'Religion', hi: 'धर्म', value: religionText || '—', muted: !religionText },
+          { label: 'Caste · Sub-caste', hi: 'जाति · उप-जाति', value: [casteText, subCasteText].filter(Boolean).join(' · ') || '—' },
+          { label: 'Mobile', hi: 'मोबाइल', value: mobileNumber || '—', mono: true },
+          { label: 'Email', hi: 'ईमेल', value: email || '—' },
+          { label: 'Aadhaar', hi: 'आधार', value: aadhaarNumber || '—', mono: true },
           {
-            label: t('visit_section_photo'),
-            value: photoUri ? t('visit_photo_attached') : '—',
+            label: 'Grievances',
+            hi: 'शिकायतें',
+            value:
+              grievances.length > 0
+                ? grievances.map((g) => GRIEVANCE_LIST.find((x) => x.code === g)?.en || g).join(', ')
+                : '—',
           },
+          { label: 'Notes', hi: 'टिप्पणियाँ', value: previewProblem || '—' },
+          { label: 'Remarks', hi: 'कर्मचारी टिप्पणी', value: previewRemarks || '—' },
+          { label: 'Photo', hi: 'फ़ोटो', value: photoUri ? 'Captured' : '—' },
         ]}
-        title={t('visit_preview_title')}
-        subtitle={t('visit_preview_subtitle')}
-        confirmText={t('visit_confirm_btn')}
-        cancelText={t('cancel')}
       />
     </View>
   );
 };
-
-function intentionLabelKey(code: string): string {
-  if (code === 'Will Vote') return 'visit_intention_will';
-  if (code === 'May Vote') return 'visit_intention_may';
-  if (code === "Won't Vote") return 'visit_intention_wont';
-  if (code === 'First-Time Voter') return 'visit_intention_first';
-  return 'visit_required_intention';
-}
-
-function Section({
-  title,
-  children,
-  required,
-  helper,
-}: {
-  title: string;
-  children: React.ReactNode;
-  required?: boolean;
-  helper?: string;
-}) {
-  return (
-    <View style={styles.section}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>
-          {title}
-          {required && <Text style={styles.required}> *</Text>}
-        </Text>
-        {helper && <Text style={styles.sectionHelper}>{helper}</Text>}
-      </View>
-      {children}
-    </View>
-  );
-}
-
-function InfoCell({ label, value, full }: { label: string; value?: string; full?: boolean }) {
-  if (!value) return null;
-  return (
-    <View style={[styles.infoCell, full && { width: '100%' }]}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
-    </View>
-  );
-}
 
 interface PickerItem {
   code: string;
@@ -626,17 +633,7 @@ interface PickerItem {
   selected: boolean;
 }
 
-function PickerModal({
-  visible,
-  onClose,
-  title,
-  items,
-  onSelect,
-  search,
-  onSearch,
-  searchPlaceholder,
-  emptyText,
-}: {
+const PickerModal: React.FC<{
   visible: boolean;
   onClose: () => void;
   title: string;
@@ -646,7 +643,7 @@ function PickerModal({
   onSearch: (v: string) => void;
   searchPlaceholder: string;
   emptyText: string;
-}) {
+}> = ({ visible, onClose, title, items, onSelect, search, onSearch, searchPlaceholder, emptyText }) => {
   const q = search.trim().toLowerCase();
   const filtered = q ? items.filter((i) => i.label.toLowerCase().includes(q)) : items;
   return (
@@ -657,16 +654,16 @@ function PickerModal({
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{title}</Text>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Icon name="close" size={22} color={COLORS.grey700} />
+              <Icon name="close" size={22} color={COLORS.mutedDeep} />
             </TouchableOpacity>
           </View>
           <View style={styles.modalSearch}>
-            <Icon name="magnify" size={18} color={COLORS.grey400} />
+            <Icon name="magnify" size={16} color={COLORS.muted} />
             <TextInput
               value={search}
               onChangeText={onSearch}
               placeholder={searchPlaceholder}
-              placeholderTextColor={COLORS.grey400}
+              placeholderTextColor={COLORS.muted}
               style={styles.modalSearchInput}
             />
           </View>
@@ -682,7 +679,7 @@ function PickerModal({
                   <Text style={[styles.modalItemText, item.selected && styles.modalItemTextActive]}>
                     {item.label}
                   </Text>
-                  {item.selected && <Icon name="check" size={18} color={COLORS.primary} />}
+                  {item.selected && <Icon name="check" size={18} color={COLORS.indigo} />}
                 </TouchableOpacity>
               ))
             )}
@@ -691,279 +688,271 @@ function PickerModal({
       </View>
     </Modal>
   );
+};
+
+interface PreviewRow {
+  label: string;
+  hi?: string;
+  value: string;
+  mono?: boolean;
+  muted?: boolean;
+  tone?: 'success';
 }
 
-function PreviewModal({
-  visible,
-  onClose,
-  onConfirm,
-  rows,
-  title,
-  subtitle,
-  confirmText,
-  cancelText,
-}: {
+const PreviewModal: React.FC<{
   visible: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  rows: Array<{ label: string; value: string }>;
-  title: string;
-  subtitle: string;
-  confirmText: string;
-  cancelText: string;
-}) {
+  voterName: string;
+  voterNameHi: string;
+  gender: string;
+  age: number;
+  epic: string;
+  serial: number;
+  rows: PreviewRow[];
+}> = ({ visible, onClose, onConfirm, voterName, voterNameHi, gender, age, epic, serial, rows }) => {
+  const initials = voterName
+    .split(' ')
+    .map((s) => s[0]?.toUpperCase())
+    .slice(0, 2)
+    .join('');
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalBackdrop}>
-        <View style={[styles.modalSheet, { maxHeight: '88%' }]}>
+        <View style={[styles.modalSheet, { maxHeight: '92%', backgroundColor: COLORS.cream }]}>
           <View style={styles.modalHandle} />
           <View style={styles.modalHeader}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.modalTitle}>{title}</Text>
-              <Text style={styles.modalSubtitle}>{subtitle}</Text>
+              <Text style={styles.modalTitle}>Preview & confirm</Text>
+              <Text style={styles.modalSubtitle}>पूर्वावलोकन और पुष्टि</Text>
             </View>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Icon name="close" size={22} color={COLORS.grey700} />
+              <Icon name="close" size={22} color={COLORS.mutedDeep} />
             </TouchableOpacity>
           </View>
-          <ScrollView style={styles.modalList} contentContainerStyle={{ paddingBottom: 12 }}>
-            {rows.map((r) => (
-              <View key={r.label} style={styles.previewRow}>
-                <Text style={styles.previewLabel}>{r.label}</Text>
-                <Text style={styles.previewValue}>{r.value}</Text>
+          <ScrollView style={{ paddingHorizontal: 14 }} contentContainerStyle={{ paddingBottom: 12 }}>
+            <Card padding={14}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: RADIUS.lg,
+                    backgroundColor: COLORS.indigoSoft,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Text style={{ fontFamily: FONTS.uiBold, fontSize: 18, color: COLORS.indigoDeep }}>
+                    {initials}
+                  </Text>
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={styles.previewName}>{voterName}</Text>
+                  <Text style={styles.previewNameHi}>
+                    {voterNameHi} · {gender} · {age}
+                  </Text>
+                  <Text style={styles.previewEpic}>
+                    {epic} · Serial {String(serial).padStart(3, '0')}
+                  </Text>
+                </View>
               </View>
-            ))}
+            </Card>
+            <View style={{ marginTop: 6 }}>
+              {rows.map((r) => (
+                <View key={r.label} style={styles.previewRow}>
+                  <View style={{ minWidth: 110 }}>
+                    <Text style={styles.previewLabel}>{r.label}</Text>
+                    {r.hi ? <Text style={styles.previewLabelHi}>{r.hi}</Text> : null}
+                  </View>
+                  <Text
+                    style={[
+                      styles.previewValue,
+                      r.mono ? { fontFamily: FONTS.monoSemiBold } : null,
+                      r.muted ? { color: COLORS.muted } : null,
+                      r.tone === 'success' ? { color: COLORS.success } : null,
+                    ]}
+                    numberOfLines={2}>
+                    {r.value}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </ScrollView>
           <View style={styles.previewFooter}>
-            <TouchableOpacity onPress={onClose} style={styles.previewCancel}>
-              <Text style={styles.previewCancelText}>{cancelText}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onConfirm} style={styles.previewConfirm}>
-              <Icon name="check-circle" size={18} color={COLORS.white} />
-              <Text style={styles.previewConfirmText}>{confirmText}</Text>
-            </TouchableOpacity>
+            <Btn kind="ghost" size="lg" onPress={onClose}>
+              Edit · संपादित
+            </Btn>
+            <View style={{ flex: 1 }}>
+              <Btn full size="lg" onPress={onConfirm} icon={<Icon name="check" size={16} color={COLORS.white} />}>
+                Confirm save · सेव करें
+              </Btn>
+            </View>
           </View>
         </View>
       </View>
     </Modal>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  loading: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  loadingText: { fontSize: 13, color: COLORS.grey500 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.grey200,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.grey100,
+  container: { flex: 1, backgroundColor: COLORS.cream },
+  loading: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.cream,
+    gap: 12,
   },
-  title: { fontSize: 17, fontWeight: '800', color: COLORS.grey800 },
-  subtitle: { fontSize: 12, color: COLORS.grey500, marginTop: 2, fontFamily: 'monospace' },
-  doneBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: COLORS.success,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
+  loadingText: {
+    fontSize: 13,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
   },
-  doneBadgeText: { color: COLORS.white, fontSize: 11, fontWeight: '700' },
+  serialChip: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.mono,
+    paddingRight: 6,
+  },
   scroll: { flex: 1 },
-  scrollContent: { padding: 14, paddingBottom: 30 },
-  voterCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: COLORS.grey200,
+  scrollContent: { padding: 14, paddingBottom: 96, gap: 12 },
+  heroRow: { flexDirection: 'row', alignItems: 'center' },
+  heroPhoto: { width: 56, height: 56, borderRadius: 28, backgroundColor: COLORS.indigoSoft },
+  heroName: {
+    fontSize: 16,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
   },
-  hintBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    padding: 12,
-    marginBottom: 12,
-    borderRadius: 12,
-    backgroundColor: COLORS.primaryLight,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
+  heroNameHi: {
+    fontSize: 13,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    marginTop: 1,
   },
-  hintBannerText: {
-    flex: 1,
-    fontSize: 12,
-    color: COLORS.primary,
-    fontWeight: '600',
-    lineHeight: 17,
-  },
-  voterHero: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: COLORS.grey100 },
-  voterPhoto: { width: 56, height: 56, borderRadius: 28, backgroundColor: COLORS.grey100 },
-  voterAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: COLORS.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  voterInitial: { fontSize: 22, fontWeight: '800', color: COLORS.primary },
-  voterHeroName: { fontSize: 17, fontWeight: '800', color: COLORS.grey800 },
-  voterHeroMeta: { fontSize: 13, color: COLORS.grey500, marginTop: 3 },
-  voterGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingTop: 12, gap: 14 },
-  infoCell: { width: '45%' },
-  infoLabel: { fontSize: 10, color: COLORS.grey500, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  infoValue: { fontSize: 13, color: COLORS.grey800, fontWeight: '600', marginTop: 3 },
-  section: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: COLORS.grey200,
-  },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: COLORS.grey800,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  required: { color: COLORS.primary },
-  sectionHelper: { fontSize: 11, color: COLORS.primary, fontWeight: '700' },
-  intentionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  intentionCard: {
-    width: '48%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: COLORS.grey200,
-    backgroundColor: COLORS.white,
-  },
-  intentionText: { fontSize: 12, fontWeight: '700', color: COLORS.grey800, flex: 1 },
-  input: {
-    backgroundColor: COLORS.grey100,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: COLORS.grey800,
-  },
-  inputWithIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: COLORS.grey100,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-  },
-  inputInner: { flex: 1, paddingVertical: 12, fontSize: 14, color: COLORS.grey800 },
-  textarea: { minHeight: 80, textAlignVertical: 'top' },
-  selectBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.grey100,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  selectText: { fontSize: 14, color: COLORS.grey800, fontWeight: '600', flex: 1 },
-  selectPlaceholder: { color: COLORS.grey400, fontWeight: '500' },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
+  heroChips: { flexDirection: 'row', marginTop: 6 },
+  heroEpicRow: {
+    marginTop: 12,
+    paddingHorizontal: 10,
     paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: COLORS.grey100,
-    borderWidth: 1,
-    borderColor: COLORS.grey200,
-  },
-  chipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  chipText: { fontSize: 12, color: COLORS.grey700, fontWeight: '600' },
-  chipTextActive: { color: COLORS.white },
-  photoBox: { position: 'relative', marginBottom: 10 },
-  photo: { width: '100%', height: 200, borderRadius: 12, backgroundColor: COLORS.grey100 },
-  photoRemove: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  photoBtnRow: { flexDirection: 'row', gap: 10 },
-  secondaryBtn: {
-    flex: 1,
+    backgroundColor: COLORS.cream,
+    borderRadius: RADIUS.sm,
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    borderWidth: 1.5,
-    borderColor: COLORS.primary,
-    borderRadius: 12,
-    backgroundColor: COLORS.primaryLight,
+    justifyContent: 'space-between',
   },
-  secondaryBtnText: { color: COLORS.primary, fontSize: 13, fontWeight: '700' },
-  footer: {
-    padding: 14,
-    paddingBottom: 18,
-    backgroundColor: COLORS.white,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.grey200,
+  heroEpic: {
+    fontSize: 12,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.monoMedium,
+    fontWeight: '500',
   },
-  saveBtn: {
+  intentionGrid: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexWrap: 'wrap',
     gap: 8,
-    paddingVertical: 15,
-    borderRadius: 14,
-    backgroundColor: COLORS.primary,
+    rowGap: 8,
+    justifyContent: 'space-between',
   },
-  saveBtnText: { color: COLORS.white, fontSize: 16, fontWeight: '800' },
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, rowGap: 6 },
+  textareaBox: {
+    backgroundColor: COLORS.paper,
+    borderWidth: 1,
+    borderColor: COLORS.hairline,
+    borderRadius: RADIUS.lg,
+    padding: 12,
+    minHeight: 80,
+  },
+  textarea: {
+    fontSize: 13,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
+    padding: 0,
+    textAlignVertical: 'top',
+    minHeight: 60,
+  },
+  photoBlock: { flexDirection: 'row' },
+  photoBox: {
+    width: 110,
+    height: 130,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    backgroundColor: COLORS.hairline,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.hairline,
+  },
+  photoImg: { width: '100%', height: '100%' },
+  photoPlaceholder: {
+    fontSize: 10,
+    color: COLORS.muted,
+    textAlign: 'center',
+    fontFamily: FONTS.mono,
+  },
+  photoOk: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 999,
+    backgroundColor: COLORS.successSoft,
+  },
+  photoOkText: {
+    fontSize: 9,
+    color: '#0F4A2D',
+    fontFamily: FONTS.monoBold,
+    fontWeight: '700',
+  },
+  photoNote: {
+    fontSize: 12,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
+    lineHeight: 18,
+  },
+  photoNoteHi: { color: COLORS.mutedDeep, fontFamily: FONTS.hi, opacity: 0.8 },
+  photoRemove: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
+  photoRemoveText: {
+    fontSize: 11,
+    color: COLORS.danger,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    backgroundColor: COLORS.cream,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.hairlineSoft,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15,27,45,0.55)',
+    justifyContent: 'flex-end',
+  },
   modalSheet: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 18,
+    backgroundColor: COLORS.paper,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 14,
     paddingTop: 10,
     paddingBottom: 18,
     maxHeight: '78%',
   },
   modalHandle: {
     alignSelf: 'center',
-    width: 42,
+    width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: COLORS.grey300,
+    backgroundColor: COLORS.hairline,
     marginBottom: 8,
   },
   modalHeader: {
@@ -971,21 +960,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingBottom: 10,
-    gap: 12,
   },
-  modalTitle: { fontSize: 16, fontWeight: '800', color: COLORS.grey800 },
-  modalSubtitle: { fontSize: 12, color: COLORS.grey500, marginTop: 2, fontWeight: '600' },
+  modalTitle: {
+    fontSize: 16,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+    marginTop: 2,
+  },
   modalSearch: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: COLORS.grey100,
-    borderRadius: 12,
+    height: 44,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    backgroundColor: COLORS.cream,
+    borderRadius: RADIUS.pill,
+    borderWidth: 1,
+    borderColor: COLORS.hairline,
     marginBottom: 8,
   },
-  modalSearchInput: { flex: 1, padding: 0, fontSize: 14, color: COLORS.grey800 },
+  modalSearchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 13,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
+    padding: 0,
+  },
   modalList: { paddingTop: 4 },
   modalItem: {
     flexDirection: 'row',
@@ -995,60 +1002,79 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 10,
   },
-  modalItemActive: { backgroundColor: COLORS.primaryLight },
-  modalItemText: { fontSize: 14, color: COLORS.grey800, fontWeight: '600', flex: 1 },
-  modalItemTextActive: { color: COLORS.primary, fontWeight: '800' },
+  modalItemActive: { backgroundColor: COLORS.indigoSoft },
+  modalItemText: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+  },
+  modalItemTextActive: { color: COLORS.indigoDeep },
   modalEmpty: {
     textAlign: 'center',
-    color: COLORS.grey500,
+    color: COLORS.muted,
     fontSize: 13,
     paddingVertical: 28,
-    fontWeight: '600',
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
+  },
+  previewName: {
+    fontSize: 15,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiBold,
+    fontWeight: '700',
+  },
+  previewNameHi: {
+    fontSize: 12,
+    color: COLORS.mutedDeep,
+    fontFamily: FONTS.hi,
+  },
+  previewEpic: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.mono,
+    marginTop: 4,
   },
   previewRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
     paddingVertical: 10,
+    paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.grey100,
+    borderBottomColor: COLORS.hairlineSoft,
   },
   previewLabel: {
-    width: '42%',
     fontSize: 11,
-    color: COLORS.grey500,
+    color: COLORS.muted,
+    fontFamily: FONTS.uiBold,
     fontWeight: '700',
-    textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
-  previewValue: { flex: 1, fontSize: 13, color: COLORS.grey800, fontWeight: '600' },
+  previewLabelHi: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontFamily: FONTS.hi,
+    opacity: 0.8,
+  },
+  previewValue: {
+    flex: 1,
+    fontSize: 13,
+    color: COLORS.ink,
+    fontFamily: FONTS.uiSemiBold,
+    fontWeight: '600',
+    textAlign: 'right',
+    marginLeft: 12,
+  },
   previewFooter: {
     flexDirection: 'row',
-    gap: 10,
     paddingTop: 12,
+    paddingHorizontal: 14,
+    paddingBottom: 4,
+    gap: 8,
     borderTopWidth: 1,
-    borderTopColor: COLORS.grey100,
+    borderTopColor: COLORS.hairlineSoft,
   },
-  previewCancel: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 12,
-    backgroundColor: COLORS.grey100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  previewCancelText: { fontSize: 14, fontWeight: '700', color: COLORS.grey700 },
-  previewConfirm: {
-    flex: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 13,
-    borderRadius: 12,
-    backgroundColor: COLORS.primary,
-  },
-  previewConfirmText: { color: COLORS.white, fontSize: 15, fontWeight: '800' },
 });
 
 export default VoterVisitScreen;

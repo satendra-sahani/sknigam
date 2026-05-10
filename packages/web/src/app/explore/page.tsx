@@ -10,6 +10,18 @@ import DiscrepancyImportModal from '@/components/DiscrepancyImportModal';
 import BoothCharts from '@/components/BoothCharts';
 import AssignmentFormModal from '@/components/AssignmentFormModal';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  FiltersButton,
+  ActiveChips,
+  SharedVoterFiltersModal,
+} from '@/components/filters';
+import {
+  describeVoterFilters,
+  clearVoterChip,
+  emptyVoterFilters,
+  type VoterFilterState,
+  type VoterChip,
+} from '@/lib/voterFilters';
 
 interface StateSummary {
   state: string;
@@ -616,6 +628,9 @@ export default function ExplorePage() {
   const [view, setView] = useState<'list' | 'charts'>('list');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [exploreFilters, setExploreFilters] = useState<VoterFilterState>(emptyVoterFilters);
+  const exploreChips = describeVoterFilters(exploreFilters);
 
   // Current page index driving the server-side pager.  Reset to 1 when
   // the drill level, tab, search, or status filter changes so the user
@@ -951,8 +966,24 @@ export default function ExplorePage() {
           </>
         )}
         <div className="flex-1" />
+        <FiltersButton onClick={() => setFiltersOpen(true)} count={exploreChips.length} />
         <LanguageSwitcher lang={lang} setLang={setLang} />
       </nav>
+
+      <ActiveChips
+        chips={exploreChips}
+        onRemove={(chip) => {
+          const next = clearVoterChip(exploreFilters, chip as VoterChip);
+          setExploreFilters(next);
+          setDateFrom(next.visitDateFrom);
+          setDateTo(next.visitDateTo);
+        }}
+        onClearAll={() => {
+          setExploreFilters(emptyVoterFilters);
+          setDateFrom('');
+          setDateTo('');
+        }}
+      />
 
       {/* Header card */}
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white">
@@ -1350,6 +1381,22 @@ export default function ExplorePage() {
           defaultAc={ac}
         />
       )}
+
+      <SharedVoterFiltersModal
+        open={filtersOpen}
+        title="Filter explore"
+        subtitle="Survey-time fields scope every chart and the voter sub-list at this drill level"
+        initial={exploreFilters}
+        onClose={() => setFiltersOpen(false)}
+        onApply={(next) => {
+          setExploreFilters(next);
+          // Keep the existing inline charts-mode date inputs in sync — they
+          // read the same `dateFrom`/`dateTo` setters the modal owns.
+          setDateFrom(next.visitDateFrom);
+          setDateTo(next.visitDateTo);
+          setFiltersOpen(false);
+        }}
+      />
     </div>
   );
 }

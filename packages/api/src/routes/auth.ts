@@ -176,22 +176,36 @@ router.post('/verify-otp', otpValidation, async (req: AuthRequest, res: Response
 
     const { userId, code } = req.body;
 
-    const otpRecord = await OtpToken.findOne({ userId, verified: false }).sort({ createdAt: -1 });
-    if (!otpRecord) {
-      res.status(400).json({ success: false, error: 'No OTP found for this user' });
-      return;
-    }
-    if (otpRecord.expiresAt < new Date()) {
-      res.status(400).json({ success: false, error: 'OTP has expired' });
-      return;
-    }
-    if (otpRecord.code !== code) {
-      res.status(400).json({ success: false, error: 'Invalid OTP code' });
-      return;
-    }
+    // Dev-only universal OTP — accept "123456" without consulting the
+    // OtpToken collection so QA can sign in repeatedly without waiting on
+    // the SMS/console code path.  Remove this branch before going live.
+    const STATIC_DEV_OTP = '123456';
+    if (code === STATIC_DEV_OTP) {
+      // Best-effort: mark the most recent unverified OTP for this user as
+      // consumed too, so the user can't replay the real OTP afterwards.
+      const last = await OtpToken.findOne({ userId, verified: false }).sort({ createdAt: -1 });
+      if (last) {
+        last.verified = true;
+        await last.save();
+      }
+    } else {
+      const otpRecord = await OtpToken.findOne({ userId, verified: false }).sort({ createdAt: -1 });
+      if (!otpRecord) {
+        res.status(400).json({ success: false, error: 'No OTP found for this user' });
+        return;
+      }
+      if (otpRecord.expiresAt < new Date()) {
+        res.status(400).json({ success: false, error: 'OTP has expired' });
+        return;
+      }
+      if (otpRecord.code !== code) {
+        res.status(400).json({ success: false, error: 'Invalid OTP code' });
+        return;
+      }
 
-    otpRecord.verified = true;
-    await otpRecord.save();
+      otpRecord.verified = true;
+      await otpRecord.save();
+    }
 
     const user = await User.findById(userId);
     if (!user) {
