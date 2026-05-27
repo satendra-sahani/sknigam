@@ -10,6 +10,11 @@ import { createAuditLog } from '../middleware/audit';
 import { upload } from '../middleware/upload';
 import { mongoIdParam, paginationQuery } from '../utils/validators';
 import {
+  getPoliticianScope,
+  applyVoterScope,
+  isBoothInScope,
+} from '../utils/politicianScope';
+import {
   parseEciRollPdf,
   ImageOnlyPdfError,
   UnreadablePdfError,
@@ -35,8 +40,10 @@ const VALID_GRIEVANCES = new Set([
 ]);
 
 // Staff may only see voters in booths they are assigned to (Stage 3 will enforce;
-// Stage 2 allows super_admin full access, staff/politician read-only by constituency).
-function buildVoterFilter(req: AuthRequest): any {
+// Stage 2 allows super_admin full access, staff read-only by constituency).
+// Politicians are scoped to `User.assignedBoothIds` (or AC-wide fallback for
+// legacy accounts) via `applyVoterScope`.
+async function buildVoterFilter(req: AuthRequest): Promise<any> {
   const filter: any = {};
   const q = req.query;
 
@@ -106,10 +113,11 @@ function buildVoterFilter(req: AuthRequest): any {
     ];
   }
 
-  // Politicians only see their constituency
-  if (req.user?.role === 'politician' && req.user.assemblyConstituency) {
-    filter.assemblyConstituency = req.user.assemblyConstituency;
-  }
+  // Politicians: restrict to admin-assigned booths (assignedBoothIds).
+  // Falls back to AC-wide for legacy politicians, returns nothing if
+  // admin hasn't scoped them at all.  Helper guards non-politicians.
+  const polScope = await getPoliticianScope(req);
+  applyVoterScope(filter, polScope);
 
   return filter;
 }
@@ -125,7 +133,7 @@ router.get(
       const page = parseInt(req.query.page as string) || 1;
       const limit = Math.min(parseInt(req.query.limit as string) || 25, 200);
       const skip = (page - 1) * limit;
-      const filter = buildVoterFilter(req);
+      const filter = await buildVoterFilter(req);
 
       const [voters, total] = await Promise.all([
         Voter.find(filter)
@@ -166,12 +174,15 @@ router.get(
         res.status(404).json({ success: false, error: 'Voter not found' });
         return;
       }
-      if (
-        req.user?.role === 'politician' &&
-        req.user.assemblyConstituency &&
-        voter.assemblyConstituency !== req.user.assemblyConstituency
-      ) {
-        res.status(403).json({ success: false, error: 'Not in your constituency' });
+      // Politicians: must be in their assigned booth scope.  Helper
+      // returns true for non-politician roles so admins/staff pass
+      // through untouched.
+      // voter.boothId may be populated (an object with _id) or a raw
+      // ObjectId — extract the actual ID for the scope check.
+      const polScope = await getPoliticianScope(req);
+      const boothIdRaw = voter.boothId?._id ?? voter.boothId;
+      if (!(await isBoothInScope(boothIdRaw, polScope))) {
+        res.status(403).json({ success: false, error: 'Voter not in your assigned scope' });
         return;
       }
       res.json({ success: true, data: voter });
@@ -847,7 +858,7 @@ router.get(
   requireRole('super_admin', 'politician'),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const baseFilter = buildVoterFilter(req);
+      const baseFilter = await buildVoterFilter(req);
       const [total, verified, male, female] = await Promise.all([
         Voter.countDocuments(baseFilter),
         Voter.countDocuments({ ...baseFilter, verificationStatus: true }),
@@ -880,7 +891,7 @@ router.get(
   requireRole('super_admin', 'politician'),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const baseFilter = buildVoterFilter(req);
+      const baseFilter = await buildVoterFilter(req);
 
       const groupBy = (field: string): mongoose.PipelineStage[] => [
         { $match: baseFilter },

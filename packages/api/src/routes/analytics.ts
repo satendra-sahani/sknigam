@@ -7,6 +7,10 @@ import { authenticate, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { UP_DISTRICTS, UP_CONSTITUENCIES } from '../data/upReferenceData';
 import { STATE_HI, DISTRICT_HI, AC_HI_BY_NUMBER, AC_HI_BY_NAME } from '../data/upHindiNames';
+import {
+  getPoliticianScope,
+  applyBoothScope as applyBoothScopeToMatch,
+} from '../utils/politicianScope';
 
 const router = Router();
 
@@ -107,8 +111,28 @@ async function buildScope(req: AuthRequest): Promise<any> {
     if (Object.keys(range).length > 0) scope.visitDate = range;
   }
 
-  if (req.user?.role === 'politician' && req.user.assemblyConstituency) {
-    scope.assemblyConstituency = req.user.assemblyConstituency;
+  if (req.user?.role === 'politician') {
+    // Narrow to the admin-assigned booth slice.  We translate the slice
+    // back into a `boothId` filter on the Voter collection.
+    const polScope = await getPoliticianScope(req);
+    if (polScope.empty) {
+      scope.boothId = new mongoose.Types.ObjectId(); // forces empty set
+    } else if (polScope.boothIds && polScope.boothIds.length > 0) {
+      // If a district filter already produced a boothId list, intersect;
+      // otherwise just set.
+      if (scope.boothId && scope.boothId.$in) {
+        const existing: any[] = scope.boothId.$in;
+        const allowed = new Set(polScope.boothIds.map((b) => b.toString()));
+        const overlap = existing.filter((id) => allowed.has(id.toString()));
+        scope.boothId = overlap.length > 0
+          ? { $in: overlap }
+          : new mongoose.Types.ObjectId();
+      } else {
+        scope.boothId = { $in: polScope.boothIds };
+      }
+    } else if (polScope.assemblyConstituency) {
+      scope.assemblyConstituency = polScope.assemblyConstituency;
+    }
   }
   if (req.user?.role === 'staff') {
     const assignments = await VoterAssignment.find({ staffId: req.user.userId, isActive: true }).select('boothId');
@@ -322,8 +346,12 @@ async function buildBoothScope(req: AuthRequest): Promise<any> {
   if (req.query.district) match.district = req.query.district;
   if (req.query.assemblyConstituency) match.assemblyConstituency = req.query.assemblyConstituency;
 
-  if (req.user?.role === 'politician' && req.user.assemblyConstituency) {
-    match.assemblyConstituency = req.user.assemblyConstituency;
+  // Politicians: narrow to their assigned booths (or AC if legacy).
+  // Helper sets `_id: {$in: [...]}` for booth scoping or `_id: <bogus>`
+  // when no scope is set, so the result is always closed by default.
+  if (req.user?.role === 'politician') {
+    const polScope = await getPoliticianScope(req);
+    applyBoothScopeToMatch(match, polScope);
   }
   if (req.user?.role === 'staff') {
     const assignments = await VoterAssignment.find({ staffId: req.user.userId, isActive: true }).select('boothId');

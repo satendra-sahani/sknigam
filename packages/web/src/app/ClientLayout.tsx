@@ -1,19 +1,58 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from '@/hooks/useAuth';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import AuthGuard from '@/components/AuthGuard';
 
-const publicRoutes = ['/login'];
+// Routes that bypass the AuthGuard and sidebar/header chrome.
+// "/" is the public Pollistics landing page; anything that needs auth
+// should live under /dashboard, /voters, /booths, etc.
+const publicRoutes = ['/login', '/', '/download', '/about', '/search', '/explore-public', '/report'];
+// Routes that handle their OWN auth + chrome and need no outer chrome
+// from this layout.  /politician/* uses the Civic Insight palette and
+// its own PoliticianShell, so we skip the admin slate Sidebar+Header
+// for that whole subtree.  Auth gating for those routes is enforced by
+// `app/politician/layout.tsx`.
+const selfShelledPrefixes = ['/politician'];
 const COLLAPSED_KEY = 'sidebar-collapsed';
+
+/**
+ * Global redirect guard for the politician role.  Sits inside the
+ * AuthProvider so we have access to `useAuth()`, and watches every
+ * navigation.  If the logged-in user is a politician on any path that
+ * is NOT under `/politician/*` (and not `/login`), bounce them to
+ * `/politician`.  Belt-and-braces over individual page-level redirects
+ * — politicians should never even see an admin route flash.
+ */
+function PoliticianRouteGuard({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading || !user) return;
+    if (user.role !== 'politician') return;
+    if (!pathname) return;
+    if (pathname === '/login') return;
+    if (pathname === '/politician' || pathname.startsWith('/politician/')) return;
+    // Public marketing pages — let politicians read them.
+    if (['/', '/download', '/about', '/search', '/explore-public', '/report'].includes(pathname)) return;
+    router.replace('/politician');
+  }, [user, loading, pathname, router]);
+
+  return <>{children}</>;
+}
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isPublicRoute = publicRoutes.includes(pathname || '');
+  const isSelfShelled = selfShelledPrefixes.some(
+    (p) => pathname === p || pathname?.startsWith(p + '/'),
+  );
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
@@ -44,22 +83,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           },
         }}
       />
-      {isPublicRoute ? (
-        children
-      ) : (
-        <AuthGuard>
-          <div className="flex min-h-screen bg-slate-50">
-            <Sidebar />
-            <div
-              className="flex-1 flex flex-col min-h-screen transition-all duration-200"
-              style={{ marginLeft: sidebarCollapsed ? 80 : 280 }}
-            >
-              <Header />
-              <main className="flex-1 p-8 page-enter">{children}</main>
+      <PoliticianRouteGuard>
+        {isPublicRoute || isSelfShelled ? (
+          children
+        ) : (
+          <AuthGuard>
+            <div className="flex min-h-screen bg-slate-50">
+              <Sidebar />
+              <div
+                className="flex-1 flex flex-col min-h-screen transition-all duration-200"
+                style={{ marginLeft: sidebarCollapsed ? 80 : 280 }}
+              >
+                <Header />
+                <main className="flex-1 p-8 page-enter">{children}</main>
+              </div>
             </div>
-          </div>
-        </AuthGuard>
-      )}
+          </AuthGuard>
+        )}
+      </PoliticianRouteGuard>
     </AuthProvider>
   );
 }

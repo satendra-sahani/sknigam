@@ -124,6 +124,52 @@ router.put('/:id', authenticate, requireRole('super_admin'), mongoIdParam, async
   }
 });
 
+// POST /api/staff/:id/password — super_admin sets a new password for a staff
+// member.  Uses the document `.save()` path (not findByIdAndUpdate) so the
+// User pre-save hook hashes the value with bcrypt; also clears any lockout
+// state so the staff can sign in straight away.
+router.post(
+  '/:id/password',
+  authenticate,
+  requireRole('super_admin'),
+  mongoIdParam,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({ success: false, error: 'Invalid ID', data: errors.array() });
+        return;
+      }
+      const password: string = String(req.body?.password || '');
+      if (password.length < 6) {
+        res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
+        return;
+      }
+      const user = await User.findById(req.params.id);
+      if (!user || user.role !== 'staff') {
+        res.status(404).json({ success: false, error: 'Staff not found' });
+        return;
+      }
+      user.hashedPassword = password; // pre-save hook hashes
+      user.failedLoginAttempts = 0;
+      user.lockedUntil = undefined;
+      await user.save();
+      await createAuditLog(
+        req.user!.userId,
+        req.user!.role,
+        'user_update',
+        req,
+        user._id.toString(),
+        undefined,
+        { passwordChanged: true },
+      );
+      res.json({ success: true, message: 'Password updated' });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  },
+);
+
 // DELETE /api/staff/:id — soft delete
 router.delete('/:id', authenticate, requireRole('super_admin'), mongoIdParam, async (req: AuthRequest, res: Response): Promise<void> => {
   try {

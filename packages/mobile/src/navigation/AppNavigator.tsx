@@ -24,6 +24,12 @@ import StateScreen from '../screens/hierarchy/StateScreen';
 import DistrictsScreen from '../screens/hierarchy/DistrictsScreen';
 import ConstituenciesScreen from '../screens/hierarchy/ConstituenciesScreen';
 import BoothsInAcScreen from '../screens/hierarchy/BoothsInAcScreen';
+import InsightTabs from './InsightTabs';
+import InsightDistrictsScreen from '../screens/politician/InsightDistricts';
+import InsightACsScreen from '../screens/politician/InsightACs';
+import InsightBoothsScreen from '../screens/politician/InsightBooths';
+import InsightVoterListScreen from '../screens/politician/InsightVoterList';
+import InsightVoterProfileScreen from '../screens/politician/InsightVoterProfile';
 
 import { RootStackParamList, MainTabParamList } from '../types';
 
@@ -74,7 +80,7 @@ function MainTabs() {
 }
 
 const AppNavigator: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const [minSplashElapsed, setMinSplashElapsed] = useState(false);
 
   useEffect(() => {
@@ -86,6 +92,11 @@ const AppNavigator: React.FC = () => {
     return <AnimatedSplash />;
   }
 
+  // Politicians get the Insight Pro surface (read-only analytics for
+  // admin-assigned booths only).  Staff and super_admin land on the
+  // existing field-staff tabs — Home / Booths / Explore / Queue.
+  const isPolitician = user?.role === 'politician';
+
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -93,6 +104,27 @@ const AppNavigator: React.FC = () => {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
+          </>
+        ) : isPolitician ? (
+          // Politician root — Insight Pro tabs + read-only drill stack
+          // (Districts → ACs → Booths → VoterList → VoterProfile).  No
+          // field-staff write screens are wired in for this role.
+          <>
+            <Stack.Screen name="MainTabs" component={InsightTabs} />
+            <Stack.Screen
+              name="InsightDistricts"
+              component={InsightDistrictsScreen}
+            />
+            <Stack.Screen name="InsightACs" component={InsightACsScreen} />
+            <Stack.Screen name="InsightBooths" component={InsightBoothsScreen} />
+            <Stack.Screen
+              name="InsightVoterList"
+              component={InsightVoterListScreen}
+            />
+            <Stack.Screen
+              name="InsightVoterProfile"
+              component={InsightVoterProfileScreen}
+            />
           </>
         ) : (
           <>

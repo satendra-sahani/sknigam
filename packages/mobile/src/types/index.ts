@@ -113,6 +113,17 @@ export type RootStackParamList = {
   Districts: { state: string };
   Constituencies: { district: string };
   BoothsInAc: { district: string; assemblyConstituency: string };
+  // Politician-only stack (drill 04 → 05 → 06 → 07 → 09 of the design canvas)
+  InsightDistricts: undefined;
+  InsightACs: { district: string };
+  InsightBooths: { district?: string; assemblyConstituency: string };
+  InsightVoterList: {
+    boothId?: string;
+    boothName?: string;
+    partNumber?: number;
+    assemblyConstituency?: string;
+  };
+  InsightVoterProfile: { voterId: string };
 };
 
 export type MainTabParamList = {
@@ -120,6 +131,15 @@ export type MainTabParamList = {
   Assignments: undefined;
   Explore: undefined;
   Queue: undefined;
+};
+
+// Politician-only tab navigator (Insight Pro surface).  Mirrors the
+// prototype's `InsightTabBar` — Home, Explore, Insights, Saved.
+export type InsightTabParamList = {
+  InsightHome: undefined;
+  InsightExplore: undefined;
+  InsightInsights: undefined;
+  InsightSaved: undefined;
 };
 
 export interface HierarchyStateSummary {

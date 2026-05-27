@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import StaffFormModal from '@/components/StaffFormModal';
+import StaffPasswordModal from '@/components/StaffPasswordModal';
 import { SkeletonTable } from '@/components/Skeleton';
 import {
   FiltersButton,
@@ -55,6 +56,7 @@ export default function StaffPage() {
 
   const [editing, setEditing] = useState<StaffUser | null>(null);
   const [creating, setCreating] = useState(false);
+  const [pwdTarget, setPwdTarget] = useState<StaffUser | null>(null);
 
   const canManage = user?.role === 'super_admin';
 
@@ -173,6 +175,11 @@ export default function StaffPage() {
                     {canManage && (
                       <>
                         <button onClick={() => setEditing(s)} className="text-red-600 hover:text-red-700 text-sm font-medium">Edit</button>
+                        <button
+                          onClick={() => setPwdTarget(s)}
+                          className="text-slate-700 hover:text-slate-900 text-sm font-medium">
+                          Password
+                        </button>
                         {s.isActive && <button onClick={() => handleDeactivate(s)} className="text-slate-500 hover:text-rose-600 text-sm">Deactivate</button>}
                       </>
                     )}
@@ -206,6 +213,14 @@ export default function StaffPage() {
 
       {(creating || editing) && (
         <StaffFormModal staff={editing} onClose={() => { setCreating(false); setEditing(null); }} onSaved={() => { setCreating(false); setEditing(null); load(); }} />
+      )}
+
+      {pwdTarget && (
+        <StaffPasswordModal
+          staffId={pwdTarget._id}
+          staffName={pwdTarget.name}
+          onClose={() => setPwdTarget(null)}
+        />
       )}
     </div>
   );

@@ -22,7 +22,11 @@ export default function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   useEffect(() => {
     if (!loading && isLoggedIn && allowedRoles && user) {
       if (!allowedRoles.includes(user.role)) {
-        router.push('/dashboard');
+        // Politicians have their own surface; everyone else lands on
+        // the admin dashboard.  Keeps users out of pages they're not
+        // licensed to see without spitting them onto a slate-admin
+        // screen they'd have no business on.
+        router.push(user.role === 'politician' ? '/politician' : '/dashboard');
       }
     }
   }, [loading, isLoggedIn, allowedRoles, user, router]);

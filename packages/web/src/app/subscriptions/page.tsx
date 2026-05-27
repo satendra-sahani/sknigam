@@ -1,11 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { SkeletonTable } from '@/components/Skeleton';
+import SubscriptionAdminModal from '@/components/SubscriptionAdminModal';
+import SubscriptionReassignModal from '@/components/SubscriptionReassignModal';
+import StaffPasswordModal from '@/components/StaffPasswordModal';
 
 interface Tier {
   key: 'basic' | 'standard' | 'premium';
@@ -37,6 +41,12 @@ declare global {
 
 export default function SubscriptionsPage() {
   const { user } = useAuth();
+  const router = useRouter();
+  // Politicians get their own /politician home — they shouldn't be
+  // managing subscriptions from the admin app.
+  useEffect(() => {
+    if (user?.role === 'politician') router.replace('/politician');
+  }, [user, router]);
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [paymentEnabled, setPaymentEnabled] = useState(false);
   const [keyId, setKeyId] = useState<string | null>(null);
@@ -45,6 +55,18 @@ export default function SubscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [constituency, setConstituency] = useState('');
+  const [adminCreateOpen, setAdminCreateOpen] = useState(false);
+  const [reassignTarget, setReassignTarget] = useState<{
+    subscriptionId: string;
+    politician: { _id: string; name?: string; email?: string };
+    currentConstituency: string;
+    currentDistrict?: string;
+    currentBoothIds: string[];
+  } | null>(null);
+  const [passwordTarget, setPasswordTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const isAdmin = user?.role === 'super_admin';
   const isPolitician = user?.role === 'politician';
@@ -155,11 +177,22 @@ export default function SubscriptionsPage() {
     <div className="space-y-4">
       {paymentEnabled && <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />}
 
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">Subscriptions</h1>
-        <p className="text-sm text-slate-500">
-          {isPolitician ? 'Pick a plan to unlock voter insights for your constituency' : 'Manage politician subscriptions'}
-        </p>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">Subscriptions</h1>
+          <p className="text-sm text-slate-500">
+            {isPolitician
+              ? 'Pick a plan to unlock voter insights for your constituency'
+              : 'Manage politician subscriptions'}
+          </p>
+        </div>
+        {isAdmin && (
+          <button
+            onClick={() => setAdminCreateOpen(true)}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition shadow-sm self-start">
+            + Add Politician
+          </button>
+        )}
       </div>
 
       {!paymentEnabled && (
@@ -300,11 +333,33 @@ export default function SubscriptionsPage() {
                 )}
                 {!loading &&
                   all.map((s) => {
-                    const pol = s as any as { politicianId: { name: string; email: string } | string };
+                    const pol = s as any as {
+                      politicianId:
+                        | {
+                            _id: string;
+                            name: string;
+                            email: string;
+                            district?: string;
+                            assignedBoothIds?: any[];
+                          }
+                        | string;
+                    };
+                    const politicianId =
+                      typeof pol.politicianId === 'object'
+                        ? pol.politicianId._id
+                        : (pol.politicianId as string);
                     const politicianName =
                       typeof pol.politicianId === 'object' ? pol.politicianId.name : '—';
                     const politicianEmail =
                       typeof pol.politicianId === 'object' ? pol.politicianId.email : '';
+                    const politicianDistrict =
+                      typeof pol.politicianId === 'object' ? pol.politicianId.district : undefined;
+                    const politicianBoothIds: string[] =
+                      typeof pol.politicianId === 'object' &&
+                      Array.isArray(pol.politicianId.assignedBoothIds)
+                        ? pol.politicianId.assignedBoothIds.map((x: any) => String(x))
+                        : [];
+                    const canReassign = s.status === 'active' || s.status === 'pending';
                     return (
                       <tr key={s._id} className="hover:bg-slate-50">
                         <td className="px-4 py-3">
@@ -332,13 +387,47 @@ export default function SubscriptionsPage() {
                           {new Date(s.endDate).toLocaleDateString('en-IN')}
                         </td>
                         <td className="px-4 py-3 text-right">
-                          {s.status === 'active' && (
-                            <button
-                              onClick={() => handleCancel(s)}
-                              className="text-slate-500 hover:text-rose-600 text-sm">
-                              Cancel
-                            </button>
-                          )}
+                          <div className="inline-flex items-center gap-3">
+                            {politicianId && (
+                              <button
+                                onClick={() =>
+                                  setPasswordTarget({
+                                    id: politicianId,
+                                    name: politicianName,
+                                  })
+                                }
+                                className="text-slate-500 hover:text-slate-700 text-sm"
+                                title="Update password">
+                                Password
+                              </button>
+                            )}
+                            {canReassign && politicianId ? (
+                              <button
+                                onClick={() =>
+                                  setReassignTarget({
+                                    subscriptionId: s._id,
+                                    politician: {
+                                      _id: politicianId,
+                                      name: politicianName,
+                                      email: politicianEmail,
+                                    },
+                                    currentConstituency: s.assemblyConstituency,
+                                    currentDistrict: politicianDistrict,
+                                    currentBoothIds: politicianBoothIds,
+                                  })
+                                }
+                                className="text-slate-700 hover:text-slate-900 text-sm font-medium">
+                                Reassign
+                              </button>
+                            ) : null}
+                            {s.status === 'active' && (
+                              <button
+                                onClick={() => handleCancel(s)}
+                                className="text-slate-500 hover:text-rose-600 text-sm">
+                                Cancel
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -353,6 +442,42 @@ export default function SubscriptionsPage() {
         <div className="bg-white rounded-xl border border-slate-200/60 p-6 text-sm text-slate-500">
           You don't have access to subscriptions.
         </div>
+      )}
+
+      {adminCreateOpen && (
+        <SubscriptionAdminModal
+          tiers={tiers}
+          onClose={() => setAdminCreateOpen(false)}
+          onCreated={() => {
+            setAdminCreateOpen(false);
+            load();
+          }}
+        />
+      )}
+
+      {reassignTarget && (
+        <SubscriptionReassignModal
+          subscriptionId={reassignTarget.subscriptionId}
+          politician={reassignTarget.politician}
+          currentConstituency={reassignTarget.currentConstituency}
+          currentDistrict={reassignTarget.currentDistrict}
+          currentBoothIds={reassignTarget.currentBoothIds}
+          onClose={() => setReassignTarget(null)}
+          onSaved={() => {
+            setReassignTarget(null);
+            load();
+          }}
+        />
+      )}
+
+      {passwordTarget && (
+        <StaffPasswordModal
+          staffId={passwordTarget.id}
+          staffName={passwordTarget.name}
+          apiPath={`/subscriptions/politician/${passwordTarget.id}/password`}
+          onClose={() => setPasswordTarget(null)}
+          onSaved={() => setPasswordTarget(null)}
+        />
       )}
     </div>
   );

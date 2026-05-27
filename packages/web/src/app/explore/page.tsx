@@ -564,6 +564,10 @@ export default function ExplorePage() {
   const router = useRouter();
   const params = useSearchParams();
   const { user } = useAuth();
+  // Politicians get their own drill at /politician/explore.
+  useEffect(() => {
+    if (user?.role === 'politician') router.replace('/politician/explore');
+  }, [user, router]);
   const canAssign = user?.role === 'super_admin';
   const state = params.get('state') || 'Uttar Pradesh';
   const district = params.get('district') || '';

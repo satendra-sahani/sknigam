@@ -21,7 +21,9 @@ function signAccessToken(user: any): string {
   return jwt.sign(
     { userId: user._id, role: user.role, assemblyConstituency: user.assemblyConstituency },
     process.env.JWT_SECRET || 'secret',
-    { expiresIn: (process.env.JWT_EXPIRY || '30m') as any }
+    // Default 12h in dev — staying logged in for a working day is the right
+    // baseline.  Tighten in prod via the JWT_EXPIRY env var.
+    { expiresIn: (process.env.JWT_EXPIRY || '12h') as any }
   );
 }
 

@@ -5,6 +5,11 @@ import { authenticate, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { createAuditLog } from '../middleware/audit';
 import { boothValidation, mongoIdParam, paginationQuery } from '../utils/validators';
+import {
+  getPoliticianScope,
+  applyBoothScope,
+  isBoothInScope,
+} from '../utils/politicianScope';
 
 const router = Router();
 
@@ -26,6 +31,12 @@ router.get('/', authenticate, paginationQuery, async (req: AuthRequest, res: Res
         { assemblyConstituency: { $regex: search, $options: 'i' } },
       ];
     }
+
+    // Politicians only ever see booths admin assigned to them
+    // (User.assignedBoothIds).  Helper handles the legacy AC-wide
+    // fallback for politicians onboarded before the assignment flow.
+    const scope = await getPoliticianScope(req);
+    applyBoothScope(filter, scope);
 
     const [booths, total] = await Promise.all([
       Booth.find(filter).sort({ assemblyConstituency: 1, partNumber: 1 }).skip(skip).limit(limit),
@@ -52,6 +63,11 @@ router.get('/:id', authenticate, mongoIdParam, async (req: AuthRequest, res: Res
     const booth = await Booth.findById(req.params.id);
     if (!booth) {
       res.status(404).json({ success: false, error: 'Booth not found' });
+      return;
+    }
+    const scope = await getPoliticianScope(req);
+    if (!(await isBoothInScope(booth._id, scope))) {
+      res.status(403).json({ success: false, error: 'Booth not in your assigned scope' });
       return;
     }
     res.json({ success: true, data: booth });

@@ -11,15 +11,20 @@ interface NavItem {
   roles?: string[];
 }
 
+// Politicians never see this sidebar — their `/politician/*` surface
+// renders its own Civic-palette nav.  We still list `politician` in
+// roles for the public-facing admin app so a super_admin previewing
+// the politician surface continues to see these links if they ever
+// route back into the admin app on the same session.
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Campaign', href: '/explore' },
+  { label: 'Dashboard', href: '/dashboard', roles: ['super_admin', 'staff'] },
+  { label: 'Campaign', href: '/explore', roles: ['super_admin', 'staff'] },
   { label: 'Booths', href: '/booths', roles: ['super_admin'] },
   { label: 'Voters', href: '/voters', roles: ['super_admin', 'staff'] },
   { label: 'Staff', href: '/staff', roles: ['super_admin'] },
   { label: 'Assignments', href: '/assignments', roles: ['super_admin', 'staff'] },
-  { label: 'Analytics', href: '/analytics', roles: ['super_admin', 'politician'] },
-  { label: 'Subscriptions', href: '/subscriptions', roles: ['super_admin', 'politician'] },
+  { label: 'Analytics', href: '/analytics', roles: ['super_admin'] },
+  { label: 'Subscriptions', href: '/subscriptions', roles: ['super_admin'] },
   { label: 'Audit Log', href: '/audit-log', roles: ['super_admin'] },
 ];
 

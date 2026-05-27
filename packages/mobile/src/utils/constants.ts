@@ -1,7 +1,9 @@
 // Change API_URL to your laptop's LAN IP if your Wi-Fi changes.
 // Android emulator can also use 10.0.2.2 to reach the host.
-export const API_URL = 'http://192.168.29.5:9003/api';
-export const SOCKET_URL = 'http://192.168.29.5:9003';
+// Uses adb reverse tcp:9003 tcp:9003 — works over USB regardless of WiFi.
+// For WiFi-only testing, replace with your laptop's LAN IP.
+export const API_URL = 'http://10.63.200.114:9003/api';
+export const SOCKET_URL = 'http://10.63.200.114:9003';
 export const IMAGEKIT_PUBLIC_KEY = 'public_Lve3HzTkm0sFK1RfoosMkz+yDMk=';
 export const IMAGEKIT_URL_ENDPOINT = 'https://ik.imagekit.io/aiwats';
 
@@ -24,6 +26,14 @@ export const COLORS = {
   indigoSoft: '#E8ECF8',
   brass: '#B7873A',
   brassSoft: '#F4EBD6',
+
+  // Brand — extended
+  gold: '#C9A14C',
+  brassTint: '#FAF5E8',
+  indigoTint: '#F2F4FB',
+  paper2: '#F6F1E6',
+  signal: '#C2241F',
+  signalSoft: '#F8E1DE',
 
   // Semantic
   success: '#1F7A4E',

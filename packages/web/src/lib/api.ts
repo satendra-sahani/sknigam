@@ -65,8 +65,16 @@ api.interceptors.response.use(
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
 
+        // Only redirect if we're actually inside a protected page.  If the
+        // user is already on /login (or any /auth-* page), don't reload —
+        // it produces a flash loop that looks like "the home keeps going
+        // to login" even after they sign in.
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          const path = window.location.pathname;
+          const isAuthPage = path === '/login' || path.startsWith('/auth') || path === '/';
+          if (!isAuthPage) {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(refreshError);
       }

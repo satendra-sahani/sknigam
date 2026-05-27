@@ -31,16 +31,29 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const passwordRef = useRef<TextInput>(null);
 
-  const isValid = email.trim().length > 0 && password.length >= 6;
+  // Client-side validation — block submit until the user has typed an
+  // actual email-shaped string in the email field.  The server enforces
+  // the same rule via express-validator (and the lookup is email-only);
+  // we just want to fail fast on the device instead of round-tripping a
+  // 400 with a "Valid email is required" message.
+  const trimmedEmail = email.trim();
+  const isEmailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
+  const showEmailError = trimmedEmail.length > 0 && !isEmailFormat;
+  const isValid = isEmailFormat && password.length >= 6;
 
   const handleLogin = async () => {
-    if (!isValid) return;
+    if (!isValid) {
+      if (!isEmailFormat) {
+        Alert.alert(t('login_failed'), 'Please enter a valid email address.');
+      }
+      return;
+    }
     setIsLoading(true);
     try {
-      const result = await login(email.trim().toLowerCase(), password);
+      const result = await login(trimmedEmail.toLowerCase(), password);
       if (result.success && result.otpRequired) {
         navigation.navigate('OtpVerification', {
-          email: email.trim().toLowerCase(),
+          email: trimmedEmail.toLowerCase(),
           tempToken: result.tempToken,
         });
       } else if (!result.success) {
@@ -104,7 +117,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               <Text style={styles.label}>Email</Text>
               <Text style={styles.labelHi}> · ईमेल</Text>
             </View>
-            <View style={styles.inputBox}>
+            <View
+              style={[
+                styles.inputBox,
+                showEmailError && styles.inputBoxError,
+              ]}>
               <TextInput
                 style={styles.input}
                 placeholder="you@pollstics.in"
@@ -118,6 +135,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 onSubmitEditing={() => passwordRef.current?.focus()}
               />
             </View>
+            {showEmailError ? (
+              <View style={styles.helperRow}>
+                <Icon
+                  name="alert-circle-outline"
+                  size={13}
+                  color={COLORS.danger}
+                />
+                <Text style={styles.helperError}>
+                  Enter a valid email address (e.g. you@pollstics.in).
+                </Text>
+              </View>
+            ) : null}
           </View>
 
           <View style={styles.fieldGroup}>
@@ -376,6 +405,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  inputBoxError: {
+    borderColor: COLORS.danger,
+    backgroundColor: '#FFF5F5',
+  },
+  helperRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  helperError: {
+    fontSize: 11,
+    color: COLORS.danger,
+    fontFamily: FONTS.uiMedium,
+    fontWeight: '500',
   },
   input: {
     flex: 1,

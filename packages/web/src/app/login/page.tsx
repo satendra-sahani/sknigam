@@ -23,18 +23,38 @@ export default function LoginPage() {
     setMounted(true);
   }, []);
 
+  // Politicians land on their dedicated Insight dashboard at /politician;
+  // every other role goes to the admin /dashboard.  Centralised here so
+  // we don't drift between login + verify-OTP redirect targets.
+  const { user } = useAuth();
+  const landingForRole = (role?: string) =>
+    role === 'politician' ? '/politician' : '/dashboard';
+
   useEffect(() => {
     if (isLoggedIn) {
-      router.replace('/dashboard');
+      router.replace(landingForRole(user?.role));
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router, user?.role]);
+
+  // Client-side validation — block submit until the user has typed a
+  // proper email-shaped string.  The API enforces the same rule, but we
+  // want fail-fast feedback so users don't waste a round-trip when they
+  // accidentally type their phone number in the email field.
+  const trimmedEmail = email.trim();
+  const isEmailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
+  const showEmailError = trimmedEmail.length > 0 && !isEmailFormat;
+  const canSubmit = isEmailFormat && password.length > 0 && !loading;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isEmailFormat) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
     setLoading(true);
 
     try {
-      const result = await login({ email, password });
+      const result = await login({ email: trimmedEmail.toLowerCase(), password });
 
       if (result.requiresOtp) {
         setOtpRequired(true);
@@ -43,7 +63,7 @@ export default function LoginPage() {
       } else if (result.user) {
         setUser(result.user);
         toast.success('Login successful');
-        router.push('/dashboard');
+        router.push(landingForRole(result.user.role));
       }
     } catch (err: any) {
       const message = err.response?.data?.error || 'Login failed';
@@ -101,7 +121,7 @@ export default function LoginPage() {
       if (result.user) {
         setUser(result.user);
         toast.success('OTP verified. Login successful.');
-        router.push('/dashboard');
+        router.push(landingForRole(result.user.role));
       }
     } catch (err: any) {
       const message = err.response?.data?.error || 'OTP verification failed';
@@ -220,10 +240,30 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="admin@election.com"
-                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
+                      autoComplete="email"
+                      inputMode="email"
+                      spellCheck={false}
+                      aria-invalid={showEmailError || undefined}
+                      aria-describedby={showEmailError ? 'email-error' : undefined}
+                      className={`w-full pl-11 pr-4 py-3 border rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
+                        showEmailError
+                          ? 'bg-red-50 border-red-300 focus:ring-red-500'
+                          : 'bg-slate-50 border-slate-200 focus:ring-red-500'
+                      }`}
                       required
                     />
                   </div>
+                  {showEmailError ? (
+                    <p
+                      id="email-error"
+                      className="mt-1.5 flex items-center gap-1 text-xs text-red-600"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                      </svg>
+                      Enter a valid email address (e.g. you@pollstics.in).
+                    </p>
+                  ) : null}
                 </div>
 
                 {/* Password */}
@@ -266,7 +306,7 @@ export default function LoginPage() {
                 {/* Sign In button */}
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={!canSubmit}
                   className="w-full py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-500 rounded-xl hover:shadow-lg hover:shadow-red-500/25 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                 >
                   {loading ? (

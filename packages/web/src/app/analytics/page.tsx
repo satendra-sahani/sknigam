@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -56,6 +58,12 @@ interface BoothProgress {
 const PALETTE = ['#dc2626', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#64748b', '#0ea5e9'];
 
 export default function AnalyticsPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  useEffect(() => {
+    if (user?.role === 'politician') router.replace('/politician/insights');
+  }, [user, router]);
+
   const [applied, setApplied] = useState<VoterFilterState>(emptyVoterFilters);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [loading, setLoading] = useState(false);

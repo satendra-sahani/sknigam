@@ -16,6 +16,8 @@ export interface IUserDocument extends Document {
   district?: string;
   // Politician-specific
   partyAffiliation?: string;
+  /** Booths a politician has been scoped to (admin-curated set in their AC). */
+  assignedBoothIds?: mongoose.Types.ObjectId[];
   // Lifecycle
   isVerified: boolean;
   isActive: boolean;
@@ -44,6 +46,7 @@ const UserSchema = new Schema<IUserDocument>(
     assemblyConstituency: { type: String, trim: true },
     district: { type: String, trim: true },
     partyAffiliation: { type: String, trim: true },
+    assignedBoothIds: [{ type: Schema.Types.ObjectId, ref: 'Booth' }],
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     otpRequired: { type: Boolean, default: true },
