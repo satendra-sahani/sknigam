@@ -704,27 +704,16 @@ function Treemap() {
     }
   });
   return (
-    <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div className="pl-treemap">
       {rows.map((row, i) => (
-        <div key={i} style={{ display: 'flex', gap: 4, height: 64 }}>
+        <div key={i} className="pl-treemap-row">
           {row.map((p) => (
             <div
               key={p.abbr}
-              style={{
-                flex: p.voteShare,
-                background: p.color,
-                color: '#fff',
-                padding: 8,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                borderRadius: 2,
-                overflow: 'hidden',
-              }}>
-              <div className="pl-mono" style={{ fontSize: 10, opacity: 0.9, letterSpacing: '.05em' }}>
-                {p.abbr}
-              </div>
-              <div className="pl-serif pl-tnum" style={{ fontSize: 14, fontWeight: 600 }}>
+              className="pl-treemap-cell"
+              style={{ flex: p.voteShare, background: p.color }}>
+              <div className="pl-mono pl-treemap-abbr">{p.abbr}</div>
+              <div className="pl-serif pl-tnum pl-treemap-share">
                 {p.voteShare.toFixed(1)}%
               </div>
             </div>
@@ -922,10 +911,7 @@ function InteractiveIndiaMap() {
         subtitle="A real territorial map, every state coloured by its leading party. Hover any state to read its verdict, turnout and the three closest contests."
         link={null}
       />
-      <IndiaGeoMap
-        title="Lok Sabha 2024 · the result, state-by-state"
-        subtitle="Coastlines from OpenStreetMap. Hover or focus a state for the spotlight panel; the colour shows the leading party in that state."
-      />
+      <IndiaGeoMap />
     </section>
   );
 }
@@ -2261,6 +2247,48 @@ function ThemeStyles() {
         margin-top: 6px;
       }
 
+      /* TREEMAP */
+      .pollistics-landing .pl-treemap {
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .pollistics-landing .pl-treemap-row {
+        display: flex;
+        gap: 4px;
+        height: 64px;
+      }
+      .pollistics-landing .pl-treemap-cell {
+        color: #fff;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-radius: 2px;
+        overflow: hidden;
+        min-width: 0;
+      }
+      .pollistics-landing .pl-treemap-abbr {
+        font-size: 10px;
+        opacity: 0.9;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: clip;
+      }
+      .pollistics-landing .pl-treemap-share {
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      /* INDIA GEO MAP card — full-width inside .pl-page */
+      .pollistics-landing .india-geo-card {
+        width: 100%;
+        display: block;
+      }
+
       /* HEX MAP */
       .pollistics-landing .pl-hex-card {
         padding: 24px;
@@ -3013,6 +3041,27 @@ function ThemeStyles() {
         }
         .pollistics-landing .pl-hex-stats {
           grid-template-columns: 1fr 1fr;
+        }
+
+        /* Treemap: tighter padding for tiny cells, and drop the %
+           share in the narrow (second) row so the abbreviation has
+           room without clipping mid-character. */
+        .pollistics-landing .pl-treemap-row {
+          height: 48px;
+        }
+        .pollistics-landing .pl-treemap-cell {
+          padding: 6px 3px;
+          align-items: flex-start;
+        }
+        .pollistics-landing .pl-treemap-abbr {
+          font-size: 9px;
+          letter-spacing: 0;
+        }
+        .pollistics-landing .pl-treemap-share {
+          font-size: 11px;
+        }
+        .pollistics-landing .pl-treemap-row:nth-child(2) .pl-treemap-share {
+          display: none;
         }
       }
     `}</style>

@@ -101,14 +101,13 @@ const NATIONAL_STATS: Array<[string, string]> = [
 ];
 
 export interface IndiaGeoMapProps {
+  /** Optional internal header above the map. Omitted by default since the
+   *  page typically renders its own SectionHead above this component. */
   title?: string;
   subtitle?: string;
 }
 
-export default function IndiaGeoMap({
-  title = 'India · geographical map',
-  subtitle = 'Hover any state for the spotlight — leading party, seats, turnout and three closest contests.',
-}: IndiaGeoMapProps) {
+export default function IndiaGeoMap({ title, subtitle }: IndiaGeoMapProps) {
   const [hover, setHover] = useState<IndiaGeoState | null>(null);
 
   const hoveredSpec = hover ? STATE_DATA_LS24[hover.code] : null;
@@ -120,25 +119,29 @@ export default function IndiaGeoMap({
   }, []);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <header className="px-6 py-5 border-b border-slate-100">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-rose-600">
-          Geography of the vote
-        </p>
-        <h2 className="mt-1 text-xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-1 text-sm text-slate-500 max-w-prose">{subtitle}</p>
-      </header>
+    <section className="india-geo-card block w-full rounded-2xl border border-slate-200 bg-white shadow-sm">
+      {(title || subtitle) && (
+        <header className="px-6 py-5 border-b border-slate-100">
+          {title && (
+            <h2 className="mt-1 text-xl font-semibold text-slate-900">{title}</h2>
+          )}
+          {subtitle && (
+            <p className="mt-1 text-sm text-slate-500 max-w-prose">{subtitle}</p>
+          )}
+        </header>
+      )}
 
-      <div className="p-6 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
+      <div className="india-geo-grid p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
         {/* LEFT — the SVG map + legend */}
-        <div>
+        <div className="min-w-0">
           <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
             <svg
               viewBox={INDIA_GEO_VIEWBOX}
               width="100%"
               role="img"
               aria-label="Map of India coloured by leading party in each state"
-              style={{ display: 'block', maxHeight: 560 }}>
+              preserveAspectRatio="xMidYMid meet"
+              style={{ display: 'block', width: '100%', maxHeight: 560 }}>
               {/* Dot backdrop, same texture as the hex card */}
               <defs>
                 <pattern id="igm-dot" width="8" height="8" patternUnits="userSpaceOnUse">
