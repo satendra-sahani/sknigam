@@ -91,13 +91,29 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <div className="flex min-h-screen bg-slate-50">
               <Sidebar />
               <div
-                className="flex-1 flex flex-col min-h-screen transition-all duration-200"
-                style={{ marginLeft: sidebarCollapsed ? 80 : 280 }}
+                className="admin-main flex-1 flex flex-col min-h-screen transition-all duration-200"
+                style={
+                  {
+                    // CSS var so the mobile media query can override it
+                    // to 0 without fighting an inline style.
+                    ['--admin-margin' as string]: `${sidebarCollapsed ? 80 : 280}px`,
+                  } as React.CSSProperties
+                }
               >
                 <Header />
-                <main className="flex-1 p-8 page-enter">{children}</main>
+                <main className="flex-1 p-4 sm:p-6 lg:p-8 page-enter">{children}</main>
               </div>
             </div>
+            <style jsx global>{`
+              .admin-main {
+                margin-left: var(--admin-margin);
+              }
+              @media (max-width: 1023px) {
+                .admin-main {
+                  margin-left: 0 !important;
+                }
+              }
+            `}</style>
           </AuthGuard>
         )}
       </PoliticianRouteGuard>

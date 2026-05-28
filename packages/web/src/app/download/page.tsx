@@ -15,11 +15,15 @@
  *   6. Footer (dark slab, 4 columns)
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PageSkeleton, useHydrated } from '@/components/landing/PageSkeleton';
 
 type ThemeKey = 'broadcast' | 'studio' | 'signal';
+
+// Theme is locked to the light "Studio" palette — the in-header
+// switcher pill was removed per product feedback.
+const THEME: ThemeKey = 'studio';
 
 const FEATURES = [
   { num: '01', h: 'Offline-first', p: "Every write queues locally, syncs the moment you're back on signal. No spinner. No loss." },
@@ -56,14 +60,20 @@ const FOOTER_COLS = [
 ] as const;
 
 export default function DownloadPage() {
-  // Match the landing's default light "Studio" palette.  Users can still
-  // cycle through Broadcast (dark) and Signal (red poster) via the same
-  // pill in the top bar.
-  const [theme, setTheme] = useState<ThemeKey>('studio');
+  const [drawerOpen, setDrawerOpen] = useState(false);
   // Skeleton during initial mount → real page after hydration.  Keeps
   // the refresh experience identical between the landing and download
   // pages (no blank flash, no FOUC).
   const hydrated = useHydrated();
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const prev = document.body.style.overflow;
+    if (drawerOpen) document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [drawerOpen]);
 
   // Build a 21×21 pseudo-QR grid with seeded random + the three corner
   // finder rings — purely decorative, never a real scan target.
@@ -96,10 +106,12 @@ export default function DownloadPage() {
     return out;
   }, []);
 
-  if (!hydrated) return <PageSkeleton variant="download" theme={theme} />;
+  if (!hydrated) return <PageSkeleton variant="download" theme={THEME} />;
+
+  const closeDrawer = () => setDrawerOpen(false);
 
   return (
-    <div className={`dl-page theme-${theme}`}>
+    <div className={`dl-page theme-${THEME}`}>
       {/* ── HEADER ───────────────────────────────────────────────── */}
       <header className="dl-header">
         <div className="dl-container dl-header-row">
@@ -122,24 +134,67 @@ export default function DownloadPage() {
             })}
           </nav>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <button
-              type="button"
-              className="dl-btn-ghost dl-btn-sm"
-              onClick={() =>
-                setTheme(
-                  theme === 'broadcast' ? 'studio' : theme === 'studio' ? 'signal' : 'broadcast',
-                )
-              }
-              title="Switch palette">
-              <span className="dl-theme-dot" />
-              <span style={{ marginLeft: 6, textTransform: 'capitalize' }}>{theme}</span>
-            </button>
-            <Link href="/login" className="dl-btn-ghost dl-btn-sm">
+            <Link href="/login" className="dl-btn-ghost dl-btn-sm dl-header-signin">
               Sign in
             </Link>
+            <button
+              type="button"
+              className="dl-burger"
+              aria-label="Open menu"
+              aria-expanded={drawerOpen}
+              onClick={() => setDrawerOpen(true)}>
+              <span />
+              <span />
+              <span />
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Mobile drawer */}
+      <div
+        className={`dl-drawer-overlay ${drawerOpen ? 'dl-drawer-open' : ''}`}
+        onClick={closeDrawer}
+        aria-hidden={!drawerOpen}
+      />
+      <aside
+        className={`dl-drawer ${drawerOpen ? 'dl-drawer-open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!drawerOpen}>
+        <div className="dl-drawer-head">
+          <Link href="/" className="dl-brand" onClick={closeDrawer}>
+            <img src="/pollistics-logo.png" alt="" width={26} height={26} className="dl-brand-img" />
+            <span className="dl-brand-name" style={{ fontSize: 18 }}>Pollistics</span>
+          </Link>
+          <button
+            type="button"
+            className="dl-drawer-close"
+            aria-label="Close menu"
+            onClick={closeDrawer}>
+            ×
+          </button>
+        </div>
+        <nav className="dl-drawer-nav">
+          {NAV.map(([label, href], i) => {
+            const isActive = href === '/download';
+            return (
+              <Link
+                key={i}
+                href={href}
+                className={`dl-drawer-item ${isActive ? 'dl-drawer-item-active' : ''}`}
+                onClick={closeDrawer}>
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="dl-drawer-foot">
+          <Link href="/login" className="dl-btn-solid" style={{ width: '100%', justifyContent: 'center' }} onClick={closeDrawer}>
+            Sign in
+          </Link>
+        </div>
+      </aside>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="dl-hero">
@@ -783,12 +838,103 @@ function PageStyles() {
         padding: 0 14px;
         font-size: 13px;
       }
-      .dl-page .dl-theme-dot {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--dl-accent);
+      /* Hamburger + drawer (mobile only) */
+      .dl-page .dl-burger {
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        width: 38px;
+        height: 38px;
+        padding: 8px;
+        background: var(--dl-paper);
+        border: 1px solid var(--dl-rule);
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .dl-page .dl-burger > span {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background: var(--dl-ink);
+        border-radius: 1px;
+      }
+      .dl-drawer-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 90;
+      }
+      .dl-drawer-overlay.dl-drawer-open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .dl-page .dl-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: min(82vw, 320px);
+        background: var(--dl-paper);
+        border-left: 1px solid var(--dl-rule);
+        z-index: 100;
+        transform: translateX(100%);
+        transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: -20px 0 40px -20px rgba(0, 0, 0, 0.35);
+        visibility: hidden;
+      }
+      .dl-page .dl-drawer.dl-drawer-open {
+        transform: translateX(0);
+        visibility: visible;
+      }
+      .dl-page .dl-drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--dl-rule);
+      }
+      .dl-page .dl-drawer-close {
+        width: 36px;
+        height: 36px;
+        background: transparent;
+        border: 1px solid var(--dl-rule);
+        border-radius: 4px;
+        font-size: 22px;
+        line-height: 1;
+        color: var(--dl-ink);
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .dl-page .dl-drawer-nav {
+        display: flex;
+        flex-direction: column;
+        padding: 8px 0;
+        flex: 1;
+        overflow-y: auto;
+      }
+      .dl-page .dl-drawer-item {
+        display: block;
+        padding: 14px 22px;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--dl-ink-soft);
+        text-decoration: none;
+        border-left: 3px solid transparent;
+      }
+      .dl-page .dl-drawer-item-active {
+        color: var(--dl-ink);
+        border-left-color: var(--dl-accent);
+        background: var(--dl-paper-2);
+      }
+      .dl-page .dl-drawer-foot {
+        padding: 16px 18px;
+        border-top: 1px solid var(--dl-rule);
       }
 
       /* HEADER */
@@ -1352,6 +1498,15 @@ function PageStyles() {
         .dl-page .dl-nav {
           display: none;
         }
+        .dl-page .dl-burger {
+          display: inline-flex;
+        }
+        .dl-page .dl-header-signin {
+          display: none;
+        }
+        .dl-page .dl-brand-tag {
+          display: none;
+        }
         .dl-page .dl-hero {
           padding: 40px 0;
         }
@@ -1395,8 +1550,27 @@ function PageStyles() {
         }
       }
       @media (max-width: 640px) {
+        .dl-page .dl-hero {
+          padding: 28px 0;
+        }
         .dl-page .dl-hero-h {
           font-size: 36px;
+        }
+        .dl-page .dl-hero-p {
+          font-size: 15px;
+        }
+        .dl-page .dl-cta-row {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+        }
+        .dl-page .dl-cta-row > .dl-btn-solid,
+        .dl-page .dl-cta-row > .dl-btn-ghost {
+          width: 100%;
+          justify-content: center;
+        }
+        .dl-page .dl-cta-row > .dl-hero-meta {
+          text-align: center;
         }
         .dl-page .dl-feature-grid {
           grid-template-columns: 1fr;
@@ -1406,6 +1580,12 @@ function PageStyles() {
         }
         .dl-page .dl-footer-top {
           grid-template-columns: 1fr;
+          gap: 28px;
+        }
+        .dl-page .dl-footer-bottom {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
         }
       }
     `}</style>

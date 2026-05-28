@@ -107,19 +107,36 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const openMobileSidebar = () => {
+    window.dispatchEvent(
+      new CustomEvent('admin-sidebar-mobile-toggle', { detail: { open: true } }),
+    );
+  };
+
   return (
-    <header className="sticky top-0 z-40 h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-8">
-      {/* Left: Title + Breadcrumb */}
-      <div>
-        <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-0.5">
-          {breadcrumbs.map((crumb, i) => (
-            <span key={i} className="flex items-center gap-1.5">
-              {i > 0 && <ChevronIcon />}
-              <span className={i === breadcrumbs.length - 1 ? 'text-slate-600 font-medium' : ''}>{crumb}</span>
-            </span>
-          ))}
+    <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-4 sm:px-6 lg:px-8 gap-3">
+      {/* Left: hamburger (mobile) + title + breadcrumb */}
+      <div className="flex items-center gap-3 min-w-0">
+        <button
+          type="button"
+          onClick={openMobileSidebar}
+          aria-label="Open navigation"
+          className="lg:hidden flex flex-col justify-center gap-[3px] w-9 h-9 p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0">
+          <span className="block w-full h-[2px] bg-current rounded-full" />
+          <span className="block w-full h-[2px] bg-current rounded-full" />
+          <span className="block w-full h-[2px] bg-current rounded-full" />
+        </button>
+        <div className="min-w-0">
+          <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 mb-0.5">
+            {breadcrumbs.map((crumb, i) => (
+              <span key={i} className="flex items-center gap-1.5">
+                {i > 0 && <ChevronIcon />}
+                <span className={i === breadcrumbs.length - 1 ? 'text-slate-600 font-medium' : ''}>{crumb}</span>
+              </span>
+            ))}
+          </div>
+          <h2 className="text-base sm:text-lg font-semibold text-slate-900 truncate">{title}</h2>
         </div>
-        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
       </div>
 
       {/* Right: Search, Notifications, Session, User */}

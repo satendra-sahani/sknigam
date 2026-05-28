@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PageSkeleton, useHydrated } from './PageSkeleton';
 
@@ -14,6 +14,11 @@ const NAV = [
   ['Report', '/report'],
   ['App', '/download'],
 ] as const;
+
+// Theme is locked to the light "Studio" palette — the in-header theme
+// switcher pill was removed per product feedback. Kept as a constant so
+// the theme-scoped CSS variables still resolve.
+const THEME: ThemeKey = 'studio';
 
 const FOOTER_COLS = [
   ['Product', ['Staff App', 'Insight Pro', 'Web Dashboard', 'API Access']],
@@ -30,13 +35,24 @@ export function PublicShell({
   activeNav: string;
   skeleton?: 'landing' | 'download';
 }) {
-  const [theme, setTheme] = useState<ThemeKey>('studio');
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const hydrated = useHydrated();
 
-  if (!hydrated) return <PageSkeleton variant={skeleton} theme={theme} />;
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const prev = document.body.style.overflow;
+    if (drawerOpen) document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [drawerOpen]);
+
+  if (!hydrated) return <PageSkeleton variant={skeleton} theme={THEME} />;
+
+  const closeDrawer = () => setDrawerOpen(false);
 
   return (
-    <div className={`ps-page theme-${theme}`}>
+    <div className={`ps-page theme-${THEME}`}>
       <header className="ps-header">
         <div className="ps-container ps-header-row">
           <Link href="/" className="ps-brand">
@@ -55,20 +71,62 @@ export function PublicShell({
             ))}
           </nav>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <Link href="/login" className="ps-btn-ghost ps-btn-sm ps-header-signin">Sign in</Link>
             <button
               type="button"
-              className="ps-btn-ghost ps-btn-sm"
-              onClick={() =>
-                setTheme(theme === 'broadcast' ? 'studio' : theme === 'studio' ? 'signal' : 'broadcast')
-              }
-              title="Switch palette">
-              <span className="ps-theme-dot" />
-              <span style={{ marginLeft: 6, textTransform: 'capitalize' }}>{theme}</span>
+              className="ps-burger"
+              aria-label="Open menu"
+              aria-expanded={drawerOpen}
+              onClick={() => setDrawerOpen(true)}>
+              <span />
+              <span />
+              <span />
             </button>
-            <Link href="/login" className="ps-btn-ghost ps-btn-sm">Sign in</Link>
           </div>
         </div>
       </header>
+
+      {/* Mobile drawer */}
+      <div
+        className={`ps-drawer-overlay ${drawerOpen ? 'ps-drawer-open' : ''}`}
+        onClick={closeDrawer}
+        aria-hidden={!drawerOpen}
+      />
+      <aside
+        className={`ps-drawer ${drawerOpen ? 'ps-drawer-open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!drawerOpen}>
+        <div className="ps-drawer-head">
+          <Link href="/" className="ps-brand" onClick={closeDrawer}>
+            <img src="/pollistics-logo.png" alt="" width={26} height={26} className="ps-brand-img" />
+            <span className="ps-brand-name" style={{ fontSize: 18 }}>Pollistics</span>
+          </Link>
+          <button
+            type="button"
+            className="ps-drawer-close"
+            aria-label="Close menu"
+            onClick={closeDrawer}>
+            ×
+          </button>
+        </div>
+        <nav className="ps-drawer-nav">
+          {NAV.map(([label, href]) => (
+            <Link
+              key={label}
+              href={href}
+              className={`ps-drawer-item ${activeNav === label ? 'ps-drawer-item-active' : ''}`}
+              onClick={closeDrawer}>
+              {label}
+            </Link>
+          ))}
+        </nav>
+        <div className="ps-drawer-foot">
+          <Link href="/login" className="ps-btn-solid ps-drawer-signin" onClick={closeDrawer}>
+            Sign in
+          </Link>
+        </div>
+      </aside>
 
       {children}
 
@@ -150,7 +208,6 @@ function ShellStyles() {
       .ps-page .ps-btn-ghost{height:44px;padding:0 18px;font-size:14px;font-weight:500;background:transparent;color:var(--ps-ink);border:1px solid var(--ps-rule-2);border-radius:4px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:10px;text-decoration:none}
       .ps-page .ps-btn-accent{background:var(--ps-accent);color:#fff;border-color:var(--ps-accent)}
       .ps-page .ps-btn-sm{height:34px;padding:0 14px;font-size:13px}
-      .ps-page .ps-theme-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ps-accent)}
       .ps-page .ps-header{position:sticky;top:0;z-index:50;background:var(--ps-bg);border-bottom:1px solid var(--ps-rule)}
       .ps-page .ps-header-row{display:flex;align-items:center;justify-content:space-between;height:60px}
       .ps-page .ps-brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
@@ -169,8 +226,40 @@ function ShellStyles() {
       .ps-page .ps-footer-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
       .ps-page .ps-footer-col li{font-size:13px;color:rgba(243,236,225,.82)}
       .ps-page .ps-footer-bottom{margin-top:48px;padding-top:20px;border-top:1px solid rgba(243,236,225,.12);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11px;color:rgba(243,236,225,.5)}
-      @media(max-width:960px){.ps-page .ps-container{padding:0 16px}.ps-page .ps-nav{display:none}.ps-page .ps-section-h{font-size:28px}.ps-page .ps-footer-top{grid-template-columns:1fr 1fr}}
-      @media(max-width:640px){.ps-page .ps-footer-top{grid-template-columns:1fr}}
+      /* HAMBURGER + DRAWER */
+      .ps-page .ps-burger{display:none;flex-direction:column;justify-content:center;gap:4px;width:38px;height:38px;padding:8px;background:var(--ps-paper);border:1px solid var(--ps-rule);border-radius:4px;cursor:pointer}
+      .ps-page .ps-burger>span{display:block;width:100%;height:2px;background:var(--ps-ink);border-radius:1px}
+      .ps-drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:90}
+      .ps-drawer-overlay.ps-drawer-open{opacity:1;pointer-events:auto}
+      .ps-page .ps-drawer{position:fixed;top:0;right:0;bottom:0;width:min(82vw,320px);background:var(--ps-paper);border-left:1px solid var(--ps-rule);z-index:100;transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 40px -20px rgba(0,0,0,.35);visibility:hidden}
+      .ps-page .ps-drawer.ps-drawer-open{transform:translateX(0);visibility:visible}
+      .ps-page .ps-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--ps-rule)}
+      .ps-page .ps-drawer-close{width:36px;height:36px;background:transparent;border:1px solid var(--ps-rule);border-radius:4px;font-size:22px;line-height:1;color:var(--ps-ink);cursor:pointer;font-family:inherit}
+      .ps-page .ps-drawer-nav{display:flex;flex-direction:column;padding:8px 0;flex:1;overflow-y:auto}
+      .ps-page .ps-drawer-item{display:block;padding:14px 22px;font-size:15px;font-weight:500;color:var(--ps-ink-soft);text-decoration:none;border-left:3px solid transparent}
+      .ps-page .ps-drawer-item-active{color:var(--ps-ink);border-left-color:var(--ps-accent);background:var(--ps-paper-2)}
+      .ps-page .ps-drawer-foot{padding:16px 18px;border-top:1px solid var(--ps-rule)}
+      .ps-page .ps-drawer-signin{width:100%;justify-content:center}
+
+      @media(max-width:960px){
+        .ps-page .ps-container{padding:0 16px}
+        .ps-page .ps-nav{display:none}
+        .ps-page .ps-burger{display:inline-flex}
+        .ps-page .ps-header-signin{display:none}
+        .ps-page .ps-brand-tag{display:none}
+        .ps-page .ps-section{padding:40px 0}
+        .ps-page .ps-section-head{margin-bottom:24px}
+        .ps-page .ps-section-h{font-size:28px}
+        .ps-page .ps-card{padding:20px}
+        .ps-page .ps-footer-top{grid-template-columns:1fr 1fr}
+      }
+      @media(max-width:640px){
+        .ps-page .ps-section-h{font-size:24px}
+        .ps-page .ps-section-p{font-size:14px}
+        .ps-page .ps-btn-solid,.ps-page .ps-btn-ghost{height:40px;padding:0 16px;font-size:13px}
+        .ps-page .ps-footer-top{grid-template-columns:1fr;gap:28px}
+        .ps-page .ps-footer-bottom{flex-direction:column;align-items:flex-start;gap:6px}
+      }
     `}</style>
   );
 }

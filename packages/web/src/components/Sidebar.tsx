@@ -40,11 +40,38 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(COLLAPSED_KEY);
     if (stored === 'true') setCollapsed(true);
   }, []);
+
+  // Header dispatches this event when the hamburger is tapped.
+  useEffect(() => {
+    function onToggle(e: Event) {
+      const detail = (e as CustomEvent).detail;
+      setMobileOpen(detail?.open ?? ((prev) => !prev));
+    }
+    window.addEventListener('admin-sidebar-mobile-toggle', onToggle);
+    return () => window.removeEventListener('admin-sidebar-mobile-toggle', onToggle);
+  }, []);
+
+  // Close on route change so tapping a nav item doesn't leave the
+  // overlay on top of the destination page.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll while the drawer is open on mobile.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const prev = document.body.style.overflow;
+    if (mobileOpen) document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
 
   const toggleCollapse = () => {
     const next = !collapsed;
@@ -60,10 +87,19 @@ export default function Sidebar() {
     : 'U';
 
   return (
+    <>
+      {/* Mobile backdrop */}
+      <div
+        onClick={() => setMobileOpen(false)}
+        className={`fixed inset-0 bg-black/45 z-40 lg:hidden transition-opacity duration-200 ${
+          mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        aria-hidden={!mobileOpen}
+      />
     <aside
       className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-slate-950 to-slate-900 text-white flex flex-col z-50 shadow-xl transition-all duration-200 ${
-        collapsed ? 'w-20' : 'w-[280px]'
-      }`}
+        collapsed ? 'w-20 lg:w-20' : 'w-[280px]'
+      } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
     >
       <div className={`flex items-center gap-3 border-b border-white/10 ${collapsed ? 'px-4 py-5 justify-center' : 'px-6 py-5'}`}>
         <img
@@ -96,7 +132,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="px-3 pb-2">
+      <div className="px-3 pb-2 hidden lg:block">
         <button
           onClick={toggleCollapse}
           className={`w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-200 ${
@@ -133,5 +169,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }
