@@ -226,6 +226,23 @@ function ShellStyles() {
       .ps-page .ps-footer-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
       .ps-page .ps-footer-col li{font-size:13px;color:rgba(243,236,225,.82)}
       .ps-page .ps-footer-bottom{margin-top:48px;padding-top:20px;border-top:1px solid rgba(243,236,225,.12);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11px;color:rgba(243,236,225,.5)}
+      /* Reusable page-content layouts (used by /about, /search, /explore-public, /report) */
+      .ps-page .ps-hero-section{padding:80px 0 40px}
+      .ps-page .ps-hero-title{font-family:var(--font-newsreader),serif;font-size:64px;font-weight:360;letter-spacing:-.025em;line-height:1;margin:18px 0 0}
+      .ps-page .ps-hero-title-md{font-family:var(--font-newsreader),serif;font-size:56px;font-weight:360;letter-spacing:-.025em;line-height:1;margin:18px 0 0}
+      .ps-page .ps-hero-lede{font-family:var(--font-newsreader),serif;font-weight:380;font-size:18px;line-height:1.55;max-width:680px;margin-top:22px;color:var(--ps-ink-soft)}
+      .ps-page .ps-hero-cta{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap}
+      .ps-page .ps-cards-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:28px}
+      .ps-page .ps-cards-4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+      .ps-page .ps-cards-3-lg{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+      .ps-page .ps-bordered-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--ps-rule);border:1px solid var(--ps-rule);border-radius:6px;overflow:hidden}
+      .ps-page .ps-states-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--ps-rule);border:1px solid var(--ps-rule);border-radius:6px;overflow:hidden}
+      .ps-page .ps-drill-row{display:grid;grid-template-columns:80px 160px 1fr;gap:24px;padding:28px 0;align-items:center}
+      .ps-page .ps-drill-row + .ps-drill-row{border-top:1px solid var(--ps-rule)}
+      .ps-page .ps-report-grid{display:grid;grid-template-columns:320px 1fr;gap:32px}
+      .ps-page .ps-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .ps-page .ps-table-scroll>*{min-width:640px}
+
       /* HAMBURGER + DRAWER */
       .ps-page .ps-burger{display:none;flex-direction:column;justify-content:center;gap:4px;width:38px;height:38px;padding:8px;background:var(--ps-paper);border:1px solid var(--ps-rule);border-radius:4px;cursor:pointer}
       .ps-page .ps-burger>span{display:block;width:100%;height:2px;background:var(--ps-ink);border-radius:1px}
@@ -252,6 +269,18 @@ function ShellStyles() {
         .ps-page .ps-section-h{font-size:28px}
         .ps-page .ps-card{padding:20px}
         .ps-page .ps-footer-top{grid-template-columns:1fr 1fr}
+        .ps-page .ps-hero-section{padding:48px 0 28px}
+        .ps-page .ps-hero-title{font-size:42px}
+        .ps-page .ps-hero-title-md{font-size:38px}
+        .ps-page .ps-hero-lede{font-size:16px;margin-top:18px}
+        .ps-page .ps-cards-3,.ps-page .ps-cards-3-lg{grid-template-columns:1fr 1fr;gap:16px}
+        .ps-page .ps-cards-4{grid-template-columns:1fr 1fr;gap:16px}
+        .ps-page .ps-bordered-grid-4{grid-template-columns:1fr 1fr}
+        .ps-page .ps-states-grid{grid-template-columns:1fr 1fr}
+        .ps-page .ps-drill-row{grid-template-columns:60px 1fr;gap:14px;padding:20px 0}
+        .ps-page .ps-drill-row>:nth-child(2){grid-column:2}
+        .ps-page .ps-drill-row>:nth-child(3){grid-column:1 / -1;font-size:13px}
+        .ps-page .ps-report-grid{grid-template-columns:1fr;gap:20px}
       }
       @media(max-width:640px){
         .ps-page .ps-section-h{font-size:24px}
@@ -259,6 +288,15 @@ function ShellStyles() {
         .ps-page .ps-btn-solid,.ps-page .ps-btn-ghost{height:40px;padding:0 16px;font-size:13px}
         .ps-page .ps-footer-top{grid-template-columns:1fr;gap:28px}
         .ps-page .ps-footer-bottom{flex-direction:column;align-items:flex-start;gap:6px}
+        .ps-page .ps-hero-section{padding:36px 0 20px}
+        .ps-page .ps-hero-title{font-size:32px}
+        .ps-page .ps-hero-title-md{font-size:30px}
+        .ps-page .ps-hero-lede{font-size:15px}
+        .ps-page .ps-hero-cta .ps-btn-solid,.ps-page .ps-hero-cta .ps-btn-ghost{flex:1;justify-content:center}
+        .ps-page .ps-cards-3,.ps-page .ps-cards-3-lg,.ps-page .ps-cards-4{grid-template-columns:1fr}
+        .ps-page .ps-bordered-grid-4{grid-template-columns:1fr}
+        .ps-page .ps-states-grid{grid-template-columns:1fr 1fr;gap:1px}
+        .ps-page .ps-card{padding:18px}
       }
     `}</style>
   );

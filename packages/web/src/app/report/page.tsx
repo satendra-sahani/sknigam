@@ -27,14 +27,14 @@ export default function ReportPage() {
   return (
     <PublicShell activeNav="Report">
       {/* Hero */}
-      <section style={{ padding: '80px 0 40px' }}>
+      <section className="ps-hero-section">
         <div className="ps-container">
           <span className="ps-kicker">Report an error</span>
-          <h1 className="ps-serif" style={{ fontSize: 56, fontWeight: 360, letterSpacing: '-.025em', lineHeight: 1, marginTop: 18 }}>
+          <h1 className="ps-hero-title-md">
             Help us keep the record{' '}
             <em className="ps-serif-it ps-accent">accurate</em>.
           </h1>
-          <p style={{ fontSize: 17, color: 'var(--ps-ink-soft)', maxWidth: 620, marginTop: 18, lineHeight: 1.5, fontFamily: 'var(--font-newsreader), serif', fontWeight: 380 }}>
+          <p className="ps-hero-lede" style={{ maxWidth: 620 }}>
             Pollistics covers 75 years and 2.4 million candidates. If you spot an error — a wrong vote count, a misattributed seat, a garbled PDF parse — report it here. Corrections ship within 24 hours.
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function ReportPage() {
               </button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 32 }}>
+            <div className="ps-report-grid">
               {/* Type selector */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {ERROR_TYPES.map((t) => (
@@ -186,7 +186,7 @@ export default function ReportPage() {
           <p style={{ color: 'var(--ps-muted)', fontSize: 15, maxWidth: 500, margin: '0 auto 22px' }}>
             Every number in Pollistics traces to an ECI source table. Our methodology document explains the normalisation pipeline, error-correction process, and citation format.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div className="ps-hero-cta" style={{ justifyContent: 'center' }}>
             <Link href="/about" className="ps-btn-solid ps-btn-accent">Read our methodology</Link>
             <Link href="/search" className="ps-btn-ghost">Search the archive</Link>
           </div>

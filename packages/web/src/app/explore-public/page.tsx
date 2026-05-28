@@ -33,17 +33,17 @@ export default function ExplorePublicPage() {
   return (
     <PublicShell activeNav="Explore">
       {/* Hero */}
-      <section style={{ padding: '80px 0 40px' }}>
+      <section className="ps-hero-section">
         <div className="ps-container">
           <span className="ps-kicker">Explore India</span>
-          <h1 className="ps-serif" style={{ fontSize: 56, fontWeight: 360, letterSpacing: '-.025em', lineHeight: 1, marginTop: 18 }}>
+          <h1 className="ps-hero-title-md">
             Drill from state to voter{' '}
             <em className="ps-serif-it ps-accent">in five clicks</em>.
           </h1>
-          <p style={{ fontSize: 17, color: 'var(--ps-ink-soft)', maxWidth: 620, marginTop: 18, lineHeight: 1.5, fontFamily: 'var(--font-newsreader), serif', fontWeight: 380 }}>
+          <p className="ps-hero-lede" style={{ maxWidth: 620 }}>
             Pollistics structures India&apos;s election geography into a five-level drill-down: State → District → AC → Booth → Voter. Every level has charts, filters, and bilingual labels.
           </p>
-          <div style={{ marginTop: 28, display: 'flex', gap: 12 }}>
+          <div className="ps-hero-cta">
             <Link href="/login" className="ps-btn-solid ps-btn-accent">Sign in to explore</Link>
             <Link href="/download" className="ps-btn-ghost">Mobile app →</Link>
           </div>
@@ -61,8 +61,8 @@ export default function ExplorePublicPage() {
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {DRILL_LEVELS.map((d, i) => (
-              <div key={d.num} style={{ display: 'grid', gridTemplateColumns: '80px 160px 1fr', gap: 24, padding: '28px 0', borderTop: i === 0 ? 'none' : '1px solid var(--ps-rule)', alignItems: 'center' }}>
+            {DRILL_LEVELS.map((d) => (
+              <div key={d.num} className="ps-drill-row">
                 <span className="ps-mono" style={{ fontSize: 28, fontWeight: 700, color: 'var(--ps-accent)', letterSpacing: '.05em' }}>{d.num}</span>
                 <span className="ps-serif" style={{ fontSize: 22, fontWeight: 500 }}>{d.level}</span>
                 <span style={{ fontSize: 14, color: 'var(--ps-muted)', lineHeight: 1.5 }}>{d.desc}</span>
@@ -85,7 +85,7 @@ export default function ExplorePublicPage() {
               </p>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--ps-rule)', border: '1px solid var(--ps-rule)', borderRadius: 6, overflow: 'hidden' }}>
+          <div className="ps-states-grid">
             {STATES.map((s) => (
               <div
                 key={s.code}
@@ -130,13 +130,13 @@ export default function ExplorePublicPage() {
               <h2 className="ps-section-h">Charts, filters, and bilingual context.</h2>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+          <div className="ps-cards-3">
             {[
               { h: 'Demographic filters', p: 'Filter by age, gender, caste, sub-caste, religion, education, employment, voting history, and sentiment — live counts update as you tap.', kicker: '9 FACETS' },
               { h: 'Sentiment heatmaps', p: 'Booth-level sentiment grid coloured from strong support (green) through undecided (brass) to opposed (red). Spot trouble before it reaches the press.', kicker: 'LIVE SIGNAL' },
               { h: 'Saved segments', p: 'Bookmark any filter combination as a named segment. Track weekly deltas and drill into the voter list at any time.', kicker: 'TRACK WEEKLY' },
             ].map((f) => (
-              <div key={f.h} className="ps-card" style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div key={f.h} className="ps-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <span className="ps-kicker">{f.kicker}</span>
                 <h4 className="ps-serif" style={{ fontSize: 22, fontWeight: 420, letterSpacing: '-.015em', margin: 0, lineHeight: 1.15 }}>{f.h}</h4>
                 <p style={{ color: 'var(--ps-muted)', fontSize: 13, lineHeight: 1.55, margin: 0 }}>{f.p}</p>
@@ -153,7 +153,7 @@ export default function ExplorePublicPage() {
           <h2 className="ps-serif" style={{ fontSize: 36, fontWeight: 380, letterSpacing: '-.02em', margin: '14px 0 22px', lineHeight: 1.1 }}>
             Your constituency, five levels deep.
           </h2>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div className="ps-hero-cta" style={{ justifyContent: 'center' }}>
             <Link href="/login" className="ps-btn-solid ps-btn-accent">Sign in to explore</Link>
             <Link href="/about" className="ps-btn-ghost">Learn more about us</Link>
           </div>

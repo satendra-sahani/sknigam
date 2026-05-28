@@ -35,14 +35,14 @@ export default function SearchPage() {
   return (
     <PublicShell activeNav="Search">
       {/* Hero + Search bar */}
-      <section style={{ padding: '80px 0 40px' }}>
+      <section className="ps-hero-section">
         <div className="ps-container">
           <span className="ps-kicker">Search the archive</span>
-          <h1 className="ps-serif" style={{ fontSize: 56, fontWeight: 360, letterSpacing: '-.025em', lineHeight: 1, marginTop: 18 }}>
+          <h1 className="ps-hero-title-md">
             Every seat, every candidate,{' '}
             <em className="ps-serif-it ps-accent">every election</em>.
           </h1>
-          <p style={{ fontSize: 17, color: 'var(--ps-ink-soft)', maxWidth: 600, marginTop: 18, lineHeight: 1.5, fontFamily: 'var(--font-newsreader), serif', fontWeight: 380 }}>
+          <p className="ps-hero-lede" style={{ maxWidth: 600 }}>
             Search across 18 Lok Sabha elections, 312+ state elections, and 2.4 million candidate records — all sourced from the Election Commission of India.
           </p>
 
@@ -54,7 +54,7 @@ export default function SearchPage() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search constituencies, candidates, parties, elections…"
               style={{
-                width: '100%', height: 56, padding: '0 56px 0 20',
+                width: '100%', height: 56, padding: '0 56px 0 20px',
                 fontSize: 16, fontFamily: 'inherit',
                 background: 'var(--ps-paper)', border: '1px solid var(--ps-rule)',
                 borderRadius: 6, color: 'var(--ps-ink)', outline: 'none',
@@ -98,7 +98,7 @@ export default function SearchPage() {
               <h2 className="ps-section-h">Four ways into the archive.</h2>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--ps-rule)', border: '1px solid var(--ps-rule)' }}>
+          <div className="ps-bordered-grid-4">
             {SEARCH_CATEGORIES.map((c) => (
               <div key={c.title} style={{ background: 'var(--ps-paper)', padding: 28, display: 'flex', flexDirection: 'column', gap: 10, cursor: 'pointer' }}>
                 <span style={{ fontSize: 28 }}>{c.icon}</span>
@@ -120,7 +120,7 @@ export default function SearchPage() {
               <h2 className="ps-section-h">Jump straight in.</h2>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          <div className="ps-cards-3-lg">
             {QUICK_LINKS.map((l) => (
               <a key={l.label} href={l.href} className="ps-card" style={{ padding: 24, textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', gap: 6, transition: 'transform .2s, box-shadow .2s' }}>
                 <div style={{ fontWeight: 600, fontSize: 16 }}>{l.label}</div>
@@ -141,7 +141,7 @@ export default function SearchPage() {
               <h2 className="ps-section-h">From the archive.</h2>
             </div>
           </div>
-          <div style={{ border: '1px solid var(--ps-rule)', borderRadius: 6, overflow: 'hidden' }}>
+          <div className="ps-table-scroll" style={{ border: '1px solid var(--ps-rule)', borderRadius: 6, overflow: 'hidden' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', padding: '10px 20px', background: 'var(--ps-paper-2)', borderBottom: '1px solid var(--ps-rule)' }}>
               {['Constituency', 'Type', 'Year', 'Winner', 'Margin'].map((h) => (
                 <span key={h} className="ps-mono" style={{ fontSize: 10, color: 'var(--ps-muted)', letterSpacing: '.1em', textTransform: 'uppercase', fontWeight: 600 }}>{h}</span>
@@ -173,7 +173,7 @@ export default function SearchPage() {
           <h2 className="ps-serif" style={{ fontSize: 36, fontWeight: 380, letterSpacing: '-.02em', margin: '14px 0 22px', lineHeight: 1.1 }}>
             Sign in for full drill-down access.
           </h2>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div className="ps-hero-cta" style={{ justifyContent: 'center' }}>
             <Link href="/login" className="ps-btn-solid ps-btn-accent">Sign in free</Link>
             <Link href="/download" className="ps-btn-ghost">Get the mobile app</Link>
           </div>

@@ -28,14 +28,14 @@ export default function AboutPage() {
   return (
     <PublicShell activeNav="About">
       {/* Hero */}
-      <section style={{ padding: '80px 0 40px' }}>
+      <section className="ps-hero-section">
         <div className="ps-container">
           <span className="ps-kicker">About Pollistics</span>
-          <h1 className="ps-serif" style={{ fontSize: 64, fontWeight: 360, letterSpacing: '-.025em', lineHeight: 1, marginTop: 18 }}>
+          <h1 className="ps-hero-title">
             India&apos;s election data,{' '}
             <em className="ps-serif-it ps-accent">read closely</em>.
           </h1>
-          <p style={{ fontSize: 18, color: 'var(--ps-ink-soft)', maxWidth: 680, marginTop: 22, lineHeight: 1.55, fontFamily: 'var(--font-newsreader), serif', fontWeight: 380 }}>
+          <p className="ps-hero-lede">
             Pollistics builds tools that turn raw Election Commission data into constituency-level intelligence — for newsrooms covering democracy, campaigns running outreach, and citizens watching their representatives.
           </p>
         </div>
@@ -55,13 +55,13 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginTop: 28 }}>
+          <div className="ps-cards-3">
             {[
               ['18', 'Lok Sabha elections', 'Full results 1952 → 2024'],
               ['312+', 'State elections', 'Vidhan Sabha archives normalised'],
               ['2.4M+', 'Candidates', 'Indexed with party, vote share, margin'],
             ].map(([num, label, sub]) => (
-              <div key={label} className="ps-card" style={{ padding: 28 }}>
+              <div key={label} className="ps-card">
                 <div className="ps-serif" style={{ fontSize: 42, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1, color: 'var(--ps-accent)' }}>{num}</div>
                 <div style={{ fontWeight: 600, fontSize: 15, marginTop: 10 }}>{label}</div>
                 <div className="ps-mono" style={{ fontSize: 11, color: 'var(--ps-muted)', marginTop: 4, letterSpacing: '.05em' }}>{sub}</div>
@@ -81,7 +81,7 @@ export default function AboutPage() {
               <h2 className="ps-section-h">Four commitments.</h2>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--ps-rule)', border: '1px solid var(--ps-rule)' }}>
+          <div className="ps-bordered-grid-4">
             {VALUES.map((v) => (
               <div key={v.num} style={{ background: 'var(--ps-paper)', padding: 28, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <span className="ps-mono" style={{ fontSize: 11, color: 'var(--ps-accent)', letterSpacing: '.15em', fontWeight: 700 }}>{v.num}</span>
@@ -103,9 +103,9 @@ export default function AboutPage() {
               <h2 className="ps-section-h">The people behind the data.</h2>
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
+          <div className="ps-cards-4">
             {TEAM.map((t) => (
-              <div key={t.name} className="ps-card" style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div key={t.name} className="ps-card" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ width: 56, height: 56, borderRadius: 12, background: 'var(--ps-accent)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 700, fontSize: 18, fontFamily: 'var(--font-newsreader), serif' }}>
                   {t.initials}
                 </div>
@@ -148,7 +148,7 @@ export default function AboutPage() {
           <h2 className="ps-serif" style={{ fontSize: 36, fontWeight: 380, letterSpacing: '-.02em', margin: '14px 0 22px', lineHeight: 1.1 }}>
             Ready to see your constituency clearly?
           </h2>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div className="ps-hero-cta" style={{ justifyContent: 'center' }}>
             <Link href="/login" className="ps-btn-solid ps-btn-accent">Try Pollistics free</Link>
             <Link href="/download" className="ps-btn-ghost">Download the app</Link>
           </div>
