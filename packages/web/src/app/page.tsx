@@ -21,7 +21,7 @@
  *  10. Footer (4-column links, "Try free" / "Talk to us" CTAs)
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PageSkeleton, useHydrated } from '@/components/landing/PageSkeleton';
 import IndiaGeoMap from '@/components/IndiaGeoMap';
@@ -201,9 +201,10 @@ const partyColor = (p: string) =>
 /* ──────────────────────────────────────────────────────────────────── */
 
 export default function LandingPage() {
-  // Default to the light "Studio" palette; user can cycle via the
-  // header pill to Broadcast (dark) or Signal (red poster).
-  const [theme, setTheme] = useState<ThemeKey>('studio');
+  // Locked to the light "Studio" palette — the in-header theme switcher
+  // was removed per product feedback (kept as a constant so the
+  // theme-scoped CSS variables still resolve).
+  const theme: ThemeKey = 'studio';
   // Show a shimmer skeleton on first render (server HTML + initial
   // hydration) and only paint the heavy editorial page once the client
   // has mounted.  Stops the brief flash of unstyled content people see
@@ -213,7 +214,7 @@ export default function LandingPage() {
 
   return (
     <div className={`pollistics-landing theme-${theme}`}>
-      <TopBar theme={theme} setTheme={setTheme} />
+      <TopBar />
       <LiveTicker />
       <Hero />
       <LokSabhaSnapshot />
@@ -232,7 +233,22 @@ export default function LandingPage() {
 /* TOP BAR                                                              */
 /* ──────────────────────────────────────────────────────────────────── */
 
-function TopBar({ theme, setTheme }: { theme: ThemeKey; setTheme: (t: ThemeKey) => void }) {
+function TopBar() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Lock body scroll while the drawer is open so the underlying page
+  // doesn't jiggle behind the overlay on mobile Safari.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const prev = document.body.style.overflow;
+    if (drawerOpen) document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [drawerOpen]);
+
+  const closeDrawer = () => setDrawerOpen(false);
+
   return (
     <header className="pl-header">
       <div className="pl-page pl-header-inner">
@@ -249,20 +265,64 @@ function TopBar({ theme, setTheme }: { theme: ThemeKey; setTheme: (t: ThemeKey) 
           })}
         </nav>
         <div className="pl-header-cta">
+          <Link href="/login" className="pl-btn-solid pl-header-signin">
+            Sign in
+          </Link>
           <button
-            className="pl-btn-ghost"
-            onClick={() =>
-              setTheme(theme === 'broadcast' ? 'studio' : theme === 'studio' ? 'signal' : 'broadcast')
-            }
-            title="Switch palette">
-            <span className="pl-theme-dot" />
-            <span style={{ marginLeft: 6, textTransform: 'capitalize' }}>{theme}</span>
+            type="button"
+            className="pl-burger"
+            aria-label="Open menu"
+            aria-expanded={drawerOpen}
+            onClick={() => setDrawerOpen(true)}>
+            <span />
+            <span />
+            <span />
           </button>
-          <Link href="/login" className="pl-btn-solid">
+        </div>
+      </div>
+
+      {/* Mobile drawer */}
+      <div
+        className={`pl-drawer-overlay ${drawerOpen ? 'pl-drawer-open' : ''}`}
+        onClick={closeDrawer}
+        aria-hidden={!drawerOpen}
+      />
+      <aside
+        className={`pl-drawer ${drawerOpen ? 'pl-drawer-open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!drawerOpen}>
+        <div className="pl-drawer-head">
+          <PollisticsMark size={26} />
+          <button
+            type="button"
+            className="pl-drawer-close"
+            aria-label="Close menu"
+            onClick={closeDrawer}>
+            ×
+          </button>
+        </div>
+        <nav className="pl-drawer-nav">
+          {NAV.map(([label, href, active], i) => {
+            const isInternal = (href as string).startsWith('/');
+            const cls = `pl-drawer-item ${active ? 'pl-drawer-item-active' : ''}`;
+            return isInternal ? (
+              <Link key={i} href={href as string} className={cls} onClick={closeDrawer}>
+                {label as string}
+              </Link>
+            ) : (
+              <a key={i} href={href as string} className={cls} onClick={closeDrawer}>
+                {label as string}
+              </a>
+            );
+          })}
+        </nav>
+        <div className="pl-drawer-foot">
+          <Link href="/login" className="pl-btn-solid pl-btn-lg" onClick={closeDrawer}>
             Sign in
           </Link>
         </div>
-      </div>
+      </aside>
     </header>
   );
 }
@@ -1770,6 +1830,109 @@ function ThemeStyles() {
         display: inline-block;
       }
 
+      /* HAMBURGER + DRAWER (mobile only) */
+      .pollistics-landing .pl-burger {
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        width: 38px;
+        height: 38px;
+        padding: 8px;
+        background: var(--paper);
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .pollistics-landing .pl-burger > span {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background: var(--ink);
+        border-radius: 1px;
+      }
+      .pollistics-landing .pl-drawer-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 90;
+      }
+      .pollistics-landing .pl-drawer-overlay.pl-drawer-open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .pollistics-landing .pl-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: min(82vw, 320px);
+        background: var(--paper);
+        border-left: 1px solid var(--rule);
+        z-index: 100;
+        transform: translateX(100%);
+        transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: -20px 0 40px -20px rgba(0, 0, 0, 0.35);
+        visibility: hidden;
+      }
+      .pollistics-landing .pl-drawer.pl-drawer-open {
+        transform: translateX(0);
+        visibility: visible;
+      }
+      .pollistics-landing .pl-drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--rule);
+      }
+      .pollistics-landing .pl-drawer-close {
+        width: 36px;
+        height: 36px;
+        background: transparent;
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        font-size: 22px;
+        line-height: 1;
+        color: var(--ink);
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .pollistics-landing .pl-drawer-nav {
+        display: flex;
+        flex-direction: column;
+        padding: 8px 0;
+        flex: 1;
+        overflow-y: auto;
+      }
+      .pollistics-landing .pl-drawer-item {
+        display: block;
+        padding: 14px 22px;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        text-decoration: none;
+        border-left: 3px solid transparent;
+      }
+      .pollistics-landing .pl-drawer-item-active {
+        color: var(--ink);
+        border-left-color: var(--accent);
+        background: var(--paper-2);
+      }
+      .pollistics-landing .pl-drawer-foot {
+        padding: 16px 18px;
+        border-top: 1px solid var(--rule);
+      }
+      .pollistics-landing .pl-drawer-foot .pl-btn-solid {
+        width: 100%;
+        justify-content: center;
+      }
+
       /* TICKER */
       .pollistics-landing .pl-ticker {
         border-bottom: 1px solid var(--rule);
@@ -2627,6 +2790,12 @@ function ThemeStyles() {
         .pollistics-landing .pl-nav {
           display: none;
         }
+        .pollistics-landing .pl-burger {
+          display: inline-flex;
+        }
+        .pollistics-landing .pl-header-signin {
+          display: none;
+        }
         .pollistics-landing .pl-mark-meta {
           display: none;
         }
@@ -2678,8 +2847,54 @@ function ThemeStyles() {
         }
       }
       @media (max-width: 640px) {
+        .pollistics-landing .pl-section {
+          padding-top: 36px;
+        }
+        .pollistics-landing .pl-hero {
+          padding-top: 24px;
+        }
+        .pollistics-landing .pl-hero-meta {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+          margin-bottom: 16px;
+        }
         .pollistics-landing .pl-hero-headline {
           font-size: 36px !important;
+        }
+        .pollistics-landing .pl-hero-lede {
+          font-size: 15px;
+          margin-top: 18px;
+        }
+        .pollistics-landing .pl-hero-cta {
+          margin-top: 22px;
+          gap: 8px;
+        }
+        .pollistics-landing .pl-hero-cta .pl-btn-lg {
+          width: 100%;
+          justify-content: center;
+        }
+        .pollistics-landing .pl-hero-cta-meta {
+          margin-left: 0;
+        }
+        .pollistics-landing .pl-hero-tile {
+          padding: 16px;
+        }
+        .pollistics-landing .pl-tile-header {
+          flex-direction: column;
+          gap: 8px;
+        }
+        .pollistics-landing .pl-tile-voters {
+          text-align: left;
+        }
+        .pollistics-landing .pl-tile-title {
+          font-size: 20px;
+        }
+        .pollistics-landing .pl-seat-strip {
+          height: 48px;
+        }
+        .pollistics-landing .pl-seat-count {
+          font-size: 18px;
         }
         .pollistics-landing .pl-tile-kpis {
           grid-template-columns: 1fr !important;
@@ -2695,9 +2910,24 @@ function ThemeStyles() {
           border-top: 0;
           padding-top: 0;
         }
+        .pollistics-landing .pl-coverage {
+          padding: 20px;
+        }
         .pollistics-landing .pl-coverage-row,
         .pollistics-landing .pl-footer-cols {
           grid-template-columns: 1fr !important;
+        }
+        .pollistics-landing .pl-coverage-stat {
+          border-left: 0;
+          border-top: 1px solid var(--rule);
+          padding-left: 0;
+          padding-top: 14px;
+        }
+        .pollistics-landing .pl-coverage-cited {
+          gap: 14px 22px;
+        }
+        .pollistics-landing .pl-coverage-cited-name {
+          font-size: 16px;
         }
         .pollistics-landing .pl-section-head-row {
           flex-direction: column;
@@ -2706,6 +2936,83 @@ function ThemeStyles() {
         }
         .pollistics-landing .pl-section-title {
           font-size: 22px;
+        }
+        .pollistics-landing .pl-section-sub {
+          font-size: 13px;
+        }
+        .pollistics-landing .pl-brief-row {
+          grid-template-columns: 1fr;
+          gap: 6px;
+          padding: 16px 0;
+        }
+        .pollistics-landing .pl-brief-arrow {
+          display: none;
+        }
+        .pollistics-landing .pl-brief-title {
+          font-size: 18px;
+        }
+        .pollistics-landing .pl-quote {
+          grid-template-columns: 1fr;
+          padding: 18px;
+        }
+        .pollistics-landing .pl-quote-avatar {
+          width: 44px;
+          height: 44px;
+          font-size: 22px;
+        }
+        .pollistics-landing .pl-quote-body {
+          font-size: 16px;
+        }
+        .pollistics-landing .pl-signup {
+          padding: 18px;
+        }
+        .pollistics-landing .pl-signup > div:last-child {
+          flex-direction: column;
+        }
+        .pollistics-landing .pl-signup-input {
+          width: 100%;
+        }
+        .pollistics-landing .pl-signup .pl-btn-solid {
+          width: 100%;
+          justify-content: center;
+        }
+        .pollistics-landing .pl-footer-inner {
+          padding-top: 40px;
+        }
+        .pollistics-landing .pl-footer-bottom {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .pollistics-landing .pl-tool-h {
+          font-size: 24px;
+        }
+        .pollistics-landing .pl-tool-h-md {
+          font-size: 22px;
+        }
+        .pollistics-landing .pl-tool-h-sm {
+          font-size: 18px;
+        }
+        .pollistics-landing .pl-tool-api-code {
+          font-size: 10.5px;
+        }
+        .pollistics-landing .pl-mark-name {
+          font-size: 18px;
+        }
+        .pollistics-landing .pl-ticker-label {
+          padding-right: 10px;
+        }
+        .pollistics-landing .pl-hex-toggles {
+          width: 100%;
+          overflow-x: auto;
+          flex-wrap: nowrap;
+        }
+        .pollistics-landing .pl-hex-toggle {
+          flex: 1 0 auto;
+          padding: 8px 10px;
+          font-size: 11px;
+        }
+        .pollistics-landing .pl-hex-stats {
+          grid-template-columns: 1fr 1fr;
         }
       }
     `}</style>

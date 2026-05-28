@@ -29,6 +29,10 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Pollistics — India\'s election intelligence',
   description: 'The most complete, queryable record of how India votes.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({
