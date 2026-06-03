@@ -327,6 +327,23 @@ const InsightHome: React.FC = () => {
           </>
         ) : null}
 
+        {/* ─── MY STAFF QUICK ACCESS ─── */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('PoliticianStaffList')}
+          style={ms.card}>
+          <View style={ms.iconWrap}>
+            <Icon name="account-multiple-outline" size={20} color={COLORS.indigo} />
+          </View>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={ms.title}>My Staff</Text>
+            <Text style={ms.sub}>
+              Add staff, assign them to your booths, manage access
+            </Text>
+          </View>
+          <Icon name="chevron-right" size={18} color={COLORS.muted} />
+        </TouchableOpacity>
+
         {/* ─── BOOTHS PREVIEW ─── */}
         {booths.length > 0 ? (
           <Card padding={14}>
@@ -382,6 +399,33 @@ const InsightHome: React.FC = () => {
     </View>
   );
 };
+
+// Inline mini-stylesheet for the My Staff quick-access tile. Kept
+// separate from `s` so it can be removed cleanly if the design
+// later moves to a separate quick-actions row.
+const ms = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.paper,
+    borderWidth: 1,
+    borderColor: COLORS.hairline,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: COLORS.indigoTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: { fontSize: 14, fontWeight: '700', color: COLORS.ink, fontFamily: FONTS.uiSemiBold },
+  sub: { fontSize: 11.5, color: COLORS.muted, marginTop: 2 },
+});
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.cream },

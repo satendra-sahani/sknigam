@@ -124,6 +124,10 @@ export type RootStackParamList = {
     assemblyConstituency?: string;
   };
   InsightVoterProfile: { voterId: string };
+  // Politician → self-service staff management
+  PoliticianStaffList: undefined;
+  PoliticianStaffForm: { staffId?: string };
+  PoliticianStaffAssign: { staffId?: string };
 };
 
 export type MainTabParamList = {

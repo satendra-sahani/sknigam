@@ -30,6 +30,9 @@ import InsightACsScreen from '../screens/politician/InsightACs';
 import InsightBoothsScreen from '../screens/politician/InsightBooths';
 import InsightVoterListScreen from '../screens/politician/InsightVoterList';
 import InsightVoterProfileScreen from '../screens/politician/InsightVoterProfile';
+import PoliticianStaffList from '../screens/politician/PoliticianStaffList';
+import PoliticianStaffForm from '../screens/politician/PoliticianStaffForm';
+import PoliticianStaffAssign from '../screens/politician/PoliticianStaffAssign';
 
 import { RootStackParamList, MainTabParamList } from '../types';
 
@@ -124,6 +127,18 @@ const AppNavigator: React.FC = () => {
             <Stack.Screen
               name="InsightVoterProfile"
               component={InsightVoterProfileScreen}
+            />
+            <Stack.Screen
+              name="PoliticianStaffList"
+              component={PoliticianStaffList}
+            />
+            <Stack.Screen
+              name="PoliticianStaffForm"
+              component={PoliticianStaffForm}
+            />
+            <Stack.Screen
+              name="PoliticianStaffAssign"
+              component={PoliticianStaffAssign}
             />
           </>
         ) : (

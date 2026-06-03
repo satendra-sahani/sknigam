@@ -23,6 +23,12 @@ router.get('/', authenticate, paginationQuery, async (req: AuthRequest, res: Res
     if (req.user!.role === 'staff') {
       filter.staffId = req.user!.userId;
       filter.isActive = true;
+    } else if (req.user!.role === 'politician') {
+      // Politicians see only assignments they made (assignedBy = self).
+      filter.assignedBy = req.user!.userId;
+      if (req.query.staffId) filter.staffId = req.query.staffId;
+      if (req.query.boothId) filter.boothId = req.query.boothId;
+      if (req.query.isActive !== undefined) filter.isActive = req.query.isActive === 'true';
     } else {
       if (req.query.staffId) filter.staffId = req.query.staffId;
       if (req.query.boothId) filter.boothId = req.query.boothId;
@@ -50,7 +56,7 @@ router.get('/', authenticate, paginationQuery, async (req: AuthRequest, res: Res
 });
 
 // POST /api/voter-assignments — admin assigns a booth (optionally a serial range) to staff
-router.post('/', authenticate, requireRole('super_admin'), voterAssignmentValidation, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/', authenticate, requireRole('super_admin', 'politician'), voterAssignmentValidation, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -68,6 +74,29 @@ router.post('/', authenticate, requireRole('super_admin'), voterAssignmentValida
     if (!booth) {
       res.status(404).json({ success: false, error: 'Booth not found' });
       return;
+    }
+
+    // Politician scope check: staff must be owned by THIS politician, AND
+    // booth must be in the politician's own assignedBoothIds. Super_admin
+    // bypasses both checks.
+    if (req.user!.role === 'politician') {
+      const politicianId = req.user!.userId;
+      if (!staff.managedBy || staff.managedBy.toString() !== politicianId) {
+        res.status(403).json({
+          success: false,
+          error: 'You can only assign staff you manage',
+        });
+        return;
+      }
+      const politician = await User.findById(politicianId).select('assignedBoothIds');
+      const assigned = (politician?.assignedBoothIds || []).map((b) => b.toString());
+      if (!assigned.includes(boothId.toString())) {
+        res.status(403).json({
+          success: false,
+          error: 'You can only assign staff to booths you have been scoped to',
+        });
+        return;
+      }
     }
 
     // Count voters in the range
@@ -101,9 +130,12 @@ router.post('/', authenticate, requireRole('super_admin'), voterAssignmentValida
 });
 
 // PUT /api/voter-assignments/:id/deactivate
-router.put('/:id/deactivate', authenticate, requireRole('super_admin'), mongoIdParam, async (req: AuthRequest, res: Response): Promise<void> => {
+router.put('/:id/deactivate', authenticate, requireRole('super_admin', 'politician'), mongoIdParam, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const assignment = await VoterAssignment.findById(req.params.id);
+    const filter: any = { _id: req.params.id };
+    // Politicians can only deactivate assignments they created.
+    if (req.user!.role === 'politician') filter.assignedBy = req.user!.userId;
+    const assignment = await VoterAssignment.findOne(filter);
     if (!assignment) {
       res.status(404).json({ success: false, error: 'Assignment not found' });
       return;

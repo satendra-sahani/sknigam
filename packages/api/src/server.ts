@@ -22,6 +22,7 @@ import imagekitRoutes from './routes/imagekit';
 import publishedBookRoutes from './routes/publishedBooks';
 import bookRoutes from './routes/books';
 import bookOrderRoutes from './routes/bookOrders';
+import politicianRoutes from './routes/politicians';
 
 const app = express();
 const server = http.createServer(app);
@@ -53,6 +54,7 @@ app.use('/api/imagekit', imagekitRoutes);
 app.use('/api/published-books', publishedBookRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/book-orders', bookOrderRoutes);
+app.use('/api/politicians', politicianRoutes);
 
 // Error handling
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

@@ -18,6 +18,11 @@ export interface IUserDocument extends Document {
   partyAffiliation?: string;
   /** Booths a politician has been scoped to (admin-curated set in their AC). */
   assignedBoothIds?: mongoose.Types.ObjectId[];
+  /** For staff users created BY a politician (not by super_admin), the
+   *  politician's User._id.  Politicians can only see / edit / delete
+   *  staff where managedBy === their own id.  Empty for super-admin-
+   *  created staff (admin-owned). */
+  managedBy?: mongoose.Types.ObjectId;
   // Lifecycle
   isVerified: boolean;
   isActive: boolean;
@@ -47,6 +52,7 @@ const UserSchema = new Schema<IUserDocument>(
     district: { type: String, trim: true },
     partyAffiliation: { type: String, trim: true },
     assignedBoothIds: [{ type: Schema.Types.ObjectId, ref: 'Booth' }],
+    managedBy: { type: Schema.Types.ObjectId, ref: 'User', index: true },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     otpRequired: { type: Boolean, default: true },

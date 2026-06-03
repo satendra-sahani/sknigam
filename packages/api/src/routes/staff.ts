@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { validationResult } from 'express-validator';
 import * as XLSX from 'xlsx';
+import mongoose from 'mongoose';
 import User from '../models/User';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
@@ -10,14 +11,31 @@ import { mongoIdParam, paginationQuery } from '../utils/validators';
 
 const router = Router();
 
+/** Scope helper: politicians can only ever see / mutate staff they own
+ *  (managedBy === their own _id).  Super_admin gets the unscoped view.
+ *  Spread the result into your Mongo filter.
+ *
+ *  Returns {} for super_admin, { managedBy: <politician_id> } for
+ *  politician, and { _id: null } as a deny-all for any other role —
+ *  the route's role guard should make that branch unreachable. */
+function staffScopeFilter(req: AuthRequest): Record<string, any> {
+  if (req.user?.role === 'super_admin') return {};
+  if (req.user?.role === 'politician') {
+    return { managedBy: new mongoose.Types.ObjectId(req.user.userId) };
+  }
+  return { _id: null };
+}
+
 // GET /api/staff — list field staff (role = 'staff')
-router.get('/', authenticate, requireRole('super_admin'), paginationQuery, async (req: AuthRequest, res: Response): Promise<void> => {
+// Super_admin sees every staff; politicians see only staff they own
+// (managedBy === their own _id).
+router.get('/', authenticate, requireRole('super_admin', 'politician'), paginationQuery, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
 
-    const filter: any = { role: 'staff' };
+    const filter: any = { role: 'staff', ...staffScopeFilter(req) };
     if (req.query.assemblyConstituency) filter.assemblyConstituency = req.query.assemblyConstituency;
     if (req.query.district) filter.district = req.query.district;
     if (req.query.isActive !== undefined) filter.isActive = req.query.isActive === 'true';
@@ -44,15 +62,17 @@ router.get('/', authenticate, requireRole('super_admin'), paginationQuery, async
 });
 
 // GET /api/staff/:id
-router.get('/:id', authenticate, requireRole('super_admin'), mongoIdParam, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:id', authenticate, requireRole('super_admin', 'politician'), mongoIdParam, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ success: false, error: 'Invalid ID', data: errors.array() });
       return;
     }
-    const staff = await User.findById(req.params.id).select('-hashedPassword');
-    if (!staff || staff.role !== 'staff') {
+    // 404 (not 403) on out-of-scope so we don't leak existence of other
+    // politicians' staff to a probing politician.
+    const staff = await User.findOne({ _id: req.params.id, role: 'staff', ...staffScopeFilter(req) }).select('-hashedPassword');
+    if (!staff) {
       res.status(404).json({ success: false, error: 'Staff not found' });
       return;
     }
@@ -63,12 +83,35 @@ router.get('/:id', authenticate, requireRole('super_admin'), mongoIdParam, async
 });
 
 // POST /api/staff
-router.post('/', authenticate, requireRole('super_admin'), async (req: AuthRequest, res: Response): Promise<void> => {
+// Super_admin: free to pick any assemblyConstituency / district.
+// Politician: managedBy auto-set to the politician's _id; AC + district
+//   inherited from the politician's own scope (politicians can't create
+//   staff outside their own AC).
+router.post('/', authenticate, requireRole('super_admin', 'politician'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { name, email, phone, password, assemblyConstituency, district } = req.body;
+    const { name, email, phone, password } = req.body;
     if (!name || !email || !phone || !password) {
       res.status(400).json({ success: false, error: 'name, email, phone and password are required' });
       return;
+    }
+
+    let assemblyConstituency = req.body.assemblyConstituency;
+    let district = req.body.district;
+    let managedBy: mongoose.Types.ObjectId | undefined;
+
+    if (req.user!.role === 'politician') {
+      // Inherit AC + district from the politician.  Politicians cannot
+      // override these to escape their own scope.
+      const politician = await User.findById(req.user!.userId).select(
+        'assemblyConstituency district',
+      );
+      if (!politician) {
+        res.status(404).json({ success: false, error: 'Politician account not found' });
+        return;
+      }
+      assemblyConstituency = politician.assemblyConstituency;
+      district = politician.district;
+      managedBy = new mongoose.Types.ObjectId(req.user!.userId);
     }
 
     const user = await User.create({
@@ -79,10 +122,11 @@ router.post('/', authenticate, requireRole('super_admin'), async (req: AuthReque
       role: 'staff',
       assemblyConstituency,
       district,
+      managedBy,
       otpRequired: true,
     });
 
-    await createAuditLog(req.user!.userId, req.user!.role, 'user_create', req, user._id.toString(), undefined, { name, email, role: 'staff' });
+    await createAuditLog(req.user!.userId, req.user!.role, 'user_create', req, user._id.toString(), undefined, { name, email, role: 'staff', managedBy: managedBy?.toString() });
 
     const userData = user.toObject();
     delete (userData as any).hashedPassword;
@@ -98,15 +142,15 @@ router.post('/', authenticate, requireRole('super_admin'), async (req: AuthReque
 });
 
 // PUT /api/staff/:id
-router.put('/:id', authenticate, requireRole('super_admin'), mongoIdParam, async (req: AuthRequest, res: Response): Promise<void> => {
+router.put('/:id', authenticate, requireRole('super_admin', 'politician'), mongoIdParam, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ success: false, error: 'Invalid ID', data: errors.array() });
       return;
     }
-    const oldUser = await User.findById(req.params.id);
-    if (!oldUser || oldUser.role !== 'staff') {
+    const oldUser = await User.findOne({ _id: req.params.id, role: 'staff', ...staffScopeFilter(req) });
+    if (!oldUser) {
       res.status(404).json({ success: false, error: 'Staff not found' });
       return;
     }
@@ -115,6 +159,13 @@ router.put('/:id', authenticate, requireRole('super_admin'), mongoIdParam, async
     delete updateData.hashedPassword;
     delete updateData.password;
     delete updateData.role;
+    // Politicians can never reassign ownership, change scope or
+    // promote their staff out of their constituency.
+    if (req.user!.role === 'politician') {
+      delete updateData.managedBy;
+      delete updateData.assemblyConstituency;
+      delete updateData.district;
+    }
 
     const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).select('-hashedPassword');
     await createAuditLog(req.user!.userId, req.user!.role, 'user_update', req, req.params.id, { name: oldUser.name }, { name: user?.name });
@@ -131,7 +182,7 @@ router.put('/:id', authenticate, requireRole('super_admin'), mongoIdParam, async
 router.post(
   '/:id/password',
   authenticate,
-  requireRole('super_admin'),
+  requireRole('super_admin', 'politician'),
   mongoIdParam,
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
@@ -145,8 +196,8 @@ router.post(
         res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
         return;
       }
-      const user = await User.findById(req.params.id);
-      if (!user || user.role !== 'staff') {
+      const user = await User.findOne({ _id: req.params.id, role: 'staff', ...staffScopeFilter(req) });
+      if (!user) {
         res.status(404).json({ success: false, error: 'Staff not found' });
         return;
       }
@@ -171,15 +222,15 @@ router.post(
 );
 
 // DELETE /api/staff/:id — soft delete
-router.delete('/:id', authenticate, requireRole('super_admin'), mongoIdParam, async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete('/:id', authenticate, requireRole('super_admin', 'politician'), mongoIdParam, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ success: false, error: 'Invalid ID', data: errors.array() });
       return;
     }
-    const user = await User.findById(req.params.id);
-    if (!user || user.role !== 'staff') {
+    const user = await User.findOne({ _id: req.params.id, role: 'staff', ...staffScopeFilter(req) });
+    if (!user) {
       res.status(404).json({ success: false, error: 'Staff not found' });
       return;
     }
@@ -273,7 +324,7 @@ router.post('/bulk-import', authenticate, requireRole('super_admin'), upload.sin
 router.post(
   '/:id/upload',
   authenticate,
-  requireRole('super_admin'),
+  requireRole('super_admin', 'politician'),
   mongoIdParam,
   upload.single('file'),
   async (req: AuthRequest, res: Response): Promise<void> => {
@@ -287,8 +338,8 @@ router.post(
         res.status(400).json({ success: false, error: 'File is required' });
         return;
       }
-      const staff = await User.findById(req.params.id);
-      if (!staff || staff.role !== 'staff') {
+      const staff = await User.findOne({ _id: req.params.id, role: 'staff', ...staffScopeFilter(req) });
+      if (!staff) {
         res.status(404).json({ success: false, error: 'Staff not found' });
         return;
       }
