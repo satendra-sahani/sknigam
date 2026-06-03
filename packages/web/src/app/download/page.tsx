@@ -48,8 +48,9 @@ const NAV = [
   ['About', '/about'],
   ['Search', '/search'],
   ['Explore', '/explore-public'],
-  ['Summary', '/#summary'],
   ['Report', '/report'],
+  ['Publish', '/publish'],
+  ['Bookstore', '/bookstore'],
   ['App', '/download'],
 ] as const;
 

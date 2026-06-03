@@ -12,6 +12,8 @@ const NAV = [
   ['Search', '/search'],
   ['Explore', '/explore-public'],
   ['Report', '/report'],
+  ['Publish', '/publish'],
+  ['Bookstore', '/bookstore'],
   ['App', '/download'],
 ] as const;
 

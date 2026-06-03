@@ -179,8 +179,9 @@ const NAV = [
   ['About', '/about', false],
   ['Search', '/search', false],
   ['Explore', '/explore-public', false],
-  ['Summary', '#summary', false],
   ['Report', '/report', false],
+  ['Publish', '/publish', false],
+  ['Bookstore', '/bookstore', false],
   ['App', '/download', false],
 ] as const;
 
@@ -218,7 +219,7 @@ export default function LandingPage() {
       <LiveTicker />
       <Hero />
       <LokSabhaSnapshot />
-      <InteractiveIndiaMap />
+      <HexMap />
       <HistoricalTrend />
       <BriefsAndBoard />
       <ToolsBento />

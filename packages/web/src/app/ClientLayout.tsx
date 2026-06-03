@@ -11,7 +11,7 @@ import AuthGuard from '@/components/AuthGuard';
 // Routes that bypass the AuthGuard and sidebar/header chrome.
 // "/" is the public Pollistics landing page; anything that needs auth
 // should live under /dashboard, /voters, /booths, etc.
-const publicRoutes = ['/login', '/', '/download', '/about', '/search', '/explore-public', '/report'];
+const publicRoutes = ['/login', '/', '/download', '/about', '/search', '/explore-public', '/report', '/publish', '/bookstore'];
 // Routes that handle their OWN auth + chrome and need no outer chrome
 // from this layout.  /politician/* uses the Civic Insight palette and
 // its own PoliticianShell, so we skip the admin slate Sidebar+Header
@@ -40,7 +40,7 @@ function PoliticianRouteGuard({ children }: { children: React.ReactNode }) {
     if (pathname === '/login') return;
     if (pathname === '/politician' || pathname.startsWith('/politician/')) return;
     // Public marketing pages — let politicians read them.
-    if (['/', '/download', '/about', '/search', '/explore-public', '/report'].includes(pathname)) return;
+    if (['/', '/download', '/about', '/search', '/explore-public', '/report', '/publish', '/bookstore'].includes(pathname)) return;
     router.replace('/politician');
   }, [user, loading, pathname, router]);
 
