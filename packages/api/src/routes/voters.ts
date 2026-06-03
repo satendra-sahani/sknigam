@@ -20,30 +20,11 @@ import {
   UnreadablePdfError,
 } from '../utils/eciRollPdfParser';
 import {
-  parseEciRollPdfWithGemini,
-  isGeminiConfigured,
-  GeminiNotConfiguredError,
-  GeminiParseFailedError,
-} from '../utils/geminiVisionPdfParser';
-import {
   parseEciRollPdfWithLocalVision,
   isLocalVisionAvailable,
   LocalVisionNotAvailableError,
   LocalVisionParseFailedError,
 } from '../utils/localVisionPdfParser';
-
-/**
- * Vision parser backend selector.
- *   PDF_VISION_BACKEND=local   → Qwen2.5-VL via Ollama on the API host (offline, ~95 min / 35 pages, no API cost)
- *   PDF_VISION_BACKEND=gemini  → Google Gemini Vision (cloud, ~1 min / 35 pages, API cost)
- * Default is `local` because offline parsing is the chosen long-term path;
- * flip to `gemini` via env to instantly roll back if the local model
- * misbehaves on a production PDF.  The dispatcher below preserves the
- * exact same error / progress contract regardless of which backend runs,
- * so the rest of the route never has to know.
- */
-const VISION_BACKEND: 'local' | 'gemini' =
-  (process.env.PDF_VISION_BACKEND as 'local' | 'gemini') === 'gemini' ? 'gemini' : 'local';
 import {
   fileHash,
   getCachedParse,
@@ -538,39 +519,27 @@ router.post(
             const isNoText = e instanceof ImageOnlyPdfError || e instanceof UnreadablePdfError;
             if (!isNoText) throw e;
 
-            // Fall back to the configured vision backend (local Qwen2.5-VL
-            // by default; Gemini if PDF_VISION_BACKEND=gemini).  Availability
-            // check is backend-specific so a stale Ollama service is reported
-            // the same way a missing GEMINI_API_KEY would be.
-            const useLocal = VISION_BACKEND === 'local';
-            const available = useLocal ? await isLocalVisionAvailable() : isGeminiConfigured();
-            if (!available) {
+            // Fall back to the offline vision parser (Qwen2.5-VL via Ollama
+            // on the API host).  No cloud, no per-request cost; the host
+            // must have Ollama running with the configured model pulled.
+            if (!(await isLocalVisionAvailable())) {
               replyErr(400, e.message, {
-                hint: useLocal
-                  ? 'This PDF has no text layer and the local vision parser is unavailable. ' +
-                    'Check that Ollama is running on the API host (systemctl status ollama) and ' +
-                    'the configured model has been pulled, or upload the Excel (.xlsx) template instead.'
-                  : 'This PDF has no text layer, and Gemini vision parsing is not configured on ' +
-                    'the server. Ask an admin to set GEMINI_API_KEY in the API .env file, or ' +
-                    'upload the Excel (.xlsx) template instead.',
+                hint:
+                  'This PDF has no text layer and the local vision parser is unavailable. ' +
+                  'Check that Ollama is running on the API host (systemctl status ollama) ' +
+                  'and the configured model (OLLAMA_VISION_MODEL) has been pulled, or upload ' +
+                  'the Excel (.xlsx) template instead.',
               });
               return;
             }
 
             try {
-              // Both backends share an identical option/result shape; the
-              // progress-event `type` discriminators are identical too, so
-              // the NDJSON stream consumer never needs to branch on which
-              // backend produced the events.
-              const visionOpts = {
+              const vision = await parseEciRollPdfWithLocalVision(req.file.buffer, {
                 onProgress: wantsStream
-                  ? (evt: any) => emit({ type: 'progress', event: evt })
+                  ? (evt) => emit({ type: 'progress', event: evt })
                   : undefined,
                 maxVoters: parseLimit > 0 ? parseLimit : undefined,
-              };
-              const vision = useLocal
-                ? await parseEciRollPdfWithLocalVision(req.file.buffer, visionOpts)
-                : await parseEciRollPdfWithGemini(req.file.buffer, visionOpts);
+              });
               rows = vision.rows.map((r) => ({
                 voterSerialNumber: r.voterSerialNumber,
                 epicNumber: r.epicNumber,
@@ -592,21 +561,15 @@ router.post(
               parsedAcEn = vision.assemblyConstituency;
               parsedAcHi = vision.assemblyConstituencyHi;
             } catch (visionErr: any) {
-              if (
-                visionErr instanceof GeminiNotConfiguredError ||
-                visionErr instanceof LocalVisionNotAvailableError
-              ) {
+              if (visionErr instanceof LocalVisionNotAvailableError) {
                 replyErr(400, visionErr.message);
                 return;
               }
-              if (
-                visionErr instanceof GeminiParseFailedError ||
-                visionErr instanceof LocalVisionParseFailedError
-              ) {
+              if (visionErr instanceof LocalVisionParseFailedError) {
                 replyErr(502, visionErr.message, {
-                  hint: useLocal
-                    ? 'The local vision parser could not extract voters from this PDF. Try a higher-resolution scan, or upload the Excel template.'
-                    : 'Gemini could not parse this PDF. Try a higher-resolution scan, or upload the Excel template.',
+                  hint:
+                    'The local vision parser could not extract voters from this PDF. Try a ' +
+                    'higher-resolution scan, or upload the Excel template.',
                 });
                 return;
               }
