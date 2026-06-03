@@ -25,6 +25,7 @@ const navItems: NavItem[] = [
   { label: 'Assignments', href: '/assignments', roles: ['super_admin', 'staff'] },
   { label: 'Analytics', href: '/analytics', roles: ['super_admin'] },
   { label: 'Subscriptions', href: '/subscriptions', roles: ['super_admin'] },
+  { label: 'Books (Catalogue)', href: '/books', roles: ['super_admin'] },
   { label: 'Published Books', href: '/published-books', roles: ['super_admin'] },
   { label: 'Audit Log', href: '/audit-log', roles: ['super_admin'] },
 ];

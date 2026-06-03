@@ -10,47 +10,29 @@
  * fakes an order ID.
  */
 import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import { PublicShell } from '@/components/landing/PublicShell';
 
+/** Public catalogue is a thin client over /api/books — admins manage
+ *  the catalogue from the admin /books page; this just renders what
+ *  the API returns.  Shape matches the Book Mongoose model. */
 interface Book {
-  id: string;
+  _id: string;
+  slug: string;
   title: string;
   author: string;
-  cat: string;
-  catLabel: string;
+  category: string;
+  categoryLabel: string;
   price: number;
   mrp?: number;
   rating: number;
   reviews: number;
-  /** Cover photo URL (Unsplash CDN, sized 600×880 portrait). */
-  cover: string;
-  /** Fallback gradient tint, shown only if the image fails to load. */
-  c1: string;
-  c2: string;
-  fg: string;
+  coverUrl: string;
+  coverGradient: { c1: string; c2: string; fg: string };
   isNew?: boolean;
 }
 
-/** Unsplash CDN URL helper — fixed aspect ratio (3:4.4 ≈ 600×880),
- *  quality 80, crop centred.  All photo IDs are stable, public images
- *  on images.unsplash.com (no rate-limited source.unsplash.com). */
-const u = (photoId: string) =>
-  `https://images.unsplash.com/${photoId}?w=600&h=880&fit=crop&crop=entropy&q=80&auto=format`;
-
-const BOOKS: Book[] = [
-  { id: 'verdict24', title: 'The Verdict 2024', author: 'Aditi Khanna', cat: 'Analysis', catLabel: 'Analysis · 2024', price: 599, mrp: 799, rating: 4.7, reviews: 212, cover: u('photo-1577563908411-5077b6dc7624'), c1: '#7a1f1c', c2: '#4a1110', fg: '#fbeae8', isNew: true },
-  { id: 'atlas', title: 'Constituency Atlas: 543 Seats Decoded', author: 'Pollistics Data Desk', cat: 'Handbook', catLabel: 'Handbook', price: 1299, mrp: 1599, rating: 4.9, reviews: 88, cover: u('photo-1519681393784-d120267933ba'), c1: '#243b6b', c2: '#16244a', fg: '#eef1f8' },
-  { id: 'caste', title: 'Caste & The Ballot', author: 'Dr. Meera Suresh', cat: 'Psephology', catLabel: 'Psephology', price: 749, rating: 4.6, reviews: 154, cover: u('photo-1532012197267-da84d127e765'), c1: '#5a3210', c2: '#3a2008', fg: '#f6e9d8' },
-  { id: 'swing', title: 'Swing States: UP to Tamil Nadu', author: 'Rohan Menon', cat: 'Analysis', catLabel: 'Analysis', price: 699, mrp: 899, rating: 4.5, reviews: 97, cover: u('photo-1481627834876-b7833e8f5570'), c1: '#1d5b4a', c2: '#103a2f', fg: '#e2f1ea' },
-  { id: 'booth', title: 'Booth-Level Bharat', author: 'S. Iyer', cat: 'Field', catLabel: 'Field Manual', price: 499, rating: 4.8, reviews: 301, cover: u('photo-1457369804613-52c61a468e7d'), c1: '#2a2a30', c2: '#161619', fg: '#f5f5f7', isNew: true },
-  { id: 'pseph', title: 'Psephology: A Field Manual', author: 'Prof. N. Banerjee', cat: 'Psephology', catLabel: 'Psephology', price: 899, mrp: 1099, rating: 4.7, reviews: 140, cover: u('photo-1544947950-fa07a98d237f'), c1: '#4a2c5e', c2: '#2e1a3c', fg: '#efe2f6' },
-  { id: 'coalition', title: 'The Coalition Decades 1989–2014', author: 'Rohan Menon', cat: 'Analysis', catLabel: 'Analysis · History', price: 849, rating: 4.6, reviews: 64, cover: u('photo-1495446815901-a7297e633e8d'), c1: '#6b4a14', c2: '#422d08', fg: '#f7ecd2' },
-  { id: 'women', title: 'Women & The Vote', author: 'Kavya Reddy', cat: 'Analysis', catLabel: 'Analysis', price: 649, mrp: 799, rating: 4.8, reviews: 176, cover: u('photo-1543002588-bfa74002ed7e'), c1: '#7a1f4a', c2: '#4a112c', fg: '#fbe8f1' },
-  { id: 'modi-bio', title: 'The Long Campaign', author: 'V. Raghavan', cat: 'Biography', catLabel: 'Biography', price: 799, mrp: 999, rating: 4.4, reviews: 233, cover: u('photo-1512820790803-83ca734da794'), c1: '#2a3a4a', c2: '#18242e', fg: '#e6eef4' },
-  { id: 'turnout', title: 'Why India Votes', author: 'Dr. Meera Suresh', cat: 'Psephology', catLabel: 'Psephology', price: 599, rating: 4.5, reviews: 71, cover: u('photo-1535905557558-afc4877a26fc'), c1: '#16244a', c2: '#0e1830', fg: '#e6ebf6' },
-  { id: 'karyakarta', title: "The Karyakarta's Handbook", author: 'Pollistics Data Desk', cat: 'Field', catLabel: 'Field Manual', price: 399, mrp: 549, rating: 4.9, reviews: 412, cover: u('photo-1589998059171-988d887df646'), c1: '#7a3a1c', c2: '#4a2210', fg: '#fbe9de' },
-  { id: 'maps', title: 'Mapping the Mandate', author: 'A. Khanna & S. Iyer', cat: 'Handbook', catLabel: 'Handbook · Atlas', price: 1099, mrp: 1399, rating: 4.7, reviews: 53, cover: u('photo-1524995997946-a1c2e315a42f'), c1: '#1d4a5b', c2: '#0f2e3a', fg: '#e2eff4', isNew: true },
-];
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9003/api';
 
 const CATEGORIES: Array<[string, string]> = [
   ['all', 'All titles'],
@@ -69,22 +51,42 @@ function starStr(r: number) {
 }
 
 export default function BookstorePage() {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [activeCat, setActiveCat] = useState('all');
   const [query, setQuery] = useState('');
   const [cartCount, setCartCount] = useState(0);
   const [openBookId, setOpenBookId] = useState<string | null>(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await axios.get<{ data: Book[] }>(`${API_BASE}/books`);
+        if (!cancelled) setBooks(data.data);
+      } catch (err: any) {
+        if (!cancelled) setLoadError(err?.message || 'Could not load catalogue');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return BOOKS.filter((b) => {
-      const okCat = activeCat === 'all' || b.cat === activeCat;
+    return books.filter((b) => {
+      const okCat = activeCat === 'all' || b.category === activeCat;
       const plain = (b.title + ' ' + b.author).toLowerCase();
       const okQ = !q || plain.includes(q);
       return okCat && okQ;
     });
-  }, [activeCat, query]);
+  }, [books, activeCat, query]);
 
-  const openBook = openBookId ? BOOKS.find((b) => b.id === openBookId) ?? null : null;
+  const openBook = openBookId ? books.find((b) => b._id === openBookId) ?? null : null;
 
   return (
     <PublicShell activeNav="Bookstore">
@@ -142,17 +144,32 @@ export default function BookstorePage() {
       {/* GRID */}
       <section style={{ padding: '40px 0 72px' }}>
         <div className="ps-container">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--ps-muted)', fontSize: 14 }}>
+              Loading catalogue…
+            </div>
+          ) : loadError ? (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--ps-muted)' }}>
+              <div className="ps-serif" style={{ fontSize: 22, marginBottom: 6, color: 'var(--ps-ink)' }}>
+                Could not load the bookstore.
+              </div>
+              <div style={{ fontSize: 13 }}>{loadError}</div>
+            </div>
+          ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--ps-muted)' }}>
               <div className="ps-serif" style={{ fontSize: 24, marginBottom: 6 }}>
-                No titles match.
+                {books.length === 0 ? 'No titles yet.' : 'No titles match.'}
               </div>
-              <div style={{ fontSize: 13 }}>Try a different category or search term.</div>
+              <div style={{ fontSize: 13 }}>
+                {books.length === 0
+                  ? 'The catalogue is empty — admins can add books from the dashboard.'
+                  : 'Try a different category or search term.'}
+              </div>
             </div>
           ) : (
             <div className="bs-grid">
               {filtered.map((b) => (
-                <BookCard key={b.id} book={b} onBuy={() => setOpenBookId(b.id)} />
+                <BookCard key={b._id} book={b} onBuy={() => setOpenBookId(b._id)} />
               ))}
             </div>
           )}
@@ -178,15 +195,15 @@ function BookCard({ book, onBuy }: { book: Book; onBuy: () => void }) {
       <div
         className="bs-cover"
         style={{
-          background: `linear-gradient(135deg, ${book.c1} 0%, ${book.c2} 100%)`,
-          color: book.fg,
+          background: `linear-gradient(135deg, ${book.coverGradient.c1} 0%, ${book.coverGradient.c2} 100%)`,
+          color: book.coverGradient.fg,
         }}>
         {book.isNew && <span className="bs-badge-new">NEW</span>}
         {/* CDN photo background; loading="lazy" so off-screen covers
             don't tax mobile data on initial paint.  The gradient + title
             overlay underneath is the graceful fallback if the image 404s. */}
         <img
-          src={book.cover}
+          src={book.coverUrl}
           alt=""
           loading="lazy"
           decoding="async"
@@ -196,7 +213,7 @@ function BookCard({ book, onBuy }: { book: Book; onBuy: () => void }) {
           }}
         />
         <div className="bs-cover-inner">
-          <div className="ps-mono bs-cover-cat">{book.catLabel}</div>
+          <div className="ps-mono bs-cover-cat">{book.categoryLabel}</div>
           <div className="ps-serif bs-cover-title">{book.title}</div>
           <div className="ps-mono bs-cover-author">{book.author}</div>
         </div>
@@ -323,11 +340,11 @@ function BuyModal({
               <div
                 className="bs-modal-cover"
                 style={{
-                  background: `linear-gradient(135deg, ${book.c1} 0%, ${book.c2} 100%)`,
-                  color: book.fg,
+                  background: `linear-gradient(135deg, ${book.coverGradient.c1} 0%, ${book.coverGradient.c2} 100%)`,
+                  color: book.coverGradient.fg,
                 }}>
                 <img
-                  src={book.cover}
+                  src={book.coverUrl}
                   alt=""
                   loading="lazy"
                   decoding="async"

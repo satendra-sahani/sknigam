@@ -20,6 +20,7 @@ import subscriptionRoutes from './routes/subscriptions';
 import discrepancyRoutes from './routes/discrepancies';
 import imagekitRoutes from './routes/imagekit';
 import publishedBookRoutes from './routes/publishedBooks';
+import bookRoutes from './routes/books';
 
 const app = express();
 const server = http.createServer(app);
@@ -49,6 +50,7 @@ app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/discrepancies', discrepancyRoutes);
 app.use('/api/imagekit', imagekitRoutes);
 app.use('/api/published-books', publishedBookRoutes);
+app.use('/api/books', bookRoutes);
 
 // Error handling
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
