@@ -24,6 +24,7 @@ const pageTitles: Record<string, string> = {
   '/analytics': 'Analytics',
   '/subscriptions': 'Subscriptions',
   '/books': 'Books (Catalogue)',
+  '/book-orders': 'Buy Requests',
   '/published-books': 'Published Books',
   '/audit-log': 'Audit Log',
 };

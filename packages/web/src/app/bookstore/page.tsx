@@ -252,6 +252,13 @@ function BookCard({ book, onBuy }: { book: Book; onBuy: () => void }) {
 
 type Fmt = 'Paperback' | 'E-book' | 'Hardcover';
 
+const PAYMENT_OPTIONS: Array<{ label: string; value: 'UPI' | 'Card' | 'NetBanking' | 'COD' }> = [
+  { label: 'UPI · GPay / PhonePe', value: 'UPI' },
+  { label: 'Credit / Debit card', value: 'Card' },
+  { label: 'Net banking', value: 'NetBanking' },
+  { label: 'Cash on delivery', value: 'COD' },
+];
+
 function BuyModal({
   book,
   onClose,
@@ -268,7 +275,15 @@ function BuyModal({
 
   const [fmt, setFmt] = useState<Fmt>('Paperback');
   const [qty, setQty] = useState(1);
+  const [customerName, setCustomerName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [pincode, setPincode] = useState('');
+  const [address, setAddress] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'Card' | 'NetBanking' | 'COD'>('UPI');
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [placing, setPlacing] = useState(false);
+  const [placeError, setPlaceError] = useState<string | null>(null);
 
   useEffect(() => {
     if (fmt === 'E-book') setQty(1);
@@ -291,11 +306,36 @@ function BuyModal({
   const ship = fmt === 'E-book' ? 0 : sub >= 699 ? 0 : SHIP;
   const total = sub + ship;
 
-  const place = (e: React.FormEvent) => {
+  const place = async (e: React.FormEvent) => {
     e.preventDefault();
-    const oid = 'PB-' + Math.floor(100000 + Math.random() * 900000);
-    setOrderId(oid);
-    onOrder(qty);
+    setPlaceError(null);
+    setPlacing(true);
+    try {
+      const { data } = await axios.post<{ data: { orderId: string } }>(
+        `${API_BASE}/book-orders`,
+        {
+          bookSlug: book.slug,
+          format: fmt,
+          quantity: qty,
+          customerName: customerName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          pincode: pincode.trim(),
+          address: address.trim(),
+          paymentMethod,
+        },
+      );
+      setOrderId(data.data.orderId);
+      onOrder(qty);
+    } catch (err: any) {
+      setPlaceError(
+        err?.response?.data?.error ||
+          err?.message ||
+          'Could not place order. Please try again or contact us directly.',
+      );
+    } finally {
+      setPlacing(false);
+    }
   };
 
   return (
@@ -406,18 +446,48 @@ function BuyModal({
 
               <p className="ps-mono bs-section-label">Delivery details</p>
               <div className="bs-frow">
-                <BsField label="Full name" required type="text" placeholder="Recipient name" />
-                <BsField label="Email" required type="email" placeholder="you@email.com" />
+                <BsField
+                  label="Full name"
+                  required
+                  type="text"
+                  placeholder="Recipient name"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+                <BsField
+                  label="Email"
+                  required
+                  type="email"
+                  placeholder="you@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
               <div className="bs-frow">
-                <BsField label="Phone" required type="tel" placeholder="+91 ·········" />
-                <BsField label="PIN code" required type="text" placeholder="110001" />
+                <BsField
+                  label="Phone"
+                  required
+                  type="tel"
+                  placeholder="+91 ·········"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <BsField
+                  label="PIN code"
+                  required
+                  type="text"
+                  placeholder="110001"
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value)}
+                />
               </div>
               <BsField
                 label="Delivery address"
                 required
                 type="text"
                 placeholder="House, street, city, state"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
               />
 
               <p className="ps-mono bs-section-label">Quantity &amp; payment</p>
@@ -444,11 +514,13 @@ function BuyModal({
                 </div>
                 <div className="bs-field" style={{ margin: 0, flex: 1, minWidth: 160 }}>
                   <label className="ps-mono bs-field-label">Payment method</label>
-                  <select className="bs-input">
-                    <option>UPI · GPay / PhonePe</option>
-                    <option>Credit / Debit card</option>
-                    <option>Net banking</option>
-                    <option>Cash on delivery</option>
+                  <select
+                    className="bs-input"
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value as typeof paymentMethod)}>
+                    {PAYMENT_OPTIONS.map((p) => (
+                      <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -470,11 +542,32 @@ function BuyModal({
                 </div>
               </div>
 
+              {placeError && (
+                <div
+                  style={{
+                    marginBottom: 10,
+                    padding: '10px 12px',
+                    border: '1px solid var(--ps-accent)',
+                    borderRadius: 5,
+                    background: 'rgba(225,30,44,.06)',
+                    color: 'var(--ps-ink)',
+                    fontSize: 13,
+                  }}>
+                  {placeError}
+                </div>
+              )}
               <button
                 type="submit"
+                disabled={placing}
                 className="ps-btn-solid ps-btn-accent"
-                style={{ width: '100%', justifyContent: 'center', height: 50 }}>
-                Place order →
+                style={{
+                  width: '100%',
+                  justifyContent: 'center',
+                  height: 50,
+                  opacity: placing ? 0.7 : 1,
+                  cursor: placing ? 'wait' : 'pointer',
+                }}>
+                {placing ? 'Placing order…' : 'Place order →'}
               </button>
               <p
                 className="ps-mono"
