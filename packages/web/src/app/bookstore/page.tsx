@@ -22,25 +22,34 @@ interface Book {
   mrp?: number;
   rating: number;
   reviews: number;
+  /** Cover photo URL (Unsplash CDN, sized 600×880 portrait). */
+  cover: string;
+  /** Fallback gradient tint, shown only if the image fails to load. */
   c1: string;
   c2: string;
   fg: string;
   isNew?: boolean;
 }
 
+/** Unsplash CDN URL helper — fixed aspect ratio (3:4.4 ≈ 600×880),
+ *  quality 80, crop centred.  All photo IDs are stable, public images
+ *  on images.unsplash.com (no rate-limited source.unsplash.com). */
+const u = (photoId: string) =>
+  `https://images.unsplash.com/${photoId}?w=600&h=880&fit=crop&crop=entropy&q=80&auto=format`;
+
 const BOOKS: Book[] = [
-  { id: 'verdict24', title: 'The Verdict 2024', author: 'Aditi Khanna', cat: 'Analysis', catLabel: 'Analysis · 2024', price: 599, mrp: 799, rating: 4.7, reviews: 212, c1: '#7a1f1c', c2: '#4a1110', fg: '#fbeae8', isNew: true },
-  { id: 'atlas', title: 'Constituency Atlas: 543 Seats Decoded', author: 'Pollistics Data Desk', cat: 'Handbook', catLabel: 'Handbook', price: 1299, mrp: 1599, rating: 4.9, reviews: 88, c1: '#243b6b', c2: '#16244a', fg: '#eef1f8' },
-  { id: 'caste', title: 'Caste & The Ballot', author: 'Dr. Meera Suresh', cat: 'Psephology', catLabel: 'Psephology', price: 749, rating: 4.6, reviews: 154, c1: '#5a3210', c2: '#3a2008', fg: '#f6e9d8' },
-  { id: 'swing', title: 'Swing States: UP to Tamil Nadu', author: 'Rohan Menon', cat: 'Analysis', catLabel: 'Analysis', price: 699, mrp: 899, rating: 4.5, reviews: 97, c1: '#1d5b4a', c2: '#103a2f', fg: '#e2f1ea' },
-  { id: 'booth', title: 'Booth-Level Bharat', author: 'S. Iyer', cat: 'Field', catLabel: 'Field Manual', price: 499, rating: 4.8, reviews: 301, c1: '#2a2a30', c2: '#161619', fg: '#f5f5f7', isNew: true },
-  { id: 'pseph', title: 'Psephology: A Field Manual', author: 'Prof. N. Banerjee', cat: 'Psephology', catLabel: 'Psephology', price: 899, mrp: 1099, rating: 4.7, reviews: 140, c1: '#4a2c5e', c2: '#2e1a3c', fg: '#efe2f6' },
-  { id: 'coalition', title: 'The Coalition Decades 1989–2014', author: 'Rohan Menon', cat: 'Analysis', catLabel: 'Analysis · History', price: 849, rating: 4.6, reviews: 64, c1: '#6b4a14', c2: '#422d08', fg: '#f7ecd2' },
-  { id: 'women', title: 'Women & The Vote', author: 'Kavya Reddy', cat: 'Analysis', catLabel: 'Analysis', price: 649, mrp: 799, rating: 4.8, reviews: 176, c1: '#7a1f4a', c2: '#4a112c', fg: '#fbe8f1' },
-  { id: 'modi-bio', title: 'The Long Campaign', author: 'V. Raghavan', cat: 'Biography', catLabel: 'Biography', price: 799, mrp: 999, rating: 4.4, reviews: 233, c1: '#2a3a4a', c2: '#18242e', fg: '#e6eef4' },
-  { id: 'turnout', title: 'Why India Votes', author: 'Dr. Meera Suresh', cat: 'Psephology', catLabel: 'Psephology', price: 599, rating: 4.5, reviews: 71, c1: '#16244a', c2: '#0e1830', fg: '#e6ebf6' },
-  { id: 'karyakarta', title: "The Karyakarta's Handbook", author: 'Pollistics Data Desk', cat: 'Field', catLabel: 'Field Manual', price: 399, mrp: 549, rating: 4.9, reviews: 412, c1: '#7a3a1c', c2: '#4a2210', fg: '#fbe9de' },
-  { id: 'maps', title: 'Mapping the Mandate', author: 'A. Khanna & S. Iyer', cat: 'Handbook', catLabel: 'Handbook · Atlas', price: 1099, mrp: 1399, rating: 4.7, reviews: 53, c1: '#1d4a5b', c2: '#0f2e3a', fg: '#e2eff4', isNew: true },
+  { id: 'verdict24', title: 'The Verdict 2024', author: 'Aditi Khanna', cat: 'Analysis', catLabel: 'Analysis · 2024', price: 599, mrp: 799, rating: 4.7, reviews: 212, cover: u('photo-1577563908411-5077b6dc7624'), c1: '#7a1f1c', c2: '#4a1110', fg: '#fbeae8', isNew: true },
+  { id: 'atlas', title: 'Constituency Atlas: 543 Seats Decoded', author: 'Pollistics Data Desk', cat: 'Handbook', catLabel: 'Handbook', price: 1299, mrp: 1599, rating: 4.9, reviews: 88, cover: u('photo-1519681393784-d120267933ba'), c1: '#243b6b', c2: '#16244a', fg: '#eef1f8' },
+  { id: 'caste', title: 'Caste & The Ballot', author: 'Dr. Meera Suresh', cat: 'Psephology', catLabel: 'Psephology', price: 749, rating: 4.6, reviews: 154, cover: u('photo-1532012197267-da84d127e765'), c1: '#5a3210', c2: '#3a2008', fg: '#f6e9d8' },
+  { id: 'swing', title: 'Swing States: UP to Tamil Nadu', author: 'Rohan Menon', cat: 'Analysis', catLabel: 'Analysis', price: 699, mrp: 899, rating: 4.5, reviews: 97, cover: u('photo-1481627834876-b7833e8f5570'), c1: '#1d5b4a', c2: '#103a2f', fg: '#e2f1ea' },
+  { id: 'booth', title: 'Booth-Level Bharat', author: 'S. Iyer', cat: 'Field', catLabel: 'Field Manual', price: 499, rating: 4.8, reviews: 301, cover: u('photo-1457369804613-52c61a468e7d'), c1: '#2a2a30', c2: '#161619', fg: '#f5f5f7', isNew: true },
+  { id: 'pseph', title: 'Psephology: A Field Manual', author: 'Prof. N. Banerjee', cat: 'Psephology', catLabel: 'Psephology', price: 899, mrp: 1099, rating: 4.7, reviews: 140, cover: u('photo-1544947950-fa07a98d237f'), c1: '#4a2c5e', c2: '#2e1a3c', fg: '#efe2f6' },
+  { id: 'coalition', title: 'The Coalition Decades 1989–2014', author: 'Rohan Menon', cat: 'Analysis', catLabel: 'Analysis · History', price: 849, rating: 4.6, reviews: 64, cover: u('photo-1495446815901-a7297e633e8d'), c1: '#6b4a14', c2: '#422d08', fg: '#f7ecd2' },
+  { id: 'women', title: 'Women & The Vote', author: 'Kavya Reddy', cat: 'Analysis', catLabel: 'Analysis', price: 649, mrp: 799, rating: 4.8, reviews: 176, cover: u('photo-1543002588-bfa74002ed7e'), c1: '#7a1f4a', c2: '#4a112c', fg: '#fbe8f1' },
+  { id: 'modi-bio', title: 'The Long Campaign', author: 'V. Raghavan', cat: 'Biography', catLabel: 'Biography', price: 799, mrp: 999, rating: 4.4, reviews: 233, cover: u('photo-1512820790803-83ca734da794'), c1: '#2a3a4a', c2: '#18242e', fg: '#e6eef4' },
+  { id: 'turnout', title: 'Why India Votes', author: 'Dr. Meera Suresh', cat: 'Psephology', catLabel: 'Psephology', price: 599, rating: 4.5, reviews: 71, cover: u('photo-1535905557558-afc4877a26fc'), c1: '#16244a', c2: '#0e1830', fg: '#e6ebf6' },
+  { id: 'karyakarta', title: "The Karyakarta's Handbook", author: 'Pollistics Data Desk', cat: 'Field', catLabel: 'Field Manual', price: 399, mrp: 549, rating: 4.9, reviews: 412, cover: u('photo-1589998059171-988d887df646'), c1: '#7a3a1c', c2: '#4a2210', fg: '#fbe9de' },
+  { id: 'maps', title: 'Mapping the Mandate', author: 'A. Khanna & S. Iyer', cat: 'Handbook', catLabel: 'Handbook · Atlas', price: 1099, mrp: 1399, rating: 4.7, reviews: 53, cover: u('photo-1524995997946-a1c2e315a42f'), c1: '#1d4a5b', c2: '#0f2e3a', fg: '#e2eff4', isNew: true },
 ];
 
 const CATEGORIES: Array<[string, string]> = [
@@ -173,6 +182,19 @@ function BookCard({ book, onBuy }: { book: Book; onBuy: () => void }) {
           color: book.fg,
         }}>
         {book.isNew && <span className="bs-badge-new">NEW</span>}
+        {/* CDN photo background; loading="lazy" so off-screen covers
+            don't tax mobile data on initial paint.  The gradient + title
+            overlay underneath is the graceful fallback if the image 404s. */}
+        <img
+          src={book.cover}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="bs-cover-img"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = 'none';
+          }}
+        />
         <div className="bs-cover-inner">
           <div className="ps-mono bs-cover-cat">{book.catLabel}</div>
           <div className="ps-serif bs-cover-title">{book.title}</div>
@@ -304,9 +326,17 @@ function BuyModal({
                   background: `linear-gradient(135deg, ${book.c1} 0%, ${book.c2} 100%)`,
                   color: book.fg,
                 }}>
-                <div className="ps-serif" style={{ fontSize: 12, lineHeight: 1.1, padding: 10 }}>
-                  {book.title}
-                </div>
+                <img
+                  src={book.cover}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="bs-modal-cover-img"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+                <div className="ps-serif bs-modal-cover-title">{book.title}</div>
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
@@ -567,12 +597,32 @@ function BookstoreStyles() {
         transform: translateY(-4px);
         box-shadow: 0 26px 54px -16px rgba(0, 0, 0, 0.4);
       }
+      .ps-page .bs-cover-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        z-index: 0;
+      }
       .ps-page .bs-cover-inner {
+        position: relative;
+        z-index: 1;
         padding: 22px 18px;
         display: flex;
         flex-direction: column;
         gap: 8px;
         flex: 1;
+        /* Dark gradient floor so the title text stays legible on top
+           of any random photo background. */
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.05) 0%,
+          rgba(0, 0, 0, 0.45) 60%,
+          rgba(0, 0, 0, 0.78) 100%
+        );
+        justify-content: flex-end;
       }
       .ps-page .bs-cover-cat {
         font-size: 9.5px;
@@ -585,7 +635,12 @@ function BookstoreStyles() {
         line-height: 1.1;
         font-weight: 500;
         letter-spacing: -0.015em;
-        flex: 1;
+        color: #fff;
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+      }
+      .ps-page .bs-cover-cat,
+      .ps-page .bs-cover-author {
+        color: #fff;
       }
       .ps-page .bs-cover-author {
         font-size: 10px;
@@ -686,13 +741,37 @@ function BookstoreStyles() {
         position: relative;
       }
       .ps-page .bs-modal-cover {
+        position: relative;
         width: 96px;
         aspect-ratio: 3 / 4.4;
         border-radius: 2px 5px 5px 2px;
+        overflow: hidden;
         flex-shrink: 0;
         box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.35);
-        display: flex;
-        align-items: flex-start;
+      }
+      .ps-page .bs-modal-cover-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .ps-page .bs-modal-cover-title {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 8px;
+        font-size: 11px;
+        line-height: 1.1;
+        color: #fff;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0) 0%,
+          rgba(0, 0, 0, 0.7) 80%,
+          rgba(0, 0, 0, 0.85) 100%
+        );
       }
       .ps-page .bs-modal-close {
         position: absolute;

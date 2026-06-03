@@ -12,7 +12,16 @@
  */
 import { useState } from 'react';
 import Link from 'next/link';
+import axios from 'axios';
 import { PublicShell } from '@/components/landing/PublicShell';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9003/api';
+
+function parsePackageLabel(label: string): 'Essential' | 'Analyst' | 'Bureau' {
+  if (label.startsWith('Essential')) return 'Essential';
+  if (label.startsWith('Bureau')) return 'Bureau';
+  return 'Analyst';
+}
 
 const STATS: Array<[string, string]> = [
   ['3,100+', 'Titles published'],
@@ -109,13 +118,68 @@ const PROMISES = [
   },
 ];
 
+interface PubForm {
+  authorName: string;
+  email: string;
+  phone: string;
+  pkg: string;
+  title: string;
+  genre: string;
+  wordCount: string;
+  synopsis: string;
+}
+
+const EMPTY_FORM: PubForm = {
+  authorName: '',
+  email: '',
+  phone: '',
+  pkg: 'Analyst · ₹14,999',
+  title: '',
+  genre: 'Election Analysis',
+  wordCount: '',
+  synopsis: '',
+};
+
 export default function PublishPage() {
-  const [pkg, setPkg] = useState('Analyst · ₹14,999');
+  const [form, setForm] = useState<PubForm>(EMPTY_FORM);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const set = <K extends keyof PubForm>(k: K, v: PubForm[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
 
   const scrollToForm = () => {
     document.getElementById('publish-form')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      await axios.post(`${API_BASE}/published-books`, {
+        authorName: form.authorName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        title: form.title.trim(),
+        genre: form.genre,
+        wordCount: form.wordCount.trim() || undefined,
+        synopsis: form.synopsis.trim() || undefined,
+        package: parsePackageLabel(form.pkg),
+        manuscriptName: fileName ?? undefined,
+      });
+      setSubmitted(true);
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.error ||
+        err?.message ||
+        'Submission failed. Please try again or email us directly.';
+      setSubmitError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -328,7 +392,7 @@ export default function PublishPage() {
                 </ul>
                 <button
                   onClick={() => {
-                    setPkg(`${p.name} · ${p.price}`);
+                    set('pkg', `${p.name} · ${p.price}`);
                     scrollToForm();
                   }}
                   className={p.featured ? 'ps-btn-solid ps-btn-accent' : 'ps-btn-ghost'}
@@ -429,6 +493,7 @@ export default function PublishPage() {
                     onClick={() => {
                       setSubmitted(false);
                       setFileName(null);
+                      setForm(EMPTY_FORM);
                     }}
                     className="ps-btn-ghost"
                     style={{ marginTop: 22 }}>
@@ -436,28 +501,54 @@ export default function PublishPage() {
                   </button>
                 </div>
               ) : (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setSubmitted(true);
-                  }}>
+                <form onSubmit={submit}>
                   <div className="pub-frow">
-                    <Field label="Author name" required type="text" placeholder="Your full name" />
-                    <Field label="Email" required type="email" placeholder="you@email.com" />
+                    <Field
+                      label="Author name"
+                      required
+                      type="text"
+                      placeholder="Your full name"
+                      value={form.authorName}
+                      onChange={(e) => set('authorName', e.target.value)}
+                    />
+                    <Field
+                      label="Email"
+                      required
+                      type="email"
+                      placeholder="you@email.com"
+                      value={form.email}
+                      onChange={(e) => set('email', e.target.value)}
+                    />
                   </div>
                   <div className="pub-frow">
-                    <Field label="Phone" required type="tel" placeholder="+91 ·········" />
+                    <Field
+                      label="Phone"
+                      required
+                      type="tel"
+                      placeholder="+91 ·········"
+                      value={form.phone}
+                      onChange={(e) => set('phone', e.target.value)}
+                    />
                     <FieldSelect
                       label="Package"
-                      value={pkg}
-                      onChange={setPkg}
+                      value={form.pkg}
+                      onChange={(v) => set('pkg', v)}
                       options={['Essential · ₹0', 'Analyst · ₹14,999', 'Bureau · ₹39,999']}
                     />
                   </div>
-                  <Field label="Book title" required type="text" placeholder="e.g. The Verdict 2029" />
+                  <Field
+                    label="Book title"
+                    required
+                    type="text"
+                    placeholder="e.g. The Verdict 2029"
+                    value={form.title}
+                    onChange={(e) => set('title', e.target.value)}
+                  />
                   <div className="pub-frow">
                     <FieldSelect
                       label="Genre / category"
+                      value={form.genre}
+                      onChange={(v) => set('genre', v)}
                       options={[
                         'Election Analysis',
                         'Psephology',
@@ -468,7 +559,13 @@ export default function PublishPage() {
                         'Other',
                       ]}
                     />
-                    <Field label="Approx. word count" type="text" placeholder="e.g. 45,000" />
+                    <Field
+                      label="Approx. word count"
+                      type="text"
+                      placeholder="e.g. 45,000"
+                      value={form.wordCount}
+                      onChange={(e) => set('wordCount', e.target.value)}
+                    />
                   </div>
                   <div className="pub-field">
                     <label className="ps-mono pub-label">Synopsis</label>
@@ -476,6 +573,8 @@ export default function PublishPage() {
                       placeholder="Two or three lines on what your book covers…"
                       className="pub-input"
                       style={{ minHeight: 90, resize: 'vertical' }}
+                      value={form.synopsis}
+                      onChange={(e) => set('synopsis', e.target.value)}
                     />
                   </div>
                   <div className="pub-field">
@@ -516,16 +615,33 @@ export default function PublishPage() {
                       )}
                     </label>
                   </div>
+                  {submitError && (
+                    <div
+                      style={{
+                        marginTop: 10,
+                        padding: '10px 12px',
+                        border: '1px solid var(--ps-accent)',
+                        borderRadius: 5,
+                        background: 'rgba(225,30,44,.06)',
+                        color: 'var(--ps-ink)',
+                        fontSize: 13,
+                      }}>
+                      {submitError}
+                    </div>
+                  )}
                   <button
                     type="submit"
+                    disabled={submitting}
                     className="ps-btn-solid ps-btn-accent"
                     style={{
                       width: '100%',
                       justifyContent: 'center',
                       height: 50,
                       marginTop: 6,
+                      opacity: submitting ? 0.7 : 1,
+                      cursor: submitting ? 'wait' : 'pointer',
                     }}>
-                    Submit for review →
+                    {submitting ? 'Submitting…' : 'Submit for review →'}
                   </button>
                   <p
                     className="ps-mono"
