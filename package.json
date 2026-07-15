@@ -19,5 +19,10 @@
   "devDependencies": {
     "concurrently": "^8.2.2",
     "typescript": "^5.4.0"
+  },
+  "//overrides": "Pin a single React across workspaces — the RN mobile pkg hoists react@18.2.0 to root while web nested 18.3.1, which broke styled-jsx (dual-React useContext crash) during `next build` prerender of /404,/500.",
+  "overrides": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   }
 }
