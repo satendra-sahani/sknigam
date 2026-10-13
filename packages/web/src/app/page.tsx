@@ -2,12 +2,12 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { PollsticsShell } from '@/components/site/PollsticsShell';
+import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
 
 const IMG = '/assets/pollstics';
 
-export default function HomePage() {
-  const [lang, setLang] = useState('hi');
+function HomeContent() {
+  const { lang } = useLang();
   const hi = lang === 'hi';
   const L = (h: string, e: string) => (hi ? h : e);
 
@@ -127,7 +127,7 @@ export default function HomePage() {
   const scrollBy = (ref: React.RefObject<HTMLDivElement | null>, dx: number) => ref.current?.scrollBy({ left: dx, behavior: 'smooth' });
 
   return (
-    <PollsticsShell activeNav="home" lang={lang} setLang={setLang}>
+    <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(32px,4.5vw,44px)' }}>
         {/* ═══ HERO ═══ */}
         <section className="pn-hero">
@@ -381,6 +381,14 @@ export default function HomePage() {
           </div>
         </section>
       </div>
+    </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <PollsticsShell activeNav="home">
+      <HomeContent />
     </PollsticsShell>
   );
 }

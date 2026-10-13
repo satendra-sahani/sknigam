@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import Link from 'next/link';
-import { PollsticsShell } from '@/components/site/PollsticsShell';
+import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
 
 const IMG = '/assets/pollstics';
 
-export default function VideoPage() {
-  const [lang, setLang] = useState('hi');
+function VideoContent() {
+  const { lang } = useLang();
   const hi = lang === 'hi';
   const L = (h: string, e: string) => (hi ? h : e);
 
@@ -44,7 +44,7 @@ export default function VideoPage() {
   const seeAll = L('सभी देखें', 'See all');
 
   return (
-    <PollsticsShell activeNav="video" lang={lang} setLang={setLang}>
+    <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(32px,4.5vw,44px)', paddingBottom: 48 }}>
 
         {/* ═══ BREADCRUMB ═══ */}
@@ -262,6 +262,14 @@ export default function VideoPage() {
         </section>
 
       </div>
+    </>
+  );
+}
+
+export default function VideoPage() {
+  return (
+    <PollsticsShell activeNav="video">
+      <VideoContent />
     </PollsticsShell>
   );
 }

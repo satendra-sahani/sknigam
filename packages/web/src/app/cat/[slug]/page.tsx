@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { PollsticsShell } from '@/components/site/PollsticsShell';
+import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
 
 const IMG = '/assets/pollstics';
 
@@ -158,9 +157,8 @@ function getCatData(slug: string): CatData {
   };
 }
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
-  const [lang, setLang] = useState('hi');
+function CategoryContent({ slug }: { slug: string }) {
+  const { lang } = useLang();
   const hi = lang === 'hi';
   const L = (h: string, e: string) => (hi ? h : e);
   const ago = (n: number, u: 'h' | 'd') => L(`${n} ${u === 'h' ? 'घंटे' : 'दिन'} पहले`, `${n} ${u === 'h' ? 'hours' : 'days'} ago`);
@@ -169,7 +167,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
   const data = getCatData(slug);
 
   return (
-    <PollsticsShell activeNav={slug} lang={lang} setLang={setLang}>
+    <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
         {/* Breadcrumb */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -280,6 +278,15 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
           </aside>
         </div>
       </div>
+    </>
+  );
+}
+
+export default function CategoryPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
+  return (
+    <PollsticsShell activeNav={slug}>
+      <CategoryContent slug={slug} />
     </PollsticsShell>
   );
 }

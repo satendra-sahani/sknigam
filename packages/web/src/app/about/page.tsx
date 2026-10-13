@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { PollsticsShell } from '@/components/site/PollsticsShell';
+import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
 
 const IMG = '/assets/pollstics';
 
-export default function AboutPage() {
-  const [lang, setLang] = useState('hi');
+function AboutContent() {
+  const { lang } = useLang();
   const hi = lang === 'hi';
   const L = (h: string, e: string) => (hi ? h : e);
 
@@ -39,7 +38,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <PollsticsShell activeNav="" lang={lang} setLang={setLang}>
+    <>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 clamp(16px,4vw,40px)' }}>
         {/* Breadcrumb */}
         <nav style={{ fontSize: 14, color: '#666', padding: '18px 0 10px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -172,6 +171,14 @@ export default function AboutPage() {
           </Link>
         </div>
       </div>
+    </>
+  );
+}
+
+export default function AboutPage() {
+  return (
+    <PollsticsShell activeNav="">
+      <AboutContent />
     </PollsticsShell>
   );
 }
