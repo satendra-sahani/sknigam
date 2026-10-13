@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import { Inter, Newsreader, Instrument_Sans, JetBrains_Mono, Outfit } from 'next/font/google';
+import { Inter, Newsreader, Instrument_Sans, JetBrains_Mono, Outfit, Noto_Sans_Devanagari } from 'next/font/google';
 import './globals.css';
 import '../styles/pollistics.css';
+import '../styles/pollstics-news.css';
 import ClientLayout from './ClientLayout';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -34,6 +35,12 @@ const jetbrains = JetBrains_Mono({
   variable: '--font-jetbrains',
   display: 'swap',
 });
+const notoDevanagari = Noto_Sans_Devanagari({
+  subsets: ['devanagari'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-noto-deva',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Pollistics — India\'s election intelligence',
@@ -52,7 +59,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} ${newsreader.variable} ${instrumentSans.variable} ${jetbrains.variable} ${outfit.variable}`}>
+        className={`${inter.className} ${newsreader.variable} ${instrumentSans.variable} ${jetbrains.variable} ${outfit.variable} ${notoDevanagari.variable}`}>
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

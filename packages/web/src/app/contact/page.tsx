@@ -1,80 +1,236 @@
-/**
- * Contact — Pollistics Management Consulting.
- * Port of the handoff Contact.html: banner, contact info column + message form,
- * and the office map band. Styling via <SiteShell>.
- */
-import { SiteShell } from '@/components/site/SiteShell';
-import { ContactForm } from '@/components/site/ContactForm';
+'use client';
 
-export const metadata = {
-  title: 'Contact — Pollistics Management Consulting',
-};
-
-const svg = (d: React.ReactNode) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{d}</svg>
-);
-
-const INFO = [
-  { h: 'Call us', p: '+91 96500 60882', icon: <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.4 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7A2 2 0 0122 16.9z" /> },
-  { h: 'Email', p: 'strategy@pollistics.in', icon: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></> },
-  { h: 'Office', p: 'New Delhi · Mumbai · Lucknow', icon: <><path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z" /><circle cx="12" cy="9" r="2.5" /></> },
-  { h: 'Hours', p: 'Mon – Sat · 9:30am – 7:00pm IST', icon: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></> },
-];
+import { useState } from 'react';
+import Link from 'next/link';
+import { PollsticsShell } from '@/components/site/PollsticsShell';
 
 export default function ContactPage() {
-  return (
-    <SiteShell active="contact" footer="default">
-      {/* BANNER */}
-      <section className="c-banner">
-        <span className="deco" style={{ width: 360, height: 360, right: -120, top: -140 }} />
-        <span className="deco" style={{ width: 220, height: 220, left: '8%', bottom: -120 }} />
-        <div className="page"><h1>Contact Us</h1><p>Planning a campaign or a publication? Let&apos;s talk.</p></div>
-      </section>
+  const [lang, setLang] = useState('hi');
+  const hi = lang === 'hi';
+  const L = (h: string, e: string) => (hi ? h : e);
 
-      {/* CONTACT */}
-      <section className="section">
-        <div className="page">
-          <div className="c-wrap">
-            <div className="c-info">
-              <div className="c-divider"><span className="dash"><i className="d3" /><i className="d2" /><i className="d1" /></span><span className="pill-label">Get in touch</span></div>
-              <h2>We&apos;d love to <span className="o">hear from you.</span></h2>
-              <p className="lead2">Reach out for campaign strategy, data &amp; analytics, or to publish with Pollistics Press. Our team responds within one working day.</p>
-              {INFO.map((i) => (
-                <div className="c-item" key={i.h}>
-                  <div className="ic">{svg(i.icon)}</div>
-                  <div><h5>{i.h}</h5><p>{i.p}</p></div>
+  const [sent, setSent] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+
+  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    setForm((f) => ({ ...f, [field]: e.target.value }));
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    border: '2px solid #141414',
+    borderRadius: 0,
+    padding: '12px 14px',
+    fontSize: 16,
+    outlineColor: '#7a0f1a',
+    fontFamily: 'inherit',
+    boxSizing: 'border-box',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: 14,
+    fontWeight: 700,
+    marginBottom: 6,
+    color: '#141414',
+  };
+
+  const contactItems = [
+    {
+      label: L('सामान्य पूछताछ', 'General'),
+      value: 'contact@pollstics.com',
+    },
+    {
+      label: L('ख़बर या सूचना भेजें', 'News tips'),
+      value: 'tips@pollstics.com',
+    },
+    {
+      label: L('विज्ञापन', 'Advertising'),
+      value: 'ads@pollstics.com',
+    },
+  ];
+
+  return (
+    <PollsticsShell activeNav="" lang={lang} setLang={setLang}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 clamp(16px,4vw,40px)' }}>
+        {/* Breadcrumb */}
+        <nav style={{ fontSize: 14, color: '#666', padding: '18px 0 10px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <Link href="/" style={{ color: '#7a0f1a', textDecoration: 'none', fontWeight: 600 }}>Home</Link>
+          <span>&gt;</span>
+          <span>{L('हमारे बारे में', 'About Us')}</span>
+        </nav>
+
+        {/* Title */}
+        <h1
+          style={{
+            fontSize: 'clamp(34px,5vw,56px)',
+            fontWeight: 800,
+            lineHeight: 1.1,
+            margin: '0 0 16px',
+            color: '#141414',
+          }}
+        >
+          {L('कांटैक्ट', 'Contact')}
+        </h1>
+        <div style={{ borderBottom: '2px solid #141414', marginBottom: 'clamp(28px,4vw,48px)' }} />
+
+        {/* Two columns */}
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 'clamp(28px,4vw,56px)',
+            marginBottom: 'clamp(36px,5vw,56px)',
+          }}
+        >
+          {/* Left: Form */}
+          <div style={{ flex: '999 1 440px', maxWidth: 680 }}>
+            {sent ? (
+              /* Success message */
+              <div
+                style={{
+                  borderTop: '4px solid #7a0f1a',
+                  background: '#f4f1f1',
+                  padding: 28,
+                }}
+              >
+                <h2 style={{ fontSize: 24, fontWeight: 800, margin: '0 0 12px', color: '#141414' }}>
+                  {L('धन्यवाद', 'Thank you')}
+                </h2>
+                <p style={{ fontSize: 16, lineHeight: 1.6, color: '#333', margin: 0 }}>
+                  {L(
+                    'आपका संदेश हमें मिल गया है। हमारी टीम जल्द आपसे संपर्क करेगी।',
+                    'We have received your message. Our team will get back to you soon.',
+                  )}
+                </p>
+              </div>
+            ) : (
+              /* Form */
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSent(true);
+                }}
+                style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+              >
+                {/* Name */}
+                <div>
+                  <label style={labelStyle}>{L('नाम', 'Name')}</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.name}
+                    onChange={set('name')}
+                    style={inputStyle}
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label style={labelStyle}>{L('ईमेल', 'Email')}</label>
+                  <input
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={set('email')}
+                    style={inputStyle}
+                  />
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label style={labelStyle}>{L('फ़ोन (वैकल्पिक)', 'Phone (optional)')}</label>
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={set('phone')}
+                    style={inputStyle}
+                  />
+                </div>
+
+                {/* Subject */}
+                <div>
+                  <label style={labelStyle}>{L('विषय', 'Subject')}</label>
+                  <select
+                    required
+                    value={form.subject}
+                    onChange={set('subject')}
+                    style={{ ...inputStyle, appearance: 'auto' as React.CSSProperties['appearance'] }}
+                  >
+                    <option value="">{L('-- चुनें --', '-- Select --')}</option>
+                    <option value="general">{L('सामान्य पूछताछ', 'General enquiry')}</option>
+                    <option value="tip">{L('ख़बर / सूचना भेजें', 'Send a tip')}</option>
+                    <option value="correction">{L('सुधार का अनुरोध', 'Correction request')}</option>
+                    <option value="advertising">{L('विज्ञापन / साझेदारी', 'Advertising / partnership')}</option>
+                  </select>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label style={labelStyle}>{L('संदेश', 'Message')}</label>
+                  <textarea
+                    required
+                    rows={6}
+                    value={form.message}
+                    onChange={set('message')}
+                    style={{ ...inputStyle, resize: 'vertical' }}
+                  />
+                </div>
+
+                {/* Submit */}
+                <div>
+                  <button
+                    type="submit"
+                    style={{
+                      background: '#7a0f1a',
+                      color: '#fff',
+                      fontWeight: 800,
+                      fontSize: 16,
+                      padding: '14px 24px',
+                      border: 0,
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      transition: 'background 0.2s',
+                    }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = '#5c0a13')}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = '#7a0f1a')}
+                  >
+                    {L('भेजें', 'Send')} &rarr;
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+
+          {/* Right: Contact info sidebar */}
+          <div style={{ flex: '1 1 280px' }}>
+            <div style={{ borderTop: '2px solid #141414' }}>
+              {contactItems.map((item) => (
+                <div
+                  key={item.value}
+                  style={{
+                    padding: '18px 0',
+                    borderBottom: '1px solid #dcdcdc',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: '#7a0f1a',
+                      marginBottom: 4,
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                  <div style={{ fontSize: 17, fontWeight: 600, color: '#141414' }}>
+                    {item.value}
+                  </div>
                 </div>
               ))}
-              <div className="c-social">
-                <a href="#" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v2H7v3h3v6h3v-6h3l1-3h-4v-2c0-.6.4-1 1-1z" /></svg></a>
-                <a href="#" aria-label="X"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h3l-7 8 8 12h-6l-5-7-6 7H1l8-9L1 2h6l5 6z" /></svg></a>
-                <a href="#" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 002.5 6 2.5 2.5 0 005 8.5 2.5 2.5 0 007.5 6 2.5 2.5 0 004.98 3.5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-1 1.83-2.05 3.76-2.05 4 0 4.74 2.64 4.74 6.07V21H18.5v-5.4c0-1.3 0-2.96-1.8-2.96-1.8 0-2.08 1.4-2.08 2.86V21H10z" /></svg></a>
-              </div>
-            </div>
-
-            <ContactForm />
-          </div>
-        </div>
-      </section>
-
-      {/* MAP */}
-      <section className="section map-band" style={{ paddingTop: 0 }}>
-        <div className="page">
-          <div className="mapph" style={{ display: 'block', position: 'relative', overflow: 'hidden', padding: 0 }}>
-            <iframe
-              title="Pollistics offices across India"
-              src="https://www.google.com/maps?q=India&z=4&output=embed"
-              style={{ width: '100%', height: '100%', border: 0, display: 'block', filter: 'grayscale(0.1)' }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen
-            />
-            <div style={{ position: 'absolute', left: '50%', bottom: 22, transform: 'translateX(-50%)', maxWidth: '92%', background: '#fff', color: 'var(--navy)', fontWeight: 700, padding: '12px 24px', borderRadius: 30, boxShadow: '0 16px 40px -16px rgba(15,39,66,.55)', textAlign: 'center', pointerEvents: 'none' }}>
-              📍 New Delhi · Mumbai · Lucknow — war rooms across India
             </div>
           </div>
         </div>
-      </section>
-    </SiteShell>
+      </div>
+    </PollsticsShell>
   );
 }
