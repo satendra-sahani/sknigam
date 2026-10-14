@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
+import { useLang } from '@/components/site/PollsticsShell';
 
 function ContactContent() {
   const { lang } = useLang();
@@ -236,9 +236,5 @@ function ContactContent() {
 }
 
 export default function ContactPage() {
-  return (
-    <PollsticsShell activeNav="">
-      <ContactContent />
-    </PollsticsShell>
-  );
+  return <ContactContent />;
 }

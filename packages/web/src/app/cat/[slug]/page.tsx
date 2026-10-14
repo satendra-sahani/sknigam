@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
+import { useLang } from '@/components/site/PollsticsShell';
 
 const IMG = '/assets/pollstics';
 
@@ -283,10 +283,5 @@ function CategoryContent({ slug }: { slug: string }) {
 }
 
 export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
-  return (
-    <PollsticsShell activeNav={slug}>
-      <CategoryContent slug={slug} />
-    </PollsticsShell>
-  );
+  return <CategoryContent slug={params.slug} />;
 }

@@ -7,12 +7,15 @@ import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import AuthGuard from '@/components/AuthGuard';
+import { PollsticsShell } from '@/components/site/PollsticsShell';
 
 // Routes that bypass the AuthGuard and sidebar/header chrome.
 // "/" is the public Pollistics landing page; anything that needs auth
 // should live under /dashboard, /voters, /booths, etc.
 const publicRoutes = ['/login', '/', '/download', '/about', '/services', '/publish', '/bookstore', '/contact', '/video', '/article'];
 const publicPrefixes = ['/cat/'];
+const pollsticsRoutes = ['/', '/about', '/contact', '/video', '/article'];
+const pollsticsPrefixes = ['/cat/'];
 // Routes that handle their OWN auth + chrome and need no outer chrome
 // from this layout.  /politician/* uses the Civic Insight palette and
 // its own PoliticianShell, so we skip the admin slate Sidebar+Header
@@ -55,6 +58,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const isSelfShelled = selfShelledPrefixes.some(
     (p) => pathname === p || pathname?.startsWith(p + '/'),
   );
+  const isPollstics = pollsticsRoutes.includes(pathname || '') || pollsticsPrefixes.some(p => pathname?.startsWith(p));
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
@@ -87,7 +91,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       />
       <PoliticianRouteGuard>
         {isPublicRoute || isSelfShelled ? (
-          children
+          isPollstics ? <PollsticsShell>{children}</PollsticsShell> : children
         ) : (
           <AuthGuard>
             <div className="flex min-h-screen bg-slate-50">

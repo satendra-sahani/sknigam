@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
+import { useLang } from '@/components/site/PollsticsShell';
 
 const IMG = '/assets/pollstics';
 
@@ -412,9 +412,5 @@ function ArticleContent() {
 }
 
 export default function ArticlePage() {
-  return (
-    <PollsticsShell activeNav="investigation">
-      <ArticleContent />
-    </PollsticsShell>
-  );
+  return <ArticleContent />;
 }

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
+import { useLang } from '@/components/site/PollsticsShell';
 
 const IMG = '/assets/pollstics';
 
@@ -386,9 +386,5 @@ function HomeContent() {
 }
 
 export default function HomePage() {
-  return (
-    <PollsticsShell activeNav="home">
-      <HomeContent />
-    </PollsticsShell>
-  );
+  return <HomeContent />;
 }

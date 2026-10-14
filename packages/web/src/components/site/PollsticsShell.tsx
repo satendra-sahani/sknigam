@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext } from 'react';
+import { usePathname } from 'next/navigation';
 import { PollsticsHeader } from './PollsticsHeader';
 import { PollsticsFooter } from './PollsticsFooter';
 
@@ -10,13 +11,22 @@ export function useLang() {
   return useContext(LangCtx);
 }
 
+function deriveActiveNav(pathname: string | null): string {
+  if (!pathname) return '';
+  if (pathname === '/') return 'home';
+  if (pathname === '/video') return 'video';
+  if (pathname === '/article') return 'investigation';
+  if (pathname.startsWith('/cat/')) return pathname.split('/')[2] || '';
+  return '';
+}
+
 export function PollsticsShell({
-  activeNav,
   children,
 }: {
-  activeNav?: string;
-  children: React.ReactNode | ((lang: string, L: (h: string, e: string) => string) => React.ReactNode);
+  children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const activeNav = deriveActiveNav(pathname);
   const [lang, setLangState] = useState('hi');
 
   useEffect(() => {
@@ -28,14 +38,12 @@ export function PollsticsShell({
     try { localStorage.setItem('pn-lang', l); } catch {}
   };
 
-  const L = (h: string, e: string) => (lang === 'hi' ? h : e);
-
   return (
     <LangCtx.Provider value={{ lang, setLang }}>
       <div className="pn" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff' }}>
         <PollsticsHeader activeNav={activeNav} lang={lang} setLang={setLang} />
         <main className="pn-main" style={{ flex: 1 }}>
-          {typeof children === 'function' ? children(lang, L) : children}
+          {children}
         </main>
         <PollsticsFooter lang={lang} setLang={setLang} />
       </div>

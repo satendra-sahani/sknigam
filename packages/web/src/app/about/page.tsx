@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
+import { useLang } from '@/components/site/PollsticsShell';
 
 const IMG = '/assets/pollstics';
 
@@ -176,9 +176,5 @@ function AboutContent() {
 }
 
 export default function AboutPage() {
-  return (
-    <PollsticsShell activeNav="">
-      <AboutContent />
-    </PollsticsShell>
-  );
+  return <AboutContent />;
 }

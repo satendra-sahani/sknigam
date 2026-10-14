@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
-import { PollsticsShell, useLang } from '@/components/site/PollsticsShell';
+import { useLang } from '@/components/site/PollsticsShell';
 
 const IMG = '/assets/pollstics';
 
@@ -267,9 +267,5 @@ function VideoContent() {
 }
 
 export default function VideoPage() {
-  return (
-    <PollsticsShell activeNav="video">
-      <VideoContent />
-    </PollsticsShell>
-  );
+  return <VideoContent />;
 }
