@@ -42,12 +42,36 @@ const notoDevanagari = Noto_Sans_Devanagari({
   display: 'swap',
 });
 
+const SITE_TITLE = 'Pollstics — स्वतंत्र हिंदी डिजिटल न्यूज़';
+const SITE_DESC = 'राजनीति, समाज, दुनिया और संस्कृति की खबरें तथ्यों और ज़िम्मेदारी के साथ।';
+const LOGO = '/assets/pollstics/logo.png';
+
 export const metadata: Metadata = {
-  title: 'Pollstics — स्वतंत्र हिंदी डिजिटल न्यूज़',
-  description: 'राजनीति, समाज, दुनिया और संस्कृति की खबरें तथ्यों और ज़िम्मेदारी के साथ।',
+  metadataBase: new URL('https://pollstics.com'),
+  title: SITE_TITLE,
+  description: SITE_DESC,
+  icons: {
+    icon: LOGO,
+    apple: LOGO,
+  },
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESC,
+    url: 'https://pollstics.com',
+    siteName: 'Pollstics',
+    locale: 'hi_IN',
+    type: 'website',
+    images: [{ url: LOGO, width: 640, height: 640, alt: 'Pollstics' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: SITE_TITLE,
+    description: SITE_DESC,
+    images: [LOGO],
+  },
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
 };
 
