@@ -43,8 +43,8 @@ const notoDevanagari = Noto_Sans_Devanagari({
 });
 
 export const metadata: Metadata = {
-  title: 'Pollistics — India\'s election intelligence',
-  description: 'The most complete, queryable record of how India votes.',
+  title: 'Pollstics — स्वतंत्र हिंदी डिजिटल न्यूज़',
+  description: 'राजनीति, समाज, दुनिया और संस्कृति की खबरें तथ्यों और ज़िम्मेदारी के साथ।',
   robots: {
     index: false,
     follow: false,
