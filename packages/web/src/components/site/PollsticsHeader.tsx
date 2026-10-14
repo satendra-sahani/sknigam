@@ -15,6 +15,7 @@ const NAV = [
   ['interview', 'साक्षात्कार', 'Interview', '/cat/interview'],
   ['special', 'पोलस्टिक्स विशेष', 'Pollstics Special', '/cat/special'],
   ['video', 'शॉर्ट वीडियो/वीडियो/पॉडकास्ट', 'Shorts/Video/Podcast', '/video'],
+  ['books', 'हमारी किताबें', 'Books', '/bookstore'],
 ] as const;
 
 export function PollsticsHeader({

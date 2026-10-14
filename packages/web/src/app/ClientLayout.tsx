@@ -14,7 +14,7 @@ import { PollsticsShell } from '@/components/site/PollsticsShell';
 // should live under /dashboard, /voters, /booths, etc.
 const publicRoutes = ['/login', '/', '/download', '/about', '/services', '/publish', '/bookstore', '/contact', '/video', '/article'];
 const publicPrefixes = ['/cat/'];
-const pollsticsRoutes = ['/', '/about', '/contact', '/video', '/article'];
+const pollsticsRoutes = ['/', '/about', '/contact', '/video', '/article', '/bookstore'];
 const pollsticsPrefixes = ['/cat/'];
 // Routes that handle their OWN auth + chrome and need no outer chrome
 // from this layout.  /politician/* uses the Civic Insight palette and

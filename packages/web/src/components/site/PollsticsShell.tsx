@@ -15,6 +15,7 @@ function deriveActiveNav(pathname: string | null): string {
   if (!pathname) return '';
   if (pathname === '/') return 'home';
   if (pathname === '/video') return 'video';
+  if (pathname === '/bookstore') return 'books';
   if (pathname === '/article') return 'investigation';
   if (pathname.startsWith('/cat/')) return pathname.split('/')[2] || '';
   return '';

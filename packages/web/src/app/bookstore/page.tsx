@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { SiteShell } from '@/components/site/SiteShell';
+import { useLang } from '@/components/site/PollsticsShell';
 
 interface Book {
   _id: string;
@@ -29,13 +29,13 @@ interface Book {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9003/api';
 const SHIP = 49;
 
-const CATEGORIES: Array<[string, string]> = [
-  ['all', 'All titles'],
-  ['Analysis', 'Election Analysis'],
-  ['Psephology', 'Psephology'],
-  ['Handbook', 'Handbooks'],
-  ['Biography', 'Biography'],
-  ['Field', 'Field Manuals'],
+const CATEGORIES: Array<[string, string, string]> = [
+  ['all', 'सभी किताबें', 'All titles'],
+  ['Analysis', 'चुनाव विश्लेषण', 'Election Analysis'],
+  ['Psephology', 'सेफ़ोलॉजी', 'Psephology'],
+  ['Handbook', 'हैंडबुक', 'Handbooks'],
+  ['Biography', 'जीवनी', 'Biography'],
+  ['Field', 'फ़ील्ड मैनुअल', 'Field Manuals'],
 ];
 
 const PAYMENTS: Array<['UPI' | 'Card' | 'NetBanking' | 'COD', string]> = [
@@ -66,6 +66,8 @@ function BookCover({ book, className }: { book: Book; className?: string }) {
 }
 
 export default function BookstorePage() {
+  const { lang } = useLang();
+  const L = (h: string, e: string) => (lang === 'hi' ? h : e);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -101,16 +103,28 @@ export default function BookstorePage() {
   const openBook = openBookId ? books.find((b) => b._id === openBookId) ?? null : null;
 
   return (
-    <SiteShell active="bookstore" footer="store">
+    <div
+      className="pol"
+      style={{
+        fontFamily: 'inherit',
+        ['--coral' as string]: '#7a0f1a',
+        ['--coral-deep' as string]: '#5c0a13',
+        ['--coral-soft' as string]: '#f4f1f1',
+      } as React.CSSProperties}
+    >
       {/* HERO */}
       <section className="phero">
-        <div className="page" style={{ padding: '56px 0' }}>
-          <span className="tag">Pollistics Bookstore</span>
-          <h1 style={{ fontSize: 54, fontWeight: 900, letterSpacing: '-0.03em', marginTop: 14 }}>
-            Every election, <span style={{ color: 'var(--coral)' }}>between two covers.</span>
+        <div className="page" style={{ padding: 'clamp(32px,5vw,56px) clamp(16px,4vw,32px)' }}>
+          <span className="tag">{L('हमारी किताबें', 'Pollstics Books')}</span>
+          <h1 style={{ fontSize: 'clamp(32px,5vw,54px)', fontWeight: 900, letterSpacing: '-0.02em', marginTop: 14, lineHeight: 1.15 }}>
+            {L('हर चुनाव, ', 'Every election, ')}
+            <span style={{ color: 'var(--coral)' }}>{L('दो जिल्दों के बीच।', 'between two covers.')}</span>
           </h1>
           <p className="lead" style={{ maxWidth: 560, marginTop: 14 }}>
-            Analysis, handbooks and field manuals — written by psephologists, journalists and our own data desk. Print and e-book editions, delivered across India.
+            {L(
+              'विश्लेषण, हैंडबुक और फ़ील्ड मैनुअल — सेफ़ोलॉजिस्ट, पत्रकारों और हमारी डेटा डेस्क द्वारा लिखी गईं। प्रिंट और ई-बुक, पूरे भारत में डिलीवरी।',
+              'Analysis, handbooks and field manuals — written by psephologists, journalists and our own data desk. Print and e-book editions, delivered across India.',
+            )}
           </p>
         </div>
       </section>
@@ -118,18 +132,18 @@ export default function BookstorePage() {
       {/* FILTER BAR */}
       <div className="filterbar">
         <div className="page row">
-          {CATEGORIES.map(([cat, label]) => (
+          {CATEGORIES.map(([cat, hiLabel, enLabel]) => (
             <div
               key={cat}
               className={`chip${activeCat === cat ? ' active' : ''}`}
               onClick={() => setActiveCat(cat)}
             >
-              {label}
+              {L(hiLabel, enLabel)}
             </div>
           ))}
           <div className="search-box">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3-3" /></svg>
-            <input type="text" placeholder="Search titles or authors…" value={query} onChange={(e) => setQuery(e.target.value)} />
+            <input type="text" placeholder={L('किताब या लेखक खोजें…', 'Search titles or authors…')} value={query} onChange={(e) => setQuery(e.target.value)} />
           </div>
           <button className="cart-btn" aria-label="Cart">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6" /></svg>
@@ -142,16 +156,16 @@ export default function BookstorePage() {
       <section className="section" style={{ paddingTop: 44 }}>
         <div className="page">
           {loading ? (
-            <div className="empty" style={{ display: 'block' }}>Loading catalogue…</div>
+            <div className="empty" style={{ display: 'block' }}>{L('किताबें लोड हो रही हैं…', 'Loading catalogue…')}</div>
           ) : loadError ? (
             <div className="empty" style={{ display: 'block' }}>
-              <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 6 }}>Couldn&apos;t load the catalogue.</div>
+              <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 6 }}>{L('किताबें लोड नहीं हो सकीं।', "Couldn't load the catalogue.")}</div>
               <div>{loadError}</div>
             </div>
           ) : filtered.length === 0 ? (
             <div className="empty" style={{ display: 'block' }}>
-              <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 6 }}>No titles match.</div>
-              <div>Try a different category or search term.</div>
+              <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 6 }}>{L('कोई किताब नहीं मिली।', 'No titles match.')}</div>
+              <div>{L('कोई दूसरी श्रेणी या शब्द आज़माएँ।', 'Try a different category or search term.')}</div>
             </div>
           ) : (
             <div className="book-grid">
@@ -170,7 +184,7 @@ export default function BookstorePage() {
                     <div className="price">{b.mrp ? <s>₹{b.mrp}</s> : null}₹{b.price}</div>
                     <button className="buy-btn" onClick={() => setOpenBookId(b._id)}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6" /></svg>
-                      Buy
+                      {L('खरीदें', 'Buy')}
                     </button>
                   </div>
                 </div>
@@ -187,7 +201,7 @@ export default function BookstorePage() {
           onOrder={(q) => setCartCount((c) => c + q)}
         />
       )}
-    </SiteShell>
+    </div>
   );
 }
 
