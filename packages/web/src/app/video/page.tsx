@@ -54,14 +54,14 @@ function VideoContent() {
           </Link>
           <span style={{ color: '#999' }}>&gt;</span>
           <span style={{ color: '#333' }}>
-            {L('शॉर्ट वीडियो / वीडियो / पॉडकास्ट', 'Shorts / Video / Podcast')}
+            {L('पॉडकास्ट', 'Podcast')}
           </span>
         </nav>
 
         {/* ═══ PAGE TITLE ═══ */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <h1 style={{ margin: 0, fontSize: 'clamp(24px,3.5vw,32px)', fontWeight: 800, color: '#7a0f1a', whiteSpace: 'nowrap' }}>
-            {L('शॉर्ट वीडियो / वीडियो / पॉडकास्ट', 'Shorts / Video / Podcast')}
+            {L('पॉडकास्ट', 'Podcast')}
           </h1>
           <span style={{ flex: 1, height: 2, background: 'linear-gradient(90deg,#7a0f1a 0%,transparent 100%)' }} />
         </div>

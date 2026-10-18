@@ -9,12 +9,12 @@ const NAV = [
   ['discourse', 'विमर्श', 'Discourse', '/cat/discourse'],
   ['politics', 'राजनीति', 'Politics', '/cat/politics'],
   ['world', 'दुनिया', 'World', '/cat/world'],
-  ['investigation', 'पड़ताल', 'Investigation', '/cat/investigation'],
+  ['investigation', 'जाँच पड़ताल', 'Investigation', '/cat/investigation'],
   ['art', 'कला-साहित्य', 'Art-Literature', '/cat/art'],
   ['cinema', 'सिनेमा', 'Cinema', '/cat/cinema'],
   ['interview', 'साक्षात्कार', 'Interview', '/cat/interview'],
   ['special', 'पोलस्टिक्स विशेष', 'Pollstics Special', '/cat/special'],
-  ['video', 'शॉर्ट वीडियो/वीडियो/पॉडकास्ट', 'Shorts/Video/Podcast', '/video'],
+  ['video', 'पॉडकास्ट', 'Podcast', '/video'],
   ['books', 'हमारी किताबें', 'Books', '/bookstore'],
 ] as const;
 
@@ -41,6 +41,8 @@ export function PollsticsHeader({
               <span className="pn-brand-name">POLLSTICS</span>
             </Link>
 
+            <div style={{ flex: 1 }} />
+
             <div className="pn-lang">
               <button
                 className={hi ? 'active' : 'inactive'}
@@ -55,8 +57,6 @@ export function PollsticsHeader({
                 English
               </button>
             </div>
-
-            <div style={{ flex: 1 }} />
 
             <label className="pn-search" id="pn-search-desktop">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141414" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>

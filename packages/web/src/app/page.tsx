@@ -183,7 +183,7 @@ function HomeContent() {
               <span className="bg" style={{ backgroundImage: `url(${IMG}/home/lead.png)` }} />
               <span className="inner">
                 <span style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span className="label">{L('वीडियो/पॉडकास्ट', 'Video/Podcast')}</span>
+                  <span className="label">{L('पॉडकास्ट', 'Podcast')}</span>
                   <span className="title">{L('क्या इलेक्टोरल बॉन्ड्स से बढ़ी राजनीतिक अपारदर्शिता?', 'Have electoral bonds increased political opacity?')}</span>
                 </span>
                 <span className="pn-play-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M7 4l13 8-13 8z" /></svg></span>
@@ -273,7 +273,7 @@ function HomeContent() {
               <span className="pn-media-icon">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="4" fill="#fff" /><path d="M10 9l5 3-5 3z" fill="#c4161c" /></svg>
               </span>
-              <h2>{L('शॉर्ट वीडियो / वीडियो / पॉडकास्ट', 'Shorts / Video / Podcast')}</h2>
+              <h2>{L('पॉडकास्ट', 'Podcast')}</h2>
             </span>
             <div className="pn-media-tabs">
               {[L('शॉर्ट वीडियो', 'Shorts'), L('वीडियो', 'Video'), L('पॉडकास्ट', 'Podcast')].map((lb, i) => (

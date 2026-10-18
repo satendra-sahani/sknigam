@@ -17,7 +17,6 @@ export function PollsticsFooter({
       title: L('हमारे बारे में', 'About us'),
       links: [
         [L('परिचय', 'Introduction'), '/about'],
-        [L('संपादकीय टीम', 'Editorial team'), '/about'],
         [L('संपर्क करें', 'Contact'), '/contact'],
       ],
     },
@@ -35,7 +34,7 @@ export function PollsticsFooter({
       links: [
         [L('सिनेमा', 'Cinema'), '/cat/cinema'],
         [L('साक्षात्कार', 'Interview'), '/cat/interview'],
-        [L('वीडियो / पॉडकास्ट', 'Video / Podcast'), '/video'],
+        [L('पॉडकास्ट', 'Podcast'), '/video'],
         [L('पोलस्टिक्स विशेष', 'Pollstics Special'), '/cat/special'],
       ],
     },

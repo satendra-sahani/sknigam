@@ -10,7 +10,7 @@ const NAV_MAP: Record<string, [string, string]> = {
   discourse: ['विमर्श', 'Discourse'],
   politics: ['राजनीति', 'Politics'],
   world: ['दुनिया', 'World'],
-  investigation: ['पड़ताल', 'Investigation'],
+  investigation: ['जाँच पड़ताल', 'Investigation'],
   art: ['कला-साहित्य', 'Art-Literature'],
   cinema: ['सिनेमा', 'Cinema'],
   interview: ['साक्षात्कार', 'Interview'],
