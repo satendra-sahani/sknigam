@@ -9,12 +9,12 @@ const NAV = [
   ['discourse', 'विमर्श', 'Discourse', '/cat/discourse'],
   ['politics', 'राजनीति', 'Politics', '/cat/politics'],
   ['world', 'दुनिया', 'World', '/cat/world'],
-  ['investigation', 'जाँच पड़ताल', 'Investigation', '/cat/investigation'],
+  ['investigation', 'जाँच-पड़ताल', 'Investigation', '/cat/investigation'],
   ['art', 'कला-साहित्य', 'Art-Literature', '/cat/art'],
   ['cinema', 'सिनेमा', 'Cinema', '/cat/cinema'],
   ['interview', 'साक्षात्कार', 'Interview', '/cat/interview'],
   ['special', 'पोलस्टिक्स विशेष', 'Pollstics Special', '/cat/special'],
-  ['video', 'पॉडकास्ट', 'Podcast', '/video'],
+  ['video', 'वीडियो/पॉडकास्ट', 'Video/Podcast', '/video'],
   ['books', 'हमारी किताबें', 'Books', '/bookstore'],
 ] as const;
 

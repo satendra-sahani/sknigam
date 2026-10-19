@@ -25,7 +25,7 @@ export function PollsticsFooter({
       links: [
         [L('राजनीति', 'Politics'), '/cat/politics'],
         [L('विश्व', 'World'), '/cat/world'],
-        [L('जाँच पड़ताल', 'Investigation'), '/cat/investigation'],
+        [L('जाँच-पड़ताल', 'Investigation'), '/cat/investigation'],
         [L('कला-साहित्य', 'Art-Literature'), '/cat/art'],
       ],
     },
@@ -34,7 +34,7 @@ export function PollsticsFooter({
       links: [
         [L('सिनेमा', 'Cinema'), '/cat/cinema'],
         [L('साक्षात्कार', 'Interview'), '/cat/interview'],
-        [L('पॉडकास्ट', 'Podcast'), '/video'],
+        [L('वीडियो/पॉडकास्ट', 'Video/Podcast'), '/video'],
         [L('पोलस्टिक्स विशेष', 'Pollstics Special'), '/cat/special'],
       ],
     },

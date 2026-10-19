@@ -76,7 +76,7 @@ function ArticleContent() {
         </Link>
         <span style={{ margin: '0 6px' }}>&gt;</span>
         <span style={{ fontWeight: 600, color: '#141414' }}>
-          {L('जाँच पड़ताल', 'Investigation')}
+          {L('जाँच-पड़ताल', 'Investigation')}
         </span>
       </nav>
 
