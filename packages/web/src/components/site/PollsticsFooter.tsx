@@ -12,43 +12,6 @@ export function PollsticsFooter({
   const hi = lang === 'hi';
   const L = (h: string, e: string) => (hi ? h : e);
 
-  const cols = [
-    {
-      title: L('हमारे बारे में', 'About us'),
-      links: [
-        [L('परिचय', 'Introduction'), '/about'],
-        [L('संपर्क करें', 'Contact'), '/contact'],
-      ],
-    },
-    {
-      title: L('श्रेणियाँ', 'Sections'),
-      links: [
-        [L('राजनीति', 'Politics'), '/cat/politics'],
-        [L('विश्व', 'World'), '/cat/world'],
-        [L('जाँच-पड़ताल', 'Investigation'), '/cat/investigation'],
-        [L('कला-साहित्य', 'Art-Literature'), '/cat/art'],
-      ],
-    },
-    {
-      title: L('विशेष', 'Featured'),
-      links: [
-        [L('सिनेमा', 'Cinema'), '/cat/cinema'],
-        [L('साक्षात्कार', 'Interview'), '/cat/interview'],
-        [L('वीडियो/पॉडकास्ट', 'Video/Podcast'), '/video'],
-        [L('पोलस्टिक्स विशेष', 'Pollstics Special'), '/cat/special'],
-      ],
-    },
-    {
-      title: L('त्वरित लिंक', 'Quick links'),
-      links: [
-        [L('गोपनीयता नीति', 'Privacy policy'), '#'],
-        [L('उपयोग की शर्तें', 'Terms of use'), '#'],
-        [L('विज्ञापन', 'Advertise'), '/contact'],
-        [L('करियर', 'Careers'), '/contact'],
-      ],
-    },
-  ];
-
   return (
     <footer className="pn-footer">
       <div className="pn-footer-inner">
@@ -63,15 +26,12 @@ export function PollsticsFooter({
 
         {/* Columns */}
         <div className="pn-footer-cols">
-          <div className="pn-footer-links">
-            {cols.map((col) => (
-              <div className="pn-footer-col" key={col.title}>
-                <span className="col-title">{col.title}</span>
-                {col.links.map(([label, href]) => (
-                  <Link key={label} href={href}>{label}</Link>
-                ))}
-              </div>
-            ))}
+          <div className="pn-footer-about">
+            <span className="col-title">{L('हमारे बारे में', 'About us')}</span>
+            <p>{L(
+              'पोलस्टिक्स एक स्वतंत्र हिंदी डिजिटल न्यूज़ प्लेटफ़ॉर्म है, जो राजनीति, समाज, दुनिया और संस्कृति की खबरें तथ्यों और ज़िम्मेदारी के साथ पाठकों तक पहुँचाता है। हमारा मकसद निष्पक्ष, सटीक और भरोसेमंद पत्रकारिता के ज़रिए हर पाठक तक सही जानकारी पहुँचाना है।',
+              'Pollstics is an independent Hindi digital news platform that brings politics, society, the world and culture to its readers with facts and responsibility. Our mission is to deliver accurate, trustworthy and unbiased journalism to every reader.',
+            )}</p>
           </div>
 
           <div className="pn-footer-social-col">
